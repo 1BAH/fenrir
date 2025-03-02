@@ -1,0 +1,8 @@
+{
+    "pre": [
+        "task-zero"
+    ],
+    "main": [
+        "walk-inspections"
+    ]
+}

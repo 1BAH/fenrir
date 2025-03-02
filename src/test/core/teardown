@@ -1,0 +1,31 @@
+#! /bin/bash
+
+
+# ASSUMPTION: running from src/test/core
+src_dir=$(realpath "$(pwd)/../../main/fenrir")
+test_env_dir=$(cat TEST_ENV_DIR)
+
+
+function info {
+    "$src_dir/core/log" info -v "$@"
+}
+
+function warn {
+    "$src_dir/core/log" warn -v "$@"
+}
+
+function err {
+    "$src_dir/core/log" err -v "$@"
+}
+
+
+
+info "Restoring PATH"
+export PATH=`cat path.save`
+
+info "Clearing test environment"
+rm -r "$test_env_dir"
+rm TEST_ENV_DIR
+rm TMP_COPY
+rm PATH_NEW
+rm path.save

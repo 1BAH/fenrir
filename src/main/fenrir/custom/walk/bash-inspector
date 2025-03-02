@@ -1,0 +1,24 @@
+#! /bin/bash
+
+# WARNING! Requires shellcheck to be installed!
+
+file=$1
+
+if ! [[ $file == *.sh ]]; then
+    exit 0
+fi
+
+
+log info "$2" "BI: Inspecting '$file'"
+
+if [ "$2" == "-v" ]; then
+    if ! shellcheck -a -Calways "$file" ; then
+        log err "$2" "BI: File '$file' contains violations."
+        exit 2
+    fi
+else
+    if ! shellcheck -a -Cnever "$file" ; then
+        log err "$2" "BI: File '$file' contains violations."
+        exit 3
+    fi
+fi

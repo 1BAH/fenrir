@@ -1,0 +1,47 @@
+#! /bin/bash
+
+# ASSUMPTION: running from src/test/core
+#test_env_dir=$(cat TEST_ENV_DIR)
+
+
+export PATH=$(cat PATH_NEW)
+
+
+function info {
+    log info -v "$@"
+}
+
+function warn {
+    log warn -v "$@"
+}
+
+function err {
+    log err -v "$@"
+}
+
+function succ {
+    log succ -v "$@"
+}
+
+return_code=0
+
+
+echo "=================================================================="
+echo "                        Running tests"
+echo "=================================================================="
+
+
+for test_file in $(ls ../*Tests.sh); do
+    if [ -d "../$test_file" ]; then
+        continue
+    fi
+
+    if ! "../$test_file"; then
+        err "Test failed"
+        (( return_code++ ))
+    else
+        succ "Test passed"
+    fi
+
+    echo "=================================================================="
+done

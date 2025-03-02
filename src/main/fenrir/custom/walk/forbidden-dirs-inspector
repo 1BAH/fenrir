@@ -1,0 +1,27 @@
+#! /bin/bash
+
+config="/etc/fenrir/forbidden-files.json"
+
+log info "$2" "FDI: Inspecting '$1'"
+
+name=$(basename "$1")
+
+if [ "$(jq "isempty( .directories[] | select(. == \"$name\") )" "$config")" = 'false' ]; then
+    log err "$2" "FDI: Found forbidden directory: '$1'"
+    exit 4
+fi
+
+pushd "$1" &> /dev/null
+
+for pattern in $(jq -r '.filePatterns[]' "$config"); do
+    ls "$pattern" &> /var/fenrir/out
+
+    # shellcheck disable=SC2181
+    if [ $? -eq 0 ]; then
+        log err -v "FDI: Found forbidden file pattern '$(cat /var/fenrir/out)'"
+        popd &> /dev/null
+        exit 3
+    fi
+done
+
+popd &> /dev/null

@@ -1,0 +1,14 @@
+image: taekwandodo/fenrir:1.0
+
+default:
+  tags:
+    - common
+
+stages:
+  - test
+
+TEST:
+  stage: test
+  before_script:
+    - cd src/test/core
+  script: ./run_tests.sh

@@ -1,0 +1,29 @@
+#! /bin/bash
+
+repo=$1
+verbosity=$2
+destination=$(getroot)
+out="/var/fenrir/out"
+err="/var/fenrir/err"
+
+##############
+
+log info "$verbosity" "TZ: Validating task0"
+
+if change-branch "$repo" "$verbosity" "task0"; then
+    if pushd "$destination/task0" > "$out" 2> "$err"; then
+        if [ -x "run.sh" ]; then
+            log succ "$verbosity" "TZ: task0 is completed"
+            exit 0 # successful exit
+        else
+            log err "$verbosity" "TZ: File 'run.sh' does not exist or is not executable"
+        fi
+    else
+        log err "$verbosity" "TZ: Failed"
+        log warn "$verbosity" "<stdout>" "$(cat "$out")"
+        log err "$verbosity" "<stderr>" "$(cat "$err")"
+    fi
+fi
+
+log err "$verbosity" "TZ: Validation failed"
+exit 3

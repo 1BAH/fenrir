@@ -1,0 +1,25 @@
+#! /bin/bash
+
+cmd=$1
+shift
+
+
+function eq {
+    if ! [ "$1" = "$2" ]; then
+        log err -v "Expected <$1> to be equal to <$2>"
+        exit 1
+    fi
+}
+
+
+
+
+case "$cmd" in
+    "eq")
+        eq "$@"
+        ;;
+    *)
+        err -v "Command not found"
+        exit 1
+        ;;
+esac

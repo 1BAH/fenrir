@@ -1,0 +1,21 @@
+#! /bin/bash
+
+repo=$1
+verbosity=$2
+destination=$(getroot)
+out="/var/fenrir/out"
+err="/var/fenrir/err"
+
+##############
+
+log info "$verbosity" "Cloning repo $repo"
+
+if git clone "$repo" "$destination" > "$out" 2> "$err"
+then
+    log succ "$verbosity" "Cloned repo to directory 'solution'"
+else
+    log err "$verbosity" "Failed"
+    log warn "$verbosity" "<stdout>" "$(cat "$out")"
+    log err "$verbosity" "<stderr>" "$(cat "$err")"
+    exit 1
+fi

@@ -1,0 +1,13 @@
+{
+    "dirs": [
+        "forbidden-dirs-inspector"
+    ],
+    "files": [
+        "new-line-inspector"
+    ],
+    "skip": [
+        ".",
+        "..",
+        ".git"
+    ]
+}

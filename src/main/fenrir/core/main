@@ -1,0 +1,74 @@
+#! /bin/bash
+
+#UNCOMMENT# cat ~/key > ~/.ssh/id_rsa
+
+repo=$1
+v="-v" # verbosity (replace with "" to mute hints and info logs)
+config_file="/etc/fenrir/main.json"
+pipeline="/home/checker/.local/bin/custom/pipeline.json"
+out="/var/fenrir/out"
+err="/var/fenrir/err"
+pre=$(jq -r '.pre[]' "$pipeline")
+main=$(jq -r '.main[]' "$pipeline")
+branch=$(jq -r '.branch' "$config_file")
+destination=$(jq -r '.root' "$config_file")
+blocking=$(jq -r '.blocking' "$config_file")
+
+###########################################
+
+function finish {
+    # Print score
+    echo "Final score: $(cat "$score_file")"
+    exit 0
+}
+
+function switch_solution {
+    log info "$v" "Switching to branch '$branch'"
+
+    if change-branch "$repo" "$v" "$branch"; then
+        if cd "$destination/$branch" > "$out" 2> "$err"; then
+            log succ "$v" "Inside solution's directory"
+        else
+            log err "$v" "Failed"
+            log warn "$v" "<stdout>" "$(cat "$out")"
+            log err "$v" "<stderr>" "$(cat "$err")"
+            return 3
+        fi
+    else
+        return 7
+    fi
+}
+
+
+# initialise score file
+score_file=$(jq -r '.score' "$config_file")
+echo -n 0 > "$score_file"
+
+
+# step 1 - clone repo
+if clone-repo "$repo" "$v"; then
+    for script in $pre; do
+        log info "$v" "--------------------------($script)--------------------------"
+        if ! "/home/checker/.local/bin/custom/$script" "$repo" "$v"; then
+            finish
+        fi
+    done
+
+    log info "$v" "--------------------------(switch-solution)--------------------------"
+
+    if ! switch_solution; then
+        finish
+    fi
+
+    for script in $main; do
+        log info "$v" "--------------------------($script)--------------------------"
+        if ! "/home/checker/.local/bin/custom/$script" "$repo" "$v" && [ "$blocking" -ne 0 ]; then
+            finish
+        fi
+    done
+
+    log info "$v" "-----------------------------------------------------------"
+fi
+
+
+finish

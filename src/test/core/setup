@@ -1,0 +1,115 @@
+#! /bin/bash
+
+################################################
+#      We assume that PATH is already set!!!
+################################################
+
+# ASSUMPTION: running from src/test/core
+src_dir=$(realpath "$(pwd)/../../main/fenrir")
+
+ls "$src_dir"
+
+if ! [ -f "$src_dir/core/log" ]; then
+    echo "Logger was not found"
+    echo "Terminating..."
+    exit 1
+fi
+
+
+function info {
+    "$src_dir/core/log" info -v "$@"
+}
+
+function warn {
+    "$src_dir/core/log" warn -v "$@"
+}
+
+function err {
+    "$src_dir/core/log" err -v "$@"
+}
+
+
+test_env_dir=$(realpath "$src_dir/../../../tmp")
+echo "$test_env_dir" > TEST_ENV_DIR
+
+info "Creating testing environment.."
+
+info "> Root dir is '$test_env_dir'"
+mkdir -p "$test_env_dir/root"
+
+
+cp -r "$src_dir/core" "$test_env_dir"
+
+# TODO support custom checks
+# cp -r "$src_dir/custom" "$test_env_dir"
+
+info "> Sources were copied"
+
+# ls -FRANC "$test_env_dir"
+
+info "> Updating PATH.."
+
+echo "$PATH" > path.save
+info ">> PATH saved to 'path.save'"
+
+export PATH="$PATH:$test_env_dir/core:$test_env_dir/core/utils"
+warn ">> Now PATH is '$PATH'"
+echo "$PATH" > PATH_NEW
+
+info "> Mocking global configs.."
+
+info ">> Creating config directories"
+mkdir -p "$test_env_dir/etc"
+mkdir -p "$test_env_dir/var"
+
+info ">> Copying configs"
+cp -r "$src_dir/configs/" "$test_env_dir/etc/fenrir/"
+
+info ">> Updating paths"
+
+info ">>> Core scripts"
+for file in $(ls "$test_env_dir/core"); do
+    if [ -d "$test_env_dir/core/$file" ]; then
+        continue
+    fi
+
+    content=$(cat "$test_env_dir/core/$file")
+    content=${content//\/var\/fenrir/"$test_env_dir/var/fenrir"}
+    content=${content//\/etc\/fenrir/"$test_env_dir/etc/fenrir"}
+    echo "$content" > "$test_env_dir/core/$file"
+done
+
+info ">>> Configs"
+for file in $(ls "$test_env_dir/etc/fenrir"); do
+    if [ -d "$test_env_dir/etc/fenrir/$file" ]; then
+        continue
+    fi
+
+    content=$(cat "$test_env_dir/etc/fenrir/$file")
+    content=${content//\/var\/fenrir/"$test_env_dir/var/fenrir"}
+    content=${content//\/etc\/fenrir/"$test_env_dir/etc/fenrir"}
+    echo "$content" > "$test_env_dir/etc/fenrir/$file"
+done
+
+for file in $(ls "$test_env_dir/var/fenrir" &> /dev/null); do
+    if [ -d "$test_env_dir/var/fenrir/$file" ]; then
+        continue
+    fi
+
+    content=$(cat "$test_env_dir/var/fenrir/$file")
+    content=${content//\/var\/fenrir/"$test_env_dir/var/fenrir"}
+    content=${content//\/etc\/fenrir/"$test_env_dir/etc/fenrir"}
+    echo "$content" > "$test_env_dir/var/fenrir/$file"
+done
+
+info "> Resetting root dir"
+
+tmp=$(mktemp)
+
+jq --arg dir "$test_env_dir/root" '.root = $dir' "$test_env_dir/etc/fenrir/main.json" > "$tmp"
+cat "$tmp" > "$test_env_dir/etc/fenrir/main.json"
+
+
+info "> Copying additional utils"
+cp -r "utils/" "$test_env_dir/core/"
+
