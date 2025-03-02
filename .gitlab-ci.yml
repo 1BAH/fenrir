@@ -1,9 +1,5 @@
 image: taekwandodo/fenrir:1.0
 
-default:
-  tags:
-    - common
-
 stages:
   - test
 
