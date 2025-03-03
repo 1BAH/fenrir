@@ -19,7 +19,7 @@ function dir_check {
 
     if [ "$(jq "isempty( .skip[] | select(. == \"$(basename "$dir")\") )" "$config")" = 'true' ]; then
         for inspection in $dir_inspections; do
-            if ! "/home/checker/.local/bin/custom/walk/$inspection" "$dir" "$v"; then
+            if ! "/$HOME/.local/bin/custom/walk/$inspection" "$dir" "$v"; then
                 terminate
             fi
         done
@@ -36,7 +36,7 @@ function inspect_dir {
     for file in "$dir"/* "$dir"/.*; do
         if [ -f "$file" ]; then
             for inspection in $reg_files_inspections; do
-                if ! "/home/checker/.local/bin/custom/walk/$inspection" "$file" "$v"; then
+                if ! "/$HOME/.local/bin/custom/walk/$inspection" "$file" "$v"; then
                     terminate
                 fi
             done

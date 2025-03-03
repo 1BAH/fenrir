@@ -1,0 +1,91 @@
+#! /bin/bash
+
+[ "$SUDO_USER" ] && user=$SUDO_USER || user="`whoami`"
+
+CLI_DIR=$(dirname "$(realpath "$0")")
+CORE_UTILS_DIR=$(realpath "${CLI_DIR}/../core")
+CFGS_DIR=$(realpath "${CLI_DIR}/../configs")
+BASIC_UTILS_DIR=$(realpath "${CLI_DIR}/../custom")
+
+###################################################################
+
+GREEN="\033[38;5;112m"
+BLUE="\033[38;5;4m"
+YELLOW="\033[38;5;214m"
+RED="\033[38;5;196m"
+ENDC="\033[0m"
+
+
+function info {
+    echo -e "${BLUE}[ INFO  ]${ENDC} $*" # > /dev/tty
+}
+
+function warn {
+    echo -e "${YELLOW}[WARNING]${ENDC} $*" # > /dev/tty
+}
+
+function err {
+    echo -e "${RED}[ ERROR ]${ENDC} $*" # > /dev/tty
+}
+
+function succ {
+    echo -e "${GREEN}[SUCCESS]${ENDC} $*" # > /dev/tty
+}
+
+#################################################################
+
+if [ "$(id -u)" -ne 0 ]; then
+    err "The script must be run under sudo!"
+    exit 111
+fi
+
+#################################################################
+
+info "Removing '/etc/fenrir' .."
+
+rm -r /etc/fenrir
+
+succ "Done"
+
+info "Removing '/var/fenrir' .."
+
+rm -r /var/fenrir
+
+succ "Done"
+
+info "Removing core .."
+
+for cmd in "$CORE_UTILS_DIR"/*; do
+    name=$(basename "$cmd")
+
+    if ! rm "/bin/$name"; then
+        err "Terminating .."
+        exit 10
+    fi
+done
+
+succ "Done"
+
+
+info "Removing basic utils .."
+
+for util in "$BASIC_UTILS_DIR"/* "$BASIC_UTILS_DIR"/**/*; do
+    relative_path=${util#$BASIC_UTILS_DIR/}
+
+    if [ -d "$util" ]; then
+        continue
+    fi
+
+    if ! rm "/home/$user/.local/bin/custom/$relative_path"; then
+        err "Terminating .."
+        exit 10
+    fi
+done
+
+succ "Done"
+
+info "Removing cli tool .."
+
+rm "/bin/fenrir"
+
+succ "Done"

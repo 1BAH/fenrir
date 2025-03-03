@@ -1,0 +1,183 @@
+#! /bin/bash
+
+[ "$SUDO_USER" ] && user=$SUDO_USER || user="`whoami`"
+
+CLI_DIR=$(dirname "$(realpath "$0")")
+CORE_UTILS_DIR=$(realpath "${CLI_DIR}/../core")
+CFGS_DIR=$(realpath "${CLI_DIR}/../configs")
+BASIC_UTILS_DIR=$(realpath "${CLI_DIR}/../custom")
+
+###################################################################
+
+GREEN="\033[38;5;112m"
+BLUE="\033[38;5;4m"
+YELLOW="\033[38;5;214m"
+RED="\033[38;5;196m"
+ENDC="\033[0m"
+
+
+function info {
+    echo -e "${BLUE}[ INFO  ]${ENDC} $*" # > /dev/tty
+}
+
+function warn {
+    echo -e "${YELLOW}[WARNING]${ENDC} $*" # > /dev/tty
+}
+
+function err {
+    echo -e "${RED}[ ERROR ]${ENDC} $*" # > /dev/tty
+}
+
+function succ {
+    echo -e "${GREEN}[SUCCESS]${ENDC} $*" # > /dev/tty
+}
+
+#################################################################
+
+if [ "$(id -u)" -ne 0 ]; then
+    err "The script must be run under sudo!"
+    exit 111
+fi
+
+###################################################################
+
+VERSION=$(sed -nE 's/.*version=([0-9])\.([0-9])\.([0-9]).*/\1.\2.\3/p' fenrir.properties)
+info "Install fenrir @$VERSION"
+
+#################################################################
+
+info "Validating environment.."
+
+if [ -d "/etc/fenrir" ]; then
+    warn "Directory '/etc/fenrir' already exists"
+    warn "Remove existing '/etc/fenrir' [yes|no]"
+    read -r op
+
+    if [ "$op" = "yes" ]; then
+        info "Removing '/etc/fenrir' .."
+        rm -fr /etc/fenrir
+    else
+        err "Terminating.."
+        exit 3
+    fi
+fi
+
+if [ -d "/var/fenrir" ]; then
+    warn "Directory '/var/fenrir' already exists. Run uninstaller to remove it"
+    warn "Remove existing '/var/fenrir'? [yes|no]"
+    read -r op
+
+    if [ "$op" = "yes" ]; then
+        info "Removing '/var/fenrir' .."
+        rm -fr /var/fenrir
+    else
+        err "Terminating.."
+        exit 3
+    fi
+fi
+
+if ! type jq &> /dev/null; then
+    err "'jq' is not installed"
+    exit 4
+fi
+
+for cmd in "$CORE_UTILS_DIR"/*; do
+    name=$(basename "$cmd")
+
+    if type "$name" &> /dev/null; then
+        warn "Command <$name> already exists"
+        warn "Override <$name>? [yes|no]"
+        read -r op
+
+        if [ "$op" != "yes" ]; then
+            err "Terminating.."
+            exit 3
+        fi
+    fi
+done
+
+succ "Ready to be installed!"
+
+#################################################################
+
+info "Creating '/etc/fenrir' .."
+
+mkdir -p /etc/fenrir
+chown "$user" /etc/fenrir
+
+succ "Done"
+
+info "Creating '/var/fenrir' .."
+
+mkdir -p /var/fenrir
+chown "$user" /var/fenrir
+
+succ "Done"
+
+info "Installing core .."
+
+for cmd in "$CORE_UTILS_DIR"/*; do
+    name=$(basename "$cmd")
+
+    if ! cp "$cmd" "/bin/$name"; then
+        err "Terminating .."
+        exit 10
+    fi
+done
+
+succ "Done"
+
+#################################################################
+
+info "Setting all configs .."
+
+for cfg in "$CFGS_DIR"/*; do
+    name=$(basename "$cfg")
+
+    if ! { cp "$cfg" "/etc/fenrir/$name" && chown "$user" "/etc/fenrir/$name"; }; then
+        err "Terminating .."
+        exit 10
+    fi
+done
+
+succ "Done"
+
+#################################################################
+
+info "Installing basic utils .."
+
+mkdir -p "/home/$user/.local/bin/custom/walk"
+chown "$user" "/home/$user/.local/bin/custom"
+chown "$user" "/home/$user/.local/bin/custom/walk"
+
+for util in "$BASIC_UTILS_DIR"/* "$BASIC_UTILS_DIR"/**/*; do
+    relative_path=${util#$BASIC_UTILS_DIR/}
+
+    if [ -d "$util" ]; then
+        continue
+    fi
+
+    if ! {
+        cp "$util" "/home/$user/.local/bin/custom/$relative_path" &&
+        chown "$user" "/home/$user/.local/bin/custom/$relative_path";
+    }; then
+        err "Terminating .."
+        exit 10
+    fi
+done
+
+succ "Done"
+
+###################################################################
+
+info "Installing cli tool .."
+
+cli=$(sed "s/REPLACEME/$VERSION/g" "$CLI_DIR/fenrir")
+
+echo "$cli" > "/bin/fenrir"
+#chown "$user" "/bin/fenrir"
+chmod +x "/bin/fenrir"
+
+succ "Done"
+
+succ "Installation has finished!"

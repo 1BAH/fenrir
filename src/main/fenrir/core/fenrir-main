@@ -5,7 +5,7 @@
 repo=$1
 v="-v" # verbosity (replace with "" to mute hints and info logs)
 config_file="/etc/fenrir/main.json"
-pipeline="/home/checker/.local/bin/custom/pipeline.json"
+pipeline="$HOME/.local/bin/custom/pipeline.json"
 out="/var/fenrir/out"
 err="/var/fenrir/err"
 pre=$(jq -r '.pre[]' "$pipeline")
@@ -44,31 +44,28 @@ function switch_solution {
 score_file=$(jq -r '.score' "$config_file")
 echo -n 0 > "$score_file"
 
-
-# step 1 - clone repo
-if clone-repo "$repo" "$v"; then
-    for script in $pre; do
-        log info "$v" "--------------------------($script)--------------------------"
-        if ! "/home/checker/.local/bin/custom/$script" "$repo" "$v"; then
-            finish
-        fi
-    done
-
-    log info "$v" "--------------------------(switch-solution)--------------------------"
-
-    if ! switch_solution; then
+for script in $pre; do
+    log info "$v" "--------------------------($script)--------------------------"
+    if ! "$HOME/.local/bin/custom/$script" "$repo" "$v"; then
         finish
     fi
+done
 
-    for script in $main; do
-        log info "$v" "--------------------------($script)--------------------------"
-        if ! "/home/checker/.local/bin/custom/$script" "$repo" "$v" && [ "$blocking" -ne 0 ]; then
-            finish
-        fi
-    done
+log info "$v" "--------------------------(switch-solution)--------------------------"
 
-    log info "$v" "-----------------------------------------------------------"
+if ! switch_solution; then
+    finish
 fi
+
+for script in $main; do
+    log info "$v" "--------------------------($script)--------------------------"
+    if ! "$HOME/.local/bin/custom/$script" "$repo" "$v" && [ "$blocking" -ne 0 ]; then
+        finish
+    fi
+done
+
+log info "$v" "-----------------------------------------------------------"
+
 
 
 finish

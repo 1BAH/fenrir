@@ -1,0 +1,175 @@
+#! /bin/bash
+
+cmd=$1
+shift
+
+######################################################################
+
+infolog="Possible options:
+fenrir help
+fenrir remote <URL>
+fenrir task <TASK ID>
+fenrir run <SOLUTION DIR>
+------------------------------------------------------------------
+fenrir help:
+    Info about fenrir util
+    See https://gitlab.com/atpd/progtech/fenrir
+
+fenrir remote <URL>:
+    Set remote task repository
+
+fenrir task <TASK ID>:
+    Set task tests
+
+fenrir run <SOLUTION DIR>:
+    Run local tests on the specified local repository
+------------------------------------------------------------------
+Current settings:
+    * Remote: $(getremote)
+    * Solution branch: $(jq '.branch' '/etc/fenrir/main.json')
+    * Blocking: $(jq '.blocking' '/etc/fenrir/main.json')
+    * Last installed task: $(jq '.task' '/etc/fenrir/main.json')
+------------------------------------------------------------------
+Run settings:
+$(jq . "$HOME/.local/bin/custom/pipeline.json")
+------------------------------------------------------------------
+fenrir REPLACEME, 2025
+@_1BAH_
+"
+
+
+function info {
+    if [ "$#" -ne 0 ]; then
+        log err -v Too many arguments!
+        exit 15
+    fi
+
+    echo "$infolog"
+}
+
+######################################################################
+
+function get_index {
+    host=$(getremote)
+    dir=$1
+
+    wget -O /tmp/index "$host/-/raw/main/$dir/index.json" &> /dev/null
+    echo -n "*"
+}
+
+function get_custom {
+    host=$(getremote)
+    dir=$1
+
+    for script in $(jq -r .custom[] /tmp/index); do
+        wget -O "$HOME/.local/bin/custom/$script" "$host/-/raw/main/$dir/$script" &> /dev/null
+        echo -n "*"
+        chmod +x "$HOME/.local/bin/custom/$script"
+    done
+}
+
+function get_cfgs {
+    host=$(getremote)
+    dir=$1
+
+    for script in $(jq -r .cfgs[] /tmp/index); do
+        wget -O "/etc/fenrir/$script" "$host/-/raw/main/$dir/$script" &> /dev/null
+        echo -n "*"
+    done
+}
+
+function get_pipeline {
+    host=$(getremote)
+    dir=$1
+
+    wget -O "$HOME/.local/bin/custom/pipeline.json" "$host/-/raw/main/$dir/pipeline.json" &> /dev/null
+    echo -n "*"
+}
+
+function get_meta {
+    branch=$(jq -r .branch /tmp/index)
+    jq ".branch = \"$branch\"" "/etc/fenrir/main.json" > /tmp/INSTALL_FENRIR
+    cat /tmp/INSTALL_FENRIR > "/etc/fenrir/main.json"
+
+    block=$(jq -r .blocking /tmp/index)
+    jq ".blocking = \"$block\"" "/etc/fenrir/main.json" > /tmp/INSTALL_FENRIR
+    cat /tmp/INSTALL_FENRIR > "/etc/fenrir/main.json"
+}
+
+######################################################################
+
+function install_tests {
+    if [ "$#" -ne 1 ]; then
+        log err -v Too many arguments!
+        exit 15
+    fi
+
+    task=$1
+
+    echo -n "DOWNLOADING '$task' ["
+
+    get_index "$task"
+
+    get_meta
+    get_cfgs "$task"
+    get_custom "$task"
+    get_pipeline "$task"
+
+    echo "]"
+
+    jq ".task = \"$task\"" "/etc/fenrir/main.json" > /tmp/INSTALL_FENRIR
+    cat /tmp/INSTALL_FENRIR > "/etc/fenrir/main.json"
+}
+
+######################################################################
+
+function set_remote {
+    if [ "$#" -ne 1 ]; then
+        log err -v Too many arguments!
+        exit 15
+    fi
+
+    url=$1
+    jq ".remote = \"$url\"" "/etc/fenrir/main.json" > /tmp/INSTALL_FENRIR
+    cat /tmp/INSTALL_FENRIR > "/etc/fenrir/main.json"
+}
+
+######################################################################
+
+function run {
+    if [ "$#" -ne 1 ]; then
+        log err -v Too many arguments!
+        exit 15
+    fi
+
+    src=$1
+    jq ".root = \"$src\"" "/etc/fenrir/main.json" > /tmp/INSTALL_FENRIR
+    cat /tmp/INSTALL_FENRIR > "/etc/fenrir/main.json"
+
+    fenrir-main
+}
+
+######################################################################
+
+case "$cmd" in
+    "remote")
+        set_remote "$@"
+    ;;
+
+    "--help" | "-h" | "help")
+        info "$@"
+    ;;
+
+    "task")
+        install_tests "$@"
+    ;;
+
+    "run")
+        run "$@"
+    ;;
+
+    *)
+        err "Command not found"
+        exit 1
+    ;;
+esac
