@@ -3,7 +3,8 @@
         "forbidden-dirs-inspector"
     ],
     "files": [
-        "new-line-inspector"
+        "new-line-inspector",
+        "bash-inspector"
     ],
     "skip": [
         ".",
