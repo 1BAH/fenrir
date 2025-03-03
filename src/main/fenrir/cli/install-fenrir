@@ -124,7 +124,7 @@ info "Installing core .."
 for cmd in "$CORE_UTILS_DIR"/*; do
     name=$(basename "$cmd")
 
-    if ! cp "$cmd" "/bin/$name"; then
+    if ! cp "$cmd" "/usr/local/bin/$name"; then
         err "Terminating .."
         exit 10
     fi
@@ -179,9 +179,9 @@ info "Installing cli tool .."
 
 cli=$(sed "s/REPLACEME/$VERSION/g" "$CLI_DIR/fenrir")
 
-echo "$cli" > "/bin/fenrir"
-#chown "$user" "/bin/fenrir"
-chmod +x "/bin/fenrir"
+echo "$cli" > "/usr/local/bin/fenrir"
+#chown "$user" "/usr/local/bin/fenrir"
+chmod +x "/usr/local/bin/fenrir"
 
 succ "Done"
 

@@ -58,7 +58,7 @@ info "Removing core .."
 for cmd in "$CORE_UTILS_DIR"/*; do
     name=$(basename "$cmd")
 
-    if ! rm "/bin/$name"; then
+    if ! rm -f "/usr/local/bin/$name"; then
         err "Terminating .."
         exit 10
     fi
@@ -86,6 +86,6 @@ succ "Done"
 
 info "Removing cli tool .."
 
-rm "/bin/fenrir"
+rm "/usr/local/bin/fenrir"
 
 succ "Done"
