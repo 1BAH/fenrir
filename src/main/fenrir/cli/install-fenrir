@@ -81,6 +81,11 @@ if ! type jq &> /dev/null; then
     exit 4
 fi
 
+if ! type wget &> /dev/null; then
+    err "'wget' is not installed"
+    exit 4
+fi
+
 for cmd in "$CORE_UTILS_DIR"/*; do
     name=$(basename "$cmd")
 
