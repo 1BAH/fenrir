@@ -9,6 +9,7 @@
 * Unix-like OS
 * `jq`
 * `wget`
+* `shellcheck`
 
 ### Installation
 
@@ -44,6 +45,10 @@ fenrir task <TASK ID>:
 fenrir run <SOLUTION DIR>:
     Run local tests on the specified local repository
 ```
+
+## Updates
+
+All updates are published [here](https://t.me/fenrir_updates)
 
 ---
 
