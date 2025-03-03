@@ -169,7 +169,7 @@ case "$cmd" in
     ;;
 
     *)
-        err "Command not found"
+        log err "Command not found"
         exit 1
     ;;
 esac
