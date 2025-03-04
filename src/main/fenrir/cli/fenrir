@@ -215,6 +215,8 @@ function update {
     uninstall-fenrir update
     /tmp/fenrir/src/main/fenrir/cli/install-fenrir update
 
+    rm -rf /tmp/fenrir
+
     fenrir-log succ -v "Successfully switched to '$(jq '.version' '/etc/fenrir/main.json') version"
 }
 
