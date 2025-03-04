@@ -183,7 +183,7 @@ function run {
     src=$(realpath "$1")
 
     if ! [ -d "$src/.git" ]; then
-        fenrir-err -v "The provided file is not a project root"
+        fenrir-log err -v "The provided file is not a project root"
         exit 89
     fi
 

@@ -23,8 +23,6 @@ function finish {
 }
 
 function switch_solution {
-    fenrir-log info "$v" "Switching to branch '$branch'"
-
     if fenrir-change-branch "$repo" "$v" "$branch"; then
         if cd "$destination/$branch" > "$out" 2> "$err"; then
             fenrir-log succ "$v" "Inside solution's directory"
