@@ -1,0 +1,17 @@
+#!/bin/bash
+
+newFiles=$(git diff --name-only --cached)
+
+for file in $newFiles; do
+    echo "Checking '$file'.."
+
+    if grep -q '#!' "$file"; then
+        meta=$(git ls-files -s "$file")
+
+        if [ "${meta[0]}" != "100755" ]; then
+            echo "File '$file' is supposed to be executable (contains shebang)"
+            echo "Changing its mode to 100755"
+            git update-index --chmod=+x "$file"
+        fi
+    fi
+done
