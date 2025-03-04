@@ -92,3 +92,9 @@ info "Removing cli tool .."
 [ -z "$update" ] && rm "/usr/local/bin/fenrir"
 
 succ "Done"
+
+#################################################################
+
+update="" # Unmute
+
+succ "Finished!"
