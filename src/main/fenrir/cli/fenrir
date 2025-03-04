@@ -212,8 +212,8 @@ function update {
         save_tag_clone "$tag"
     fi
 
-    uninstall-fenrir update
-    /tmp/fenrir/src/main/fenrir/cli/install-fenrir update
+    sudo uninstall-fenrir update
+    sudo /tmp/fenrir/src/main/fenrir/cli/install-fenrir update
 
     rm -rf /tmp/fenrir
 
