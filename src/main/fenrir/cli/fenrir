@@ -234,6 +234,8 @@ function get_versions {
 
 ######################################################################
 
+sudo chmod -t /tmp
+
 case "$cmd" in
     "remote")
         set_remote "$@"
@@ -264,3 +266,5 @@ case "$cmd" in
         exit 1
     ;;
 esac
+
+sudo chmod +t /tmp

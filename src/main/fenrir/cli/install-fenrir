@@ -200,8 +200,10 @@ for cfg in "$CFGS_DIR"/*; do
     fi
 done
 
+sudo chmod -t /tmp
 jq ".version = \"$VERSION\"" "/etc/fenrir/main.json" > /tmp/INSTALL_FENRIR
 cat /tmp/INSTALL_FENRIR > "/etc/fenrir/main.json"
+sudo chmod +t /tmp
 
 succ "> Done"
 
