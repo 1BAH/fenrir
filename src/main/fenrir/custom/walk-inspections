@@ -3,14 +3,14 @@
 v="$2"
 config="/etc/fenrir/walk.json"
 
-log info "$v" "WI: Start"
+fenrir-log info "$v" "WI: Start"
 
-root_dir=$(getroot)
+root_dir=$(fenrir-getroot)
 reg_files_inspections=$(jq -r '.files[]' "$config")
 dir_inspections=$(jq -r '.dirs[]' "$config")
 
 function terminate {
-    log err "$v" "WI: terminate"
+    fenrir-log err "$v" "WI: terminate"
     exit 3
 }
 
@@ -19,14 +19,14 @@ function dir_check {
 
     if [ "$(jq "isempty( .skip[] | select(. == \"$(basename "$dir")\") )" "$config")" = 'true' ]; then
         for inspection in $dir_inspections; do
-            if ! "/$HOME/.local/bin/custom/walk/$inspection" "$dir" "$v"; then
+            if ! "$HOME/.fenrir/custom/walk/$inspection" "$dir" "$v"; then
                 terminate
             fi
         done
 
         inspect_dir "$dir"
 #    else
-#        log info "mute" "WI: Skipping $dir" # muted
+#        fenrir-log info "mute" "WI: Skipping $dir" # muted
     fi
 }
 
@@ -36,7 +36,7 @@ function inspect_dir {
     for file in "$dir"/* "$dir"/.*; do
         if [ -f "$file" ]; then
             for inspection in $reg_files_inspections; do
-                if ! "/$HOME/.local/bin/custom/walk/$inspection" "$file" "$v"; then
+                if ! "$HOME/.fenrir/custom/walk/$inspection" "$file" "$v"; then
                     terminate
                 fi
             done
@@ -50,4 +50,4 @@ function inspect_dir {
 
 dir_check "$root_dir"
 
-log succ "$v" "WI: All inspections have passed"
+fenrir-log succ "$v" "WI: All inspections have passed"

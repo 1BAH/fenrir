@@ -1,11 +1,8 @@
 #! /bin/bash
 
-[ "$SUDO_USER" ] && user=$SUDO_USER || user="`whoami`"
+[ -n "$SUDO_USER" ] && user=$SUDO_USER || user=$USER
 
-CLI_DIR=$(dirname "$(realpath "$0")")
-CORE_UTILS_DIR=$(realpath "${CLI_DIR}/../core")
-CFGS_DIR=$(realpath "${CLI_DIR}/../configs")
-BASIC_UTILS_DIR=$(realpath "${CLI_DIR}/../custom")
+update=""
 
 ###################################################################
 
@@ -17,20 +14,27 @@ ENDC="\033[0m"
 
 
 function info {
-    echo -e "${BLUE}[ INFO  ]${ENDC} $*" # > /dev/tty
+    [ -z "$update" ] && echo -e "${BLUE}[ INFO  ]${ENDC} $*" # > /dev/tty
 }
 
 function warn {
-    echo -e "${YELLOW}[WARNING]${ENDC} $*" # > /dev/tty
+    [ -z "$update" ] && echo -e "${YELLOW}[WARNING]${ENDC} $*" # > /dev/tty
 }
 
 function err {
-    echo -e "${RED}[ ERROR ]${ENDC} $*" # > /dev/tty
+    [ -z "$update" ] && echo -e "${RED}[ ERROR ]${ENDC} $*" # > /dev/tty
 }
 
 function succ {
-    echo -e "${GREEN}[SUCCESS]${ENDC} $*" # > /dev/tty
+    [ -z "$update" ] && echo -e "${GREEN}[SUCCESS]${ENDC} $*" # > /dev/tty
 }
+
+#################################################################
+
+if [ "$1" = "update" ]; then
+    info "Uninstalling previous version of fenrir: $(jq '.version' '/etc/fenrir/main.json')"
+    update=true
+fi
 
 #################################################################
 
@@ -41,51 +45,50 @@ fi
 
 #################################################################
 
-info "Removing '/etc/fenrir' .."
+info "Removing '/etc/fenrir'.."
 
 rm -r /etc/fenrir
 
 succ "Done"
 
-info "Removing '/var/fenrir' .."
+#################################################################
+
+info "Removing '/var/fenrir'.."
 
 rm -r /var/fenrir
 
 succ "Done"
 
-info "Removing core .."
+#################################################################
 
-for cmd in "$CORE_UTILS_DIR"/*; do
+info "Removing core.."
+
+for cmd in /usr/local/bin/fenrir-*; do
     name=$(basename "$cmd")
 
-    if ! rm -f "/usr/local/bin/$name"; then
-        err "Terminating .."
+    if ! rm "/usr/local/bin/$name"; then
+        err "Terminating.."
         exit 10
     fi
 done
 
 succ "Done"
 
+#################################################################
 
-info "Removing basic utils .."
+info "Removing basic utils.."
 
-for util in "$BASIC_UTILS_DIR"/* "$BASIC_UTILS_DIR"/**/*; do
-    relative_path=${util#$BASIC_UTILS_DIR/}
-
-    if [ -d "$util" ]; then
-        continue
-    fi
-
-    if ! rm "/home/$user/.local/bin/custom/$relative_path"; then
-        err "Terminating .."
-        exit 10
-    fi
-done
+if ! rm -r "/home/$user/.fenrir"; then
+    err "Terminating .."
+    exit 10
+fi
 
 succ "Done"
+
+#################################################################
 
 info "Removing cli tool .."
 
-rm "/usr/local/bin/fenrir"
+[ -z "$update" ] && rm "/usr/local/bin/fenrir"
 
 succ "Done"

@@ -1,13 +1,13 @@
 #! /bin/bash
 
 verbosity=$1
-repo=$2
+#repo=$2
 branch=$3
 
 
 log info "$verbosity" "Checking whether branch <$branch> exists.."
 
-if git ls-remote -h "$repo" | grep -q "refs/heads/$branch"; then
+if git branch | grep -q "$branch"; then
     log succ "$verbosity" "Branch exists"
 else
     log err "$verbosity" "Branch does not exist"

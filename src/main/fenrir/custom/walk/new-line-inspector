@@ -2,11 +2,11 @@
 
 file=$1
 
-log info "$2" "NLI: Inspecting '$file'"
+fenrir-log info "$2" "NLI: Inspecting '$file'"
 
 last_sym=$(tail -c 1 "$file")
 
 if [ -n "$last_sym" ]; then
-    log err "$2" "NLI: File '$file' has no EOL at the end."
+    fenrir-log err "$2" "NLI: File '$file' has no EOL at the end."
     exit 3
 fi

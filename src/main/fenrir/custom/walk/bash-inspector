@@ -2,6 +2,10 @@
 
 # WARNING! Requires shellcheck to be installed!
 
+if ! type shellcheck &> /dev/null; then
+    fenrir-log err "$2" "shellcheck is not installed"
+fi
+
 file=$1
 
 if ! [[ $file == *.sh ]]; then
@@ -9,16 +13,16 @@ if ! [[ $file == *.sh ]]; then
 fi
 
 
-log info "$2" "BI: Inspecting '$file'"
+fenrir-log info "$2" "BI: Inspecting '$file'"
 
 if [ "$2" == "-v" ]; then
     if ! shellcheck -a -Calways "$file" ; then
-        log err "$2" "BI: File '$file' contains violations."
+        fenrir-log err "$2" "BI: File '$file' contains violations."
         exit 2
     fi
 else
     if ! shellcheck -a -Cnever "$file" ; then
-        log err "$2" "BI: File '$file' contains violations."
+        fenrir-log err "$2" "BI: File '$file' contains violations."
         exit 3
     fi
 fi
