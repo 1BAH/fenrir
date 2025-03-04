@@ -19,14 +19,14 @@ function dir_check {
 
     if [ "$(jq "isempty( .skip[] | select(. == \"$(basename "$dir")\") )" "$config")" = 'true' ]; then
         for inspection in $dir_inspections; do
-            if ! "/$HOME/.local/bin/custom/walk/$inspection" "$dir" "$v"; then
+            if ! "/$HOME/.fenrir/walk/$inspection" "$dir" "$v"; then
                 terminate
             fi
         done
 
         inspect_dir "$dir"
 #    else
-#        log info "mute" "WI: Skipping $dir" # muted
+#        fenrir-log info "mute" "WI: Skipping $dir" # muted
     fi
 }
 
@@ -36,7 +36,7 @@ function inspect_dir {
     for file in "$dir"/* "$dir"/.*; do
         if [ -f "$file" ]; then
             for inspection in $reg_files_inspections; do
-                if ! "/$HOME/.local/bin/custom/walk/$inspection" "$file" "$v"; then
+                if ! "/$HOME/.fenrir/walk/$inspection" "$file" "$v"; then
                     terminate
                 fi
             done
