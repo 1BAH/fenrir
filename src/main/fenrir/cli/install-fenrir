@@ -66,7 +66,7 @@ case "$(uname -s)" in
         info ">> OS is LINUX"
     ;;
     Darwin*)
-        os_pref_home="/User"
+        os_pref_home="/Users"
         info ">> OS is MACOS"
     ;;
 #    CYGWIN*)
