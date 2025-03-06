@@ -9,21 +9,37 @@ url="https://gitlab.com/atpd/progtech/fenrir.git"
 out="/var/fenrir/out"
 err="/var/fenrir/err"
 
+function check_arg_count {
+    if [ "$#" -ne "$1" ]; then
+        fenrir-log err -v '(＃°Д°)' Too many arguments!
+        exit 15
+    fi
+}
+
 function save_tag_clone {
     tag=$1
-    if ! git clone --depth 1 --branch "$tag" "$url" /tmp/fenrir > "$out" 2> "$err"; then
-        fenrir-log err "Failed to clone repo"
-        fenrir-log warn "<stdout>" "$(cat "$out")"
-        fenrir-log err "<stderr>" "$(cat "$err")"
+
+    if [ -d "$HOME/.fenrir/tag" ]; then
+        rm -rf "$HOME/.fenrir/tag"
+    fi
+
+    if ! git clone --depth 1 --branch "$tag" "$url" "$HOME/.fenrir/tag" > "$out" 2> "$err"; then
+        fenrir-log err  -v 'ヽ（≧□≦）ノ' "Failed to clone repo"
+        fenrir-log warn -v "<stdout>" "$(cat "$out")"
+        fenrir-log err  -v "<stderr>" "$(cat "$err")"
         exit 66
     fi
 }
 
 function save_clone {
-    if ! git clone --depth 1 "$url" /tmp/fenrir > "$out" 2> "$err"; then
-        fenrir-log err "Failed to clone repo"
-        fenrir-log warn "<stdout>" "$(cat "$out")"
-        fenrir-log err "<stderr>" "$(cat "$err")"
+    if [ -d "$HOME/.fenrir/tag" ]; then
+        rm -rf "$HOME/.fenrir/tag"
+    fi
+
+    if ! git clone --depth 1 "$url" "$HOME/.fenrir/tag" > "$out" 2> "$err"; then
+        fenrir-log err  -v 'ヽ（≧□≦）ノ' "Failed to clone repo"
+        fenrir-log warn -v "<stdout>" "$(cat "$out")"
+        fenrir-log err  -v "<stderr>" "$(cat "$err")"
         exit 66
     fi
 }
@@ -77,22 +93,38 @@ fenrir $(jq '.version' '/etc/fenrir/main.json'), 2025
 
 
 function info {
-    if [ "$#" -ne 0 ]; then
-        fenrir-log err -v Too many arguments!
-        exit 15
-    fi
+    check_arg_count 0
 
     echo "$infolog"
 }
 
 ######################################################################
 
+function get_file {
+    url=$1
+    output=$2
+    err_msg=$3
+
+    if ! wget -o /tmp/FENRIR_DOWNLOAD -O "$output" "$url"; then
+        echo "!]" # Terminate processing line
+        fenrir-log err -v '(っ °Д °;)っ' "$err_msg"
+        fenrir-log warn -v "$(cat /tmp/FENRIR_DOWNLOAD)"
+        exit 13
+    else
+        echo -n "*"
+    fi
+}
+
 function get_index {
     host=$(fenrir-getremote)
     dir=$1
 
-    wget -O /tmp/FENRIR_INDEX "$host/-/raw/main/$dir/index.json" &> /dev/null
-    echo -n "*"
+    if ! get_file "$host/-/raw/main/$dir/index.json" \
+                  "/tmp/FENRIR_INDEX" \
+                  "Failed to download task '$dir'"
+    then
+        exit 13
+    fi
 }
 
 function get_custom {
@@ -100,8 +132,13 @@ function get_custom {
     dir=$1
 
     for script in $(jq -r .custom[] /tmp/FENRIR_INDEX); do
-        wget -O "$HOME/.fenrir/custom/$script" "$host/-/raw/main/$dir/$script" &> /dev/null
-        echo -n "*"
+        if ! get_file "$host/-/raw/main/$dir/$script" \
+                      "$HOME/.fenrir/custom/$script" \
+                      "Failed to download file '$script'"
+        then
+            exit 13
+        fi
+
         chmod +x "$HOME/.fenrir/custom/$script"
     done
 }
@@ -111,8 +148,12 @@ function get_cfgs {
     dir=$1
 
     for script in $(jq -r .cfgs[] /tmp/FENRIR_INDEX); do
-        wget -O "/etc/fenrir/$script" "$host/-/raw/main/$dir/$script" &> /dev/null
-        echo -n "*"
+        if ! get_file "$host/-/raw/main/$dir/$script" \
+                      "/etc/fenrir/$script" \
+                      "Failed to download file '$script'"
+        then
+            exit 13
+        fi
     done
 }
 
@@ -120,8 +161,12 @@ function get_pipeline {
     host=$(fenrir-getremote)
     dir=$1
 
-    wget -O "$HOME/.fenrir/custom/pipeline.json" "$host/-/raw/main/$dir/pipeline.json" &> /dev/null
-    echo -n "*"
+    if ! get_file "$host/-/raw/main/$dir/pipeline.json" \
+                  "$HOME/.fenrir/custom/pipeline.json" \
+                  "Failed to download testing pipeline"
+    then
+        exit 13
+    fi
 }
 
 function get_meta {
@@ -137,35 +182,42 @@ function get_meta {
 ######################################################################
 
 function install_tests {
-    if [ "$#" -ne 1 ]; then
-        fenrir-log err -v Too many arguments!
-        exit 15
-    fi
+    check_arg_count 1
 
     task=$1
 
     echo -n "DOWNLOADING '$task' ["
 
-    get_index "$task"
+    if ! get_index "$task"; then
+        exit 13
+    fi
 
     get_meta
-    get_cfgs "$task"
-    get_custom "$task"
-    get_pipeline "$task"
+
+    if ! get_cfgs "$task"; then
+        exit 13
+    fi
+
+    if ! get_custom "$task"; then
+        exit 13
+    fi
+
+    if ! get_pipeline "$task"; then
+        exit 13
+    fi
 
     echo "]"
 
     jq ".task = \"$task\"" "/etc/fenrir/main.json" > /tmp/TMP_FENRIR
     cat /tmp/TMP_FENRIR > "/etc/fenrir/main.json"
+
+    fenrir-log succ -v '[]~(￣▽￣)~*' "Task '$task' has been downloaded"
 }
 
 ######################################################################
 
 function set_remote {
-    if [ "$#" -ne 1 ]; then
-        fenrir-log err -v Too many arguments!
-        exit 15
-    fi
+    check_arg_count 1
 
     url=$1
     jq ".remote = \"$url\"" "/etc/fenrir/main.json" > /tmp/TMP_FENRIR
@@ -175,15 +227,12 @@ function set_remote {
 ######################################################################
 
 function run {
-    if [ "$#" -ne 1 ]; then
-        fenrir-log err -v Too many arguments!
-        exit 15
-    fi
+    check_arg_count 1
 
     src=$(realpath "$1")
 
     if ! [ -d "$src/.git" ]; then
-        fenrir-log err -v "The provided file is not a project root"
+        fenrir-log err -v '(╬▔皿▔)╯' "The provided file is not a project root"
         exit 89
     fi
 
@@ -196,45 +245,35 @@ function run {
 ######################################################################
 
 function update {
-    if [ "$#" -ne 1 ]; then
-        fenrir-log err -v Too many arguments!
-        exit 15
-    fi
+    check_arg_count 1
 
     tag=$1
 
     if [ "$tag" = "latest" ]; then
         save_clone
     elif [ -z "$tag" ]; then
-        fenrir-log err "Empty version"
+        fenrir-log err '(ㆆ_ㆆ)' "Empty version"
         exit 67
     else
         save_tag_clone "$tag"
     fi
 
     sudo uninstall-fenrir update
-    sudo /tmp/fenrir/src/main/fenrir/cli/install-fenrir update
+    sudo "$HOME/.fenrir/tag/src/main/fenrir/cli/install-fenrir" update
 
-    rm -rf /tmp/fenrir
-
-    fenrir-log succ -v "Successfully switched to '$(jq '.version' '/etc/fenrir/main.json') version"
+    fenrir-log succ -v '♪(^∇^*)' "Successfully switched to '$(jq '.version' '/etc/fenrir/main.json') version"
 }
 
 ######################################################################
 
 function get_versions {
-    if [ "$#" -ne 0 ]; then
-        fenrir-log err -v Too many arguments!
-        exit 15
-    fi
+    check_arg_count 0
 
     tags=$(curl https://gitlab.com/api/v4/projects/67614102/repository/tags 2> /dev/null)
     echo "$tags" | jq '.[].name'
 }
 
 ######################################################################
-
-sudo chmod -t /tmp
 
 case "$cmd" in
     "remote")
@@ -262,9 +301,7 @@ case "$cmd" in
     ;;
 
     *)
-        fenrir-log err "Command not found"
+        fenrir-log err -v '(+_+)?' "Command not found"
         exit 1
     ;;
 esac
-
-sudo chmod +t /tmp
