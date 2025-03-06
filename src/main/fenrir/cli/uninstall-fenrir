@@ -47,7 +47,11 @@ fi
 
 info "Removing '/etc/fenrir'.."
 
-rm -r /etc/fenrir
+if [ -d "/etc/fenrir" ]; then
+    rm -r /etc/fenrir
+else
+    warn "The directory does not exist!"
+fi
 
 succ "Done"
 
@@ -55,7 +59,11 @@ succ "Done"
 
 info "Removing '/var/fenrir'.."
 
-rm -r /var/fenrir
+if [ -d "/var/fenrir" ]; then
+    rm -r /var/fenrir
+else
+    warn "The directory does not exist!"
+fi
 
 succ "Done"
 
@@ -64,6 +72,11 @@ succ "Done"
 info "Removing core.."
 
 for cmd in /usr/local/bin/fenrir-*; do
+    if [ "$cmd" = "/usr/local/bin/fenrir-*" ]; then
+        warn "No core commands were found!"
+        break
+    fi
+
     name=$(basename "$cmd")
 
     if ! rm "/usr/local/bin/$name"; then
@@ -78,9 +91,13 @@ succ "Done"
 
 info "Removing basic utils.."
 
-if ! rm -r "/home/$user/.fenrir"; then
-    err "Terminating .."
-    exit 10
+if [ -d "/home/$user/.fenrir/custom" ]; then
+    if ! rm -r "/home/$user/.fenrir/custom"; then
+        err "Terminating .."
+        exit 10
+    fi
+else
+    warn "fenrir's local repository was not found!"
 fi
 
 succ "Done"
@@ -89,12 +106,13 @@ succ "Done"
 
 info "Removing cli tool .."
 
-[ -z "$update" ] && rm "/usr/local/bin/fenrir"
+if [ -z "$update" ]; then
+    if [ -f "/usr/local/bin/fenrir" ]; then
+        rm "/usr/local/bin/fenrir"
+    else
+        warn "fenrir cli is not installed"
+    fi
+fi
 
 succ "Done"
 
-#################################################################
-
-update="" # Unmute
-
-succ "Finished!"
