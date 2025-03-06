@@ -263,4 +263,6 @@ succ "> Done"
 
 ###################################################################
 
+update="" # Unmute
+
 succ "Installation has finished!"
