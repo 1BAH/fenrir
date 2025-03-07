@@ -10,8 +10,12 @@ out="/var/fenrir/out"
 err="/var/fenrir/err"
 
 function check_arg_count {
-    if [ "$#" -ne "$1" ]; then
-        fenrir-log err -v '(＃°Д°)' Too many arguments!
+    exp=$1
+    real=$2
+
+    if [ "$exp" -ne "$real" ]; then
+        fenrir-log err -v '(＃°Д°)' Wrong arguments count!
+        fenrir-log err -v "Expected <$exp> but got <$real>"
         exit 15
     fi
 }
@@ -93,7 +97,7 @@ fenrir $(jq '.version' '/etc/fenrir/main.json'), 2025
 
 
 function info {
-    check_arg_count 0
+    check_arg_count $# 0
 
     echo "$infolog"
 }
@@ -182,7 +186,7 @@ function get_meta {
 ######################################################################
 
 function install_tests {
-    check_arg_count 1
+    check_arg_count $# 1
 
     task=$1
 
@@ -217,7 +221,7 @@ function install_tests {
 ######################################################################
 
 function set_remote {
-    check_arg_count 1
+    check_arg_count $# 1
 
     url=$1
     jq ".remote = \"$url\"" "/etc/fenrir/main.json" > /tmp/TMP_FENRIR
@@ -227,7 +231,7 @@ function set_remote {
 ######################################################################
 
 function run {
-    check_arg_count 1
+    check_arg_count $# 1
 
     src=$(realpath "$1")
 
@@ -245,7 +249,7 @@ function run {
 ######################################################################
 
 function update {
-    check_arg_count 1
+    check_arg_count $# 1
 
     tag=$1
 
@@ -267,7 +271,7 @@ function update {
 ######################################################################
 
 function get_versions {
-    check_arg_count 0
+    check_arg_count $# 0
 
     tags=$(curl https://gitlab.com/api/v4/projects/67614102/repository/tags 2> /dev/null)
     echo "$tags" | jq '.[].name'

@@ -23,6 +23,18 @@ function finish {
 }
 
 function switch_solution {
+    if [ "$branch" = "--" ]; then
+        if cd "$destination" > "$out" 2> "$err"; then
+            fenrir-log succ "$v" "Inside solution's directory"
+            return
+        else
+            fenrir-log err "$v" "Failed"
+            fenrir-log warn "$v" "<stdout>" "$(cat "$out")"
+            fenrir-log err "$v" "<stderr>" "$(cat "$err")"
+            return 3
+        fi
+    fi
+
     if fenrir-change-branch "$repo" "$v" "$branch"; then
         if cd "$destination/$branch" > "$out" 2> "$err"; then
             fenrir-log succ "$v" "Inside solution's directory"
