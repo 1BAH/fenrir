@@ -25,16 +25,20 @@ function succ {
 
 return_code=0
 
+cat <<__HEREDOC
+==================================================================
+                        Running tests"
+==================================================================
+__HEREDOC
 
-echo "=================================================================="
-echo "                        Running tests"
-echo "=================================================================="
-
+ls -R
 
 for test_file in $(ls ../*Tests.sh); do
     if [ -d "../$test_file" ]; then
         continue
     fi
+
+    echo "$test_file"
 
     if ! "../$test_file"; then
         err "Test failed"
