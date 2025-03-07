@@ -1,0 +1,66 @@
+#! /bin/bash
+
+FENRIR_LOCAL_TMP="$HOME/.fenrir/tmp"
+
+######################################################################
+##                         VERIFY ARGUMENTS                         ##
+######################################################################
+
+exp=1
+real=$#
+
+if [ "$real" -gt "$exp" ]; then
+    fenrir-log err -v '(＃°Д°)' Wrong arguments count!
+    fenrir-log err -v "Expected no more than <$exp> but got <$real>"
+    exit 15
+fi
+
+######################################################################
+##                            FUNCTIONS                             ##
+######################################################################
+
+function new_name {
+    # shellcheck disable=SC2012
+    last_tmp=$(ls "$FENRIR_LOCAL_TMP" | sort -nr | head -n 1)
+
+    echo $(( last_tmp + 1 ))
+}
+
+function tmp_file {
+    name="$FENRIR_LOCAL_TMP/$(new_name)"
+    touch "$name"
+    echo "$name"
+}
+
+function tmp_dir {
+    name="$FENRIR_LOCAL_TMP/$(new_name)"
+    mkdir "$name"
+    echo "$name"
+}
+
+######################################################################
+##                           MAIN PROGRAM                           ##
+######################################################################
+
+if ! [ -d "$FENRIR_LOCAL_TMP" ]; then
+    mkdir -p "$FENRIR_LOCAL_TMP"
+fi
+
+if [ "$#" -eq 0 ]; then
+    tmp_file
+    exit
+fi
+
+case "$1" in
+    "-d")
+        tmp_dir
+    ;;
+
+    "-f")
+        tmp_file
+    ;;
+
+    "-v")
+        echo "$FENRIR_LOCAL_TMP"
+    ;;
+esac

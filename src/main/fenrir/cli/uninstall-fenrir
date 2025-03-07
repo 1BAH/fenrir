@@ -104,6 +104,18 @@ succ "Done"
 
 #################################################################
 
+info "Removing additional .."
+
+if [ -z "$update" ]; then
+    if [ -f "/usr/local/bin/update-fenrir" ]; then
+        rm "/usr/local/bin/update-fenrir"
+    fi
+fi
+
+succ "Done"
+
+#################################################################
+
 info "Removing cli tool .."
 
 if [ -z "$update" ]; then

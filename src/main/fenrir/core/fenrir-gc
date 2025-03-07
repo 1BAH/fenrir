@@ -1,0 +1,67 @@
+#! /bin/bash
+
+######################################################################
+##                         VERIFY ARGUMENTS                         ##
+######################################################################
+
+exp=0
+real=$#
+
+if [ "$exp" -ne "$real" ]; then
+    fenrir-log err -v '(＃°Д°)' Wrong arguments count!
+    fenrir-log err -v "Expected <$exp> but got <$real>"
+    exit 15
+fi
+
+######################################################################
+##                           MAIN PROGRAM                           ##
+######################################################################
+
+fenrir-log info -v "Removing update repo.."
+rm -fr "$HOME/.fenrir/tag"
+
+fenrir-log info -v "Removing tmp.."
+rm -fr "$HOME/.fenrir/tmp"
+
+fenrir-log info -v "Removing local repo.."
+rm -fr "$HOME/.fenrir/repo"
+
+fenrir-log info -v "Removing local configs.."
+rm -fr "$HOME/.fenrir/cfgs"
+
+fenrir-log info -v "Cleaning default task.."
+for file in "$HOME/.fenrir/custom"/*; do
+    if [ -d "$file" ]; then
+        continue
+    fi
+
+    if [ "$file" = "$HOME/.fenrir/custom/task-zero" ] ||
+       [ "$file" = "$HOME/.fenrir/custom/walk-inspections" ]; then
+           continue
+    fi
+
+    rm -f "$file"
+done
+
+fenrir-log info -v "Cleaning global configs.."
+for file in /etc/fenrir/*; do
+    if [ "$file" = "/etc/fenrir/main.json" ] ||
+       [ "$file" = "/etc/fenrir/walk.json" ] ||
+       [ "$file" = "/etc/fenrir/forbidden-files.json" ]; then
+           continue
+    fi
+
+    rm -f "$file"
+done
+
+fenrir-log info -v "Setting default configs.."
+
+TMP=$(fenrir-tmp -v)
+
+jq '.branch = "-"' "/etc/fenrir/main.json" > "$TMP/TMP_FENRIR"
+cat "$TMP/TMP_FENRIR" > "/etc/fenrir/main.json"
+
+jq '.task = "-"' "/etc/fenrir/main.json" > "$TMP/TMP_FENRIR"
+cat "$TMP/TMP_FENRIR" > "/etc/fenrir/main.json"
+
+fenrir-log succ -v "Done"
