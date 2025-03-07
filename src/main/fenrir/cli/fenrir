@@ -57,6 +57,10 @@ case "$cmd" in
         jq '.version' '/etc/fenrir/main.json'
     ;;
 
+    "gc")
+        fenrir-gc "$@"
+    ;;
+
     *)
         fenrir-log err -v '(+_+)?' "Command not found"
         exit 1

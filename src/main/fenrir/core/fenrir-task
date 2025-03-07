@@ -1,130 +1,81 @@
 #! /bin/bash
 
+TMP=$(fenrir-tmp -v)
+LOCAL_REPO="$HOME/.fenrir/repo"
+LOCAL_CFGS="$HOME/.fenrir/cfgs"
+
 ######################################################################
-##                         VERIFY ARGUMENTS                         ##
+##                         PARSE ARGUMENTS                          ##
 ######################################################################
 
-exp=1
-real=$#
+INSTALL=0
 
-if [ "$exp" -ne "$real" ]; then
+if [ "$1" = "-f" ] || [ "$1" = "--force" ]; then
+    INSTALL=1
+    shift
+fi
+
+if [ "$#" -ne "1" ]; then
     fenrir-log err -v '(＃°Д°)' Wrong arguments count!
-    fenrir-log err -v "Expected <$exp> but got <$real>"
+    fenrir-log err -v "Expected <1> but got <$#>"
     exit 15
+fi
+
+TASK=$1
+
+if ! [ -d "$LOCAL_REPO/$TASK" ]; then
+    INSTALL=1
+    fenrir-log warn -v "Task '$TASK' has not been installed yet"
+else
+    fenrir-log info -v "Task '$TASK' has already been installed"
 fi
 
 ######################################################################
 ##                            FUNCTIONS                             ##
 ######################################################################
 
-function get_file {
-    url=$1
-    output=$2
-    err_msg=$3
-
-    if ! wget -o /tmp/FENRIR_DOWNLOAD -O "$output" "$url"; then
-        echo "!]" # Terminate processing line
-        fenrir-log err -v '(っ °Д °;)っ' "$err_msg"
-        fenrir-log warn -v "$(cat /tmp/FENRIR_DOWNLOAD)"
-        exit 13
-    else
-        echo -n "*"
+function get_local_cfgs {
+    if [ "$(ls "$LOCAL_CFGS/$TASK" | wc -w)" -eq 0 ]; then
+        return
     fi
-}
 
-function get_index {
-    host=$(fenrir-getremote)
-    dir=$1
-
-    if ! get_file "$host/-/raw/main/$dir/index.json" \
-                  "/tmp/FENRIR_INDEX"                \
-                  "Failed to download task '$dir'"
-    then
-        exit 13
-    fi
-}
-
-function get_custom {
-    host=$(fenrir-getremote)
-    dir=$1
-
-    for script in $(jq -r .custom[] /tmp/FENRIR_INDEX); do
-        if ! get_file "$host/-/raw/main/$dir/$script" \
-                      "$HOME/.fenrir/custom/$script"  \
-                      "Failed to download file '$script'"
-        then
-            exit 13
+    for cfg in "$LOCAL_CFGS/$TASK"/*; do
+        if [ -f "/etc/fenrir/$(basename "$cfg")" ]; then
+            rm -f "/etc/fenrir/$(basename "$cfg")"
         fi
 
-        chmod +x "$HOME/.fenrir/custom/$script"
+        cp "$cfg" "/etc/fenrir/$(basename "$cfg")"
     done
 }
 
-function get_cfgs {
-    host=$(fenrir-getremote)
-    dir=$1
-
-    for script in $(jq -r .cfgs[] /tmp/FENRIR_INDEX); do
-        if ! get_file "$host/-/raw/main/$dir/$script" \
-                      "/etc/fenrir/$script" \
-                      "Failed to download file '$script'"
-        then
-            exit 13
-        fi
+function get_local_task {
+    for file in "$LOCAL_REPO/$TASK"/*; do
+        cp "$file" "$HOME/.fenrir/custom/$(basename "$file")"
     done
 }
 
-function get_pipeline {
-    host=$(fenrir-getremote)
-    dir=$1
+function set_meta {
+    branch=$(jq -r .branch "$LOCAL_REPO/$TASK/index.json")
+    jq ".branch = \"$branch\"" "/etc/fenrir/main.json" > "$TMP/TMP_FENRIR"
+    cat "$TMP/TMP_FENRIR" > "/etc/fenrir/main.json"
 
-    if ! get_file "$host/-/raw/main/$dir/pipeline.json" \
-                  "$HOME/.fenrir/custom/pipeline.json"  \
-                  "Failed to download testing pipeline"
-    then
-        exit 13
-    fi
-}
-
-function get_meta {
-    branch=$(jq -r .branch /tmp/FENRIR_INDEX)
-    jq ".branch = \"$branch\"" "/etc/fenrir/main.json" > /tmp/TMP_FENRIR
-    cat /tmp/TMP_FENRIR > "/etc/fenrir/main.json"
-
-    block=$(jq -r .blocking /tmp/FENRIR_INDEX)
-    jq ".blocking = \"$block\"" "/etc/fenrir/main.json" > /tmp/TMP_FENRIR
-    cat /tmp/TMP_FENRIR > "/etc/fenrir/main.json"
+    block=$(jq -r .blocking "$LOCAL_REPO/$TASK/index.json")
+    jq ".blocking = \"$block\"" "/etc/fenrir/main.json" > "$TMP/TMP_FENRIR"
+    cat "$TMP/TMP_FENRIR" > "/etc/fenrir/main.json"
 }
 
 ######################################################################
 ##                           MAIN PROGRAM                           ##
 ######################################################################
 
-task=$1
-
-echo -n "DOWNLOADING '$task' ["
-
-if ! get_index "$task"; then
-    exit 13
+if [ "$INSTALL" -ne 0 ]; then
+    if ! fenrir-install-task "$TASK"; then
+        exit 56
+    fi
 fi
 
-get_meta
+get_local_cfgs
+get_local_task
+set_meta
 
-if ! get_cfgs "$task"; then
-    exit 13
-fi
-
-if ! get_custom "$task"; then
-    exit 13
-fi
-
-if ! get_pipeline "$task"; then
-    exit 13
-fi
-
-echo "]"
-
-jq ".task = \"$task\"" "/etc/fenrir/main.json" > /tmp/TMP_FENRIR
-cat /tmp/TMP_FENRIR > "/etc/fenrir/main.json"
-
-fenrir-log succ -v '[]~(￣▽￣)~*' "Task '$task' has been downloaded"
+fenrir-log succ -v '[]~(￣▽￣)~*' "Fenrir is ready to check task '$TASK'"

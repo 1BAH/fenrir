@@ -1,4 +1,4 @@
-# Fenrir v0.2.0
+# Fenrir v0.4.0
 
 > Framework for testing
 
