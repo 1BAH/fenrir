@@ -31,14 +31,10 @@ cat <<__HEREDOC
 ==================================================================
 __HEREDOC
 
-ls -R
-
 for test_file in ../*Tests.sh; do
     if [ -d "../$test_file" ]; then
         continue
     fi
-
-    echo "$test_file"
 
     if ! "$test_file"; then
         err "Test failed"
