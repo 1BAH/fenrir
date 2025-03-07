@@ -27,20 +27,20 @@ return_code=0
 
 cat <<__HEREDOC
 ==================================================================
-                        Running tests"
+                          Running tests
 ==================================================================
 __HEREDOC
 
 ls -R
 
-for test_file in $(ls ../*Tests.sh); do
+for test_file in ../*Tests.sh; do
     if [ -d "../$test_file" ]; then
         continue
     fi
 
     echo "$test_file"
 
-    if ! "../$test_file"; then
+    if ! "$test_file"; then
         err "Test failed"
         (( return_code++ ))
     else
