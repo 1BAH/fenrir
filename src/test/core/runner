@@ -8,19 +8,19 @@ export PATH=$(cat PATH_NEW)
 
 
 function info {
-    log info -v "$@"
+    fenrir-log info -v "$@"
 }
 
 function warn {
-    log warn -v "$@"
+    fenrir-log warn -v "$@"
 }
 
 function err {
-    log err -v "$@"
+    fenrir-log err -v "$@"
 }
 
 function succ {
-    log succ -v "$@"
+    fenrir-log succ -v "$@"
 }
 
 return_code=0

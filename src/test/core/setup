@@ -9,7 +9,7 @@ src_dir=$(realpath "$(pwd)/../../main/fenrir")
 
 ls "$src_dir"
 
-if ! [ -f "$src_dir/core/log" ]; then
+if ! [ -f "$src_dir/core/fenrir-log" ]; then
     echo "Logger was not found"
     echo "Terminating..."
     exit 1
