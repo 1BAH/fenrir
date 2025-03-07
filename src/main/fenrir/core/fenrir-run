@@ -1,0 +1,30 @@
+#! /bin/bash
+
+######################################################################
+##                         VERIFY ARGUMENTS                         ##
+######################################################################
+
+exp=1
+real=$#
+
+if [ "$exp" -ne "$real" ]; then
+    fenrir-log err -v '(＃°Д°)' Wrong arguments count!
+    fenrir-log err -v "Expected <$exp> but got <$real>"
+    exit 15
+fi
+
+######################################################################
+##                           MAIN PROGRAM                           ##
+######################################################################
+
+src=$(realpath "$1")
+
+if ! [ -d "$src/.git" ]; then
+    fenrir-log err -v '(╬▔皿▔)╯' "The provided file is not a project root"
+    exit 89
+fi
+
+jq ".root = \"$src\"" "/etc/fenrir/main.json" > /tmp/TMP_FENRIR
+cat /tmp/TMP_FENRIR > "/etc/fenrir/main.json"
+
+fenrir-main

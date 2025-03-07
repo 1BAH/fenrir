@@ -1,0 +1,130 @@
+#! /bin/bash
+
+######################################################################
+##                         VERIFY ARGUMENTS                         ##
+######################################################################
+
+exp=1
+real=$#
+
+if [ "$exp" -ne "$real" ]; then
+    fenrir-log err -v '(＃°Д°)' Wrong arguments count!
+    fenrir-log err -v "Expected <$exp> but got <$real>"
+    exit 15
+fi
+
+######################################################################
+##                            FUNCTIONS                             ##
+######################################################################
+
+function get_file {
+    url=$1
+    output=$2
+    err_msg=$3
+
+    if ! wget -o /tmp/FENRIR_DOWNLOAD -O "$output" "$url"; then
+        echo "!]" # Terminate processing line
+        fenrir-log err -v '(っ °Д °;)っ' "$err_msg"
+        fenrir-log warn -v "$(cat /tmp/FENRIR_DOWNLOAD)"
+        exit 13
+    else
+        echo -n "*"
+    fi
+}
+
+function get_index {
+    host=$(fenrir-getremote)
+    dir=$1
+
+    if ! get_file "$host/-/raw/main/$dir/index.json" \
+                  "/tmp/FENRIR_INDEX"                \
+                  "Failed to download task '$dir'"
+    then
+        exit 13
+    fi
+}
+
+function get_custom {
+    host=$(fenrir-getremote)
+    dir=$1
+
+    for script in $(jq -r .custom[] /tmp/FENRIR_INDEX); do
+        if ! get_file "$host/-/raw/main/$dir/$script" \
+                      "$HOME/.fenrir/custom/$script"  \
+                      "Failed to download file '$script'"
+        then
+            exit 13
+        fi
+
+        chmod +x "$HOME/.fenrir/custom/$script"
+    done
+}
+
+function get_cfgs {
+    host=$(fenrir-getremote)
+    dir=$1
+
+    for script in $(jq -r .cfgs[] /tmp/FENRIR_INDEX); do
+        if ! get_file "$host/-/raw/main/$dir/$script" \
+                      "/etc/fenrir/$script" \
+                      "Failed to download file '$script'"
+        then
+            exit 13
+        fi
+    done
+}
+
+function get_pipeline {
+    host=$(fenrir-getremote)
+    dir=$1
+
+    if ! get_file "$host/-/raw/main/$dir/pipeline.json" \
+                  "$HOME/.fenrir/custom/pipeline.json"  \
+                  "Failed to download testing pipeline"
+    then
+        exit 13
+    fi
+}
+
+function get_meta {
+    branch=$(jq -r .branch /tmp/FENRIR_INDEX)
+    jq ".branch = \"$branch\"" "/etc/fenrir/main.json" > /tmp/TMP_FENRIR
+    cat /tmp/TMP_FENRIR > "/etc/fenrir/main.json"
+
+    block=$(jq -r .blocking /tmp/FENRIR_INDEX)
+    jq ".blocking = \"$block\"" "/etc/fenrir/main.json" > /tmp/TMP_FENRIR
+    cat /tmp/TMP_FENRIR > "/etc/fenrir/main.json"
+}
+
+######################################################################
+##                           MAIN PROGRAM                           ##
+######################################################################
+
+task=$1
+
+echo -n "DOWNLOADING '$task' ["
+
+if ! get_index "$task"; then
+    exit 13
+fi
+
+get_meta
+
+if ! get_cfgs "$task"; then
+    exit 13
+fi
+
+if ! get_custom "$task"; then
+    exit 13
+fi
+
+if ! get_pipeline "$task"; then
+    exit 13
+fi
+
+echo "]"
+
+jq ".task = \"$task\"" "/etc/fenrir/main.json" > /tmp/TMP_FENRIR
+cat /tmp/TMP_FENRIR > "/etc/fenrir/main.json"
+
+fenrir-log succ -v '[]~(￣▽￣)~*' "Task '$task' has been downloaded"

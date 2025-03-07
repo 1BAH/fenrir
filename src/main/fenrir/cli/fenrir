@@ -5,10 +5,6 @@ shift
 
 ######################################################################
 
-url="https://gitlab.com/atpd/progtech/fenrir.git"
-out="/var/fenrir/out"
-err="/var/fenrir/err"
-
 function check_arg_count {
     exp=$1
     real=$2
@@ -20,288 +16,45 @@ function check_arg_count {
     fi
 }
 
-function save_tag_clone {
-    tag=$1
-
-    if [ -d "$HOME/.fenrir/tag" ]; then
-        rm -rf "$HOME/.fenrir/tag"
-    fi
-
-    if ! git clone --depth 1 --branch "$tag" "$url" "$HOME/.fenrir/tag" > "$out" 2> "$err"; then
-        fenrir-log err  -v 'ヽ（≧□≦）ノ' "Failed to clone repo"
-        fenrir-log warn -v "<stdout>" "$(cat "$out")"
-        fenrir-log err  -v "<stderr>" "$(cat "$err")"
-        exit 66
-    fi
-}
-
-function save_clone {
-    if [ -d "$HOME/.fenrir/tag" ]; then
-        rm -rf "$HOME/.fenrir/tag"
-    fi
-
-    if ! git clone --depth 1 "$url" "$HOME/.fenrir/tag" > "$out" 2> "$err"; then
-        fenrir-log err  -v 'ヽ（≧□≦）ノ' "Failed to clone repo"
-        fenrir-log warn -v "<stdout>" "$(cat "$out")"
-        fenrir-log err  -v "<stderr>" "$(cat "$err")"
-        exit 66
-    fi
-}
-
-
-######################################################################
-
-infolog="Possible options:
-fenrir help
-fenrir remote <URL>
-fenrir task <TASK ID>
-fenrir run <SOLUTION DIR>
-
-fenrir versions
-fenrir switch [<VERSION> | latest]
-------------------------------------------------------------------
-fenrir help:
-    Info about fenrir util
-    See https://gitlab.com/atpd/progtech/fenrir
-
-fenrir remote <URL>:
-    Set remote task repository
-
-fenrir task <TASK ID>:
-    Set task tests
-
-fenrir run <SOLUTION DIR>:
-    Run local tests on the specified local repository
-
-fenrir versions
-    Get all available versions
-
-fenrir switch latest
-    Update up to the latest version
-
-fenrir switch <VERSION>
-    Switch to the specified version (Error is thrown if the version is not available)
-    Run 'fenrir version' to list all available versions
-------------------------------------------------------------------
-Current settings:
-    * Remote: $(fenrir-getremote)
-    * Solution branch: $(jq '.branch' '/etc/fenrir/main.json')
-    * Blocking: $(jq '.blocking' '/etc/fenrir/main.json')
-    * Last installed task: $(jq '.task' '/etc/fenrir/main.json')
-------------------------------------------------------------------
-Run settings:
-$(jq . "$HOME/.fenrir/custom/pipeline.json")
-------------------------------------------------------------------
-fenrir $(jq '.version' '/etc/fenrir/main.json'), 2025
-@_1BAH_"
-
-
-function info {
-    check_arg_count $# 0
-
-    echo "$infolog"
-}
-
-######################################################################
-
-function get_file {
-    url=$1
-    output=$2
-    err_msg=$3
-
-    if ! wget -o /tmp/FENRIR_DOWNLOAD -O "$output" "$url"; then
-        echo "!]" # Terminate processing line
-        fenrir-log err -v '(っ °Д °;)っ' "$err_msg"
-        fenrir-log warn -v "$(cat /tmp/FENRIR_DOWNLOAD)"
-        exit 13
-    else
-        echo -n "*"
-    fi
-}
-
-function get_index {
-    host=$(fenrir-getremote)
-    dir=$1
-
-    if ! get_file "$host/-/raw/main/$dir/index.json" \
-                  "/tmp/FENRIR_INDEX" \
-                  "Failed to download task '$dir'"
-    then
-        exit 13
-    fi
-}
-
-function get_custom {
-    host=$(fenrir-getremote)
-    dir=$1
-
-    for script in $(jq -r .custom[] /tmp/FENRIR_INDEX); do
-        if ! get_file "$host/-/raw/main/$dir/$script" \
-                      "$HOME/.fenrir/custom/$script" \
-                      "Failed to download file '$script'"
-        then
-            exit 13
-        fi
-
-        chmod +x "$HOME/.fenrir/custom/$script"
-    done
-}
-
-function get_cfgs {
-    host=$(fenrir-getremote)
-    dir=$1
-
-    for script in $(jq -r .cfgs[] /tmp/FENRIR_INDEX); do
-        if ! get_file "$host/-/raw/main/$dir/$script" \
-                      "/etc/fenrir/$script" \
-                      "Failed to download file '$script'"
-        then
-            exit 13
-        fi
-    done
-}
-
-function get_pipeline {
-    host=$(fenrir-getremote)
-    dir=$1
-
-    if ! get_file "$host/-/raw/main/$dir/pipeline.json" \
-                  "$HOME/.fenrir/custom/pipeline.json" \
-                  "Failed to download testing pipeline"
-    then
-        exit 13
-    fi
-}
-
-function get_meta {
-    branch=$(jq -r .branch /tmp/FENRIR_INDEX)
-    jq ".branch = \"$branch\"" "/etc/fenrir/main.json" > /tmp/TMP_FENRIR
-    cat /tmp/TMP_FENRIR > "/etc/fenrir/main.json"
-
-    block=$(jq -r .blocking /tmp/FENRIR_INDEX)
-    jq ".blocking = \"$block\"" "/etc/fenrir/main.json" > /tmp/TMP_FENRIR
-    cat /tmp/TMP_FENRIR > "/etc/fenrir/main.json"
-}
-
-######################################################################
-
-function install_tests {
-    check_arg_count $# 1
-
-    task=$1
-
-    echo -n "DOWNLOADING '$task' ["
-
-    if ! get_index "$task"; then
-        exit 13
-    fi
-
-    get_meta
-
-    if ! get_cfgs "$task"; then
-        exit 13
-    fi
-
-    if ! get_custom "$task"; then
-        exit 13
-    fi
-
-    if ! get_pipeline "$task"; then
-        exit 13
-    fi
-
-    echo "]"
-
-    jq ".task = \"$task\"" "/etc/fenrir/main.json" > /tmp/TMP_FENRIR
-    cat /tmp/TMP_FENRIR > "/etc/fenrir/main.json"
-
-    fenrir-log succ -v '[]~(￣▽￣)~*' "Task '$task' has been downloaded"
-}
-
-######################################################################
-
-function set_remote {
-    check_arg_count $# 1
-
-    url=$1
-    jq ".remote = \"$url\"" "/etc/fenrir/main.json" > /tmp/TMP_FENRIR
-    cat /tmp/TMP_FENRIR > "/etc/fenrir/main.json"
-}
-
-######################################################################
-
-function run {
-    check_arg_count $# 1
-
-    src=$(realpath "$1")
-
-    if ! [ -d "$src/.git" ]; then
-        fenrir-log err -v '(╬▔皿▔)╯' "The provided file is not a project root"
-        exit 89
-    fi
-
-    jq ".root = \"$src\"" "/etc/fenrir/main.json" > /tmp/TMP_FENRIR
-    cat /tmp/TMP_FENRIR > "/etc/fenrir/main.json"
-
-    fenrir-main
-}
-
-######################################################################
-
-function update {
-    check_arg_count $# 1
-
-    tag=$1
-
-    if [ "$tag" = "latest" ]; then
-        save_clone
-    elif [ -z "$tag" ]; then
-        fenrir-log err '(ㆆ_ㆆ)' "Empty version"
-        exit 67
-    else
-        save_tag_clone "$tag"
-    fi
-
-    sudo uninstall-fenrir update
-    sudo "$HOME/.fenrir/tag/src/main/fenrir/cli/install-fenrir" update
-
-    fenrir-log succ -v '♪(^∇^*)' "Successfully switched to '$(jq '.version' '/etc/fenrir/main.json') version"
-}
-
-######################################################################
-
-function get_versions {
-    check_arg_count $# 0
-
-    tags=$(curl https://gitlab.com/api/v4/projects/67614102/repository/tags 2> /dev/null)
-    echo "$tags" | jq '.[].name'
-}
-
 ######################################################################
 
 case "$cmd" in
     "remote")
-        set_remote "$@"
+        check_arg_count $# 1
+
+        url=$1
+        jq ".remote = \"$url\"" "/etc/fenrir/main.json" > /tmp/TMP_FENRIR
+        cat /tmp/TMP_FENRIR > "/etc/fenrir/main.json"
     ;;
 
     "--help" | "-h" | "help")
-        info "$@"
+        fenrir-info "$@"
     ;;
 
     "task")
-        install_tests "$@"
+        fenrir-task "$@"
     ;;
 
     "run")
-        run "$@"
+        fenrir-run "$@"
     ;;
 
     "switch")
-        update "$@"
+        update-fenrir "$@"
     ;;
 
     "versions")
-        get_versions "$@"
+        check_arg_count $# 0
+
+        # TODO Handle errors
+        tags=$(curl https://gitlab.com/api/v4/projects/67614102/repository/tags 2> /dev/null)
+        echo "$tags" | jq '.[].name'
+    ;;
+
+    "-v" | "--version" | "version" | "-version")
+        check_arg_count $# 0
+
+        jq '.version' '/etc/fenrir/main.json'
     ;;
 
     *)
