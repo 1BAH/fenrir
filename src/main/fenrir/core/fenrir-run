@@ -4,12 +4,19 @@
 ##                         VERIFY ARGUMENTS                         ##
 ######################################################################
 
+SILENT="-v"
+
+if [ "$1" = "-s" ]; then
+    SILENT=""
+    shift
+fi
+
 exp=1
 real=$#
 
 if [ "$exp" -ne "$real" ]; then
-    fenrir-log err -v '(＃°Д°)' Wrong arguments count!
-    fenrir-log err -v "Expected <$exp> but got <$real>"
+    fenrir-log err "$SILENT" '(＃°Д°)' Wrong arguments count!
+    fenrir-log err "$SILENT" "Expected <$exp> but got <$real>"
     exit 15
 fi
 
@@ -20,11 +27,11 @@ fi
 src=$(realpath "$1")
 
 if ! [ -d "$src/.git" ]; then
-    fenrir-log err -v '(╬▔皿▔)╯' "The provided file is not a project root"
+    fenrir-log err "$SILENT" '(╬▔皿▔)╯' "The provided file is not a project root"
     exit 89
 fi
 
 jq ".root = \"$src\"" "/etc/fenrir/main.json" > /tmp/TMP_FENRIR
 cat /tmp/TMP_FENRIR > "/etc/fenrir/main.json"
 
-fenrir-main
+fenrir-main "$SILENT"

@@ -34,8 +34,9 @@ fenrir help:
 fenrir remote <URL>:
     Set remote task repository
 
-fenrir task <TASK ID>:
-    Set task tests
+fenrir task [-f|--force] <TASK ID>:
+    Set task tests. If they have not been installed yet then install then.
+    '-f' or '--force' option
 
 fenrir run <SOLUTION DIR>:
     Run local tests on the specified local repository
