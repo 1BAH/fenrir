@@ -20,10 +20,14 @@ fi
 cat <<____HEREDOC
 Possible options:
 fenrir help
-fenrir remote <URL>
-fenrir task <TASK ID>
-fenrir run <SOLUTION DIR>
 
+fenrir gc
+fenrir remote <URL>
+fenrir task [-s] <TASK ID>
+fenrir run [-s] <SOLUTION DIR>
+
+fenrir [-v|--version|version]
+fenrir version
 fenrir versions
 fenrir switch [<VERSION> | latest]
 ------------------------------------------------------------------
@@ -34,22 +38,34 @@ fenrir help:
 fenrir remote <URL>:
     Set remote task repository
 
-fenrir task [-f|--force] <TASK ID>:
+fenrir task [-s] [-f|--force] <TASK ID>:
     Set task tests. If they have not been installed yet then install then.
-    '-f' or '--force' option
+    '-f' or '--force': Install anyway
+    '-s': Mute colours
 
-fenrir run <SOLUTION DIR>:
+fenrir run [-s] <SOLUTION DIR>:
     Run local tests on the specified local repository
+    '-s': Mute colours
 
-fenrir versions
+fenrir gc:
+    Clean local repository. Removes all installed tasks and dependencies, fenrir-tmp.
+
+fenrir versions:
     Get all available versions
 
-fenrir switch latest
+fenrir switch [-s] latest:
     Update up to the latest version
+    '-s': Mute colours
 
-fenrir switch <VERSION>
+fenrir switch <VERSION>:
     Switch to the specified version (Error is thrown if the version is not available)
     Run 'fenrir version' to list all available versions
+
+fenrir version:
+    Print current version
+
+fenrir [-v|--version|version]:
+    Print current version
 ------------------------------------------------------------------
 Current settings:
     * Remote: $(fenrir-getremote)
