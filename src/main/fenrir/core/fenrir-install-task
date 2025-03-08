@@ -8,12 +8,19 @@ LOCAL_CFGS="$HOME/.fenrir/cfgs"
 ##                         VERIFY ARGUMENTS                         ##
 ######################################################################
 
+DOCKER_UPDATE="-v"
+
+if [ "$1" = "-s" ]; then
+    DOCKER_UPDATE=""
+    shift
+fi
+
 exp=1
 real=$#
 
 if [ "$exp" -ne "$real" ]; then
-    fenrir-log err -v '(＃°Д°)' Wrong arguments count!
-    fenrir-log err -v "Expected <$exp> but got <$real>"
+    fenrir-log err "$DOCKER_UPDATE" '(＃°Д°)' Wrong arguments count!
+    fenrir-log err "$DOCKER_UPDATE" "Expected <$exp> but got <$real>"
     exit 15
 fi
 
@@ -28,8 +35,8 @@ function get_file {
 
     if ! wget -o "$TMP/FENRIR_DOWNLOAD" -O "$output" "$url"; then
         echo "!]" # Terminate processing line
-        fenrir-log err -v '(っ °Д °;)っ' "$err_msg"
-        fenrir-log warn -v "$(cat "$TMP/FENRIR_DOWNLOAD")"
+        fenrir-log err  "$DOCKER_UPDATE" '(っ °Д °;)っ' "$err_msg"
+        fenrir-log warn "$DOCKER_UPDATE" "$(cat "$TMP/FENRIR_DOWNLOAD")"
         return 13
     else
         echo -n "*"
@@ -127,4 +134,4 @@ echo "]"
 jq ".task = \"$task\"" "/etc/fenrir/main.json" > "$TMP/TMP_FENRIR"
 cat "$TMP/TMP_FENRIR" > "/etc/fenrir/main.json"
 
-fenrir-log succ -v '[]~(￣▽￣)~*' "Task '$task' has been downloaded"
+fenrir-log succ "$DOCKER_UPDATE" '[]~(￣▽￣)~*' "Task '$task' has been downloaded"

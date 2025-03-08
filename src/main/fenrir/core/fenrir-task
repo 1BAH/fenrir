@@ -9,6 +9,12 @@ LOCAL_CFGS="$HOME/.fenrir/cfgs"
 ######################################################################
 
 INSTALL=0
+DOCKER_UPDATE="-v"
+
+if [ "$1" = "-s" ]; then
+    DOCKER_UPDATE=""
+    shift
+fi
 
 if [ "$1" = "-f" ] || [ "$1" = "--force" ]; then
     INSTALL=1
@@ -16,8 +22,8 @@ if [ "$1" = "-f" ] || [ "$1" = "--force" ]; then
 fi
 
 if [ "$#" -ne "1" ]; then
-    fenrir-log err -v '(＃°Д°)' Wrong arguments count!
-    fenrir-log err -v "Expected <1> but got <$#>"
+    fenrir-log err "$DOCKER_UPDATE" '(＃°Д°)' Wrong arguments count!
+    fenrir-log err "$DOCKER_UPDATE" "Expected <1> but got <$#>"
     exit 15
 fi
 
@@ -25,9 +31,9 @@ TASK=$1
 
 if ! [ -d "$LOCAL_REPO/$TASK" ]; then
     INSTALL=1
-    fenrir-log warn -v "Task '$TASK' has not been installed yet"
+    fenrir-log warn "$DOCKER_UPDATE" "Task '$TASK' has not been installed yet"
 else
-    fenrir-log info -v "Task '$TASK' has already been installed"
+    fenrir-log info "$DOCKER_UPDATE" "Task '$TASK' has already been installed"
 fi
 
 ######################################################################
@@ -69,8 +75,14 @@ function set_meta {
 ######################################################################
 
 if [ "$INSTALL" -ne 0 ]; then
-    if ! fenrir-install-task "$TASK"; then
-        exit 56
+    if [ -z "$DOCKER_UPDATE" ]; then
+        if ! fenrir-install-task -s "$TASK"; then
+            exit 56
+        fi
+    else
+        if ! fenrir-install-task "$TASK"; then
+            exit 56
+        fi
     fi
 fi
 
@@ -78,4 +90,4 @@ get_local_cfgs
 get_local_task
 set_meta
 
-fenrir-log succ -v '[]~(￣▽￣)~*' "Fenrir is ready to check task '$TASK'"
+fenrir-log succ "$DOCKER_UPDATE" '[]~(￣▽￣)~*' "Fenrir is ready to check task '$TASK'"
