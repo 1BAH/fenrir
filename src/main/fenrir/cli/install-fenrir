@@ -12,6 +12,7 @@ while IFS='=' read -r key value; do
 done < "$CLI_DIR/fenrir.properties"
 
 update=""
+docker_update=""
 
 ###################################################################
 
@@ -43,6 +44,12 @@ function succ {
 if [ "$1" = "update" ]; then
     info "Updating fenrir up to version @$VERSION"
     update=true
+fi
+
+if [ "$1" = "docker" ]; then
+    echo "[ INFO  ] Updating fenrir up to the latest version: \"$VERSION\""
+    update=true
+    docker_update=true
 fi
 
 #################################################################
@@ -142,6 +149,9 @@ for cmd in "$CORE_UTILS_DIR"/*; do
 
     if type "$name" &> /dev/null; then
         location=($(type "$name")) # FIXME: SC2207
+        if [ -n "$docker_update" ]; then
+            continue
+        fi
 
         warn ">> Command <$name> already exists: '${location[2]}'"
         warn ">> After installation it will be overridden. Continue? [yes|no]"
@@ -270,4 +280,4 @@ succ "> Done"
 
 update="" # Unmute
 
-succ "Installation has finished!"
+[ -z "$docker_update" ] && succ "Installation has finished!"

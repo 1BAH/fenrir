@@ -8,12 +8,19 @@ err="/var/fenrir/err"
 ##                         VERIFY ARGUMENTS                         ##
 ######################################################################
 
+DOCKER_UPDATE="-v"
+
+if [ "$1" = "-d" ]; then
+    DOCKER_UPDATE=""
+    shift
+fi
+
 exp=1
 real=$#
 
 if [ "$exp" -ne "$real" ]; then
-    fenrir-log err -v '(＃°Д°)' Wrong arguments count!
-    fenrir-log err -v "Expected <$exp> but got <$real>"
+    fenrir-log err "$DOCKER_UPDATE" '(＃°Д°)' Wrong arguments count!
+    fenrir-log err "$DOCKER_UPDATE" "Expected <$exp> but got <$real>"
     exit 15
 fi
 
@@ -29,9 +36,9 @@ function safe_tag_clone {
     fi
 
     if ! git clone --depth 1 --branch "$tag" "$url" "$HOME/.fenrir/tag" > "$out" 2> "$err"; then
-        fenrir-log err  -v 'ヽ（≧□≦）ノ' "Failed to clone repo"
-        fenrir-log warn -v "<stdout>" "$(cat "$out")"
-        fenrir-log err  -v "<stderr>" "$(cat "$err")"
+        fenrir-log err  "$DOCKER_UPDATE" 'ヽ（≧□≦）ノ' "Failed to clone repo"
+        fenrir-log warn "$DOCKER_UPDATE" "<stdout>" "$(cat "$out")"
+        fenrir-log err  "$DOCKER_UPDATE" "<stderr>" "$(cat "$err")"
         exit 66
     fi
 }
@@ -42,9 +49,9 @@ function safe_clone {
     fi
 
     if ! git clone --depth 1 "$url" "$HOME/.fenrir/tag" > "$out" 2> "$err"; then
-        fenrir-log err  -v 'ヽ（≧□≦）ノ' "Failed to clone repo"
-        fenrir-log warn -v "<stdout>" "$(cat "$out")"
-        fenrir-log err  -v "<stderr>" "$(cat "$err")"
+        fenrir-log err  "$DOCKER_UPDATE" 'ヽ（≧□≦）ノ' "Failed to clone repo"
+        fenrir-log warn "$DOCKER_UPDATE" "<stdout>" "$(cat "$out")"
+        fenrir-log err  "$DOCKER_UPDATE" "<stderr>" "$(cat "$err")"
         exit 66
     fi
 }
@@ -58,13 +65,18 @@ tag=$1
 if [ "$tag" = "latest" ]; then
     safe_clone
 elif [ -z "$tag" ]; then
-    fenrir-log err '(ㆆ_ㆆ)' "Empty version"
+    fenrir-log err "$DOCKER_UPDATE" '(ㆆ_ㆆ)' "Empty version"
     exit 67
 else
     safe_tag_clone "$tag"
 fi
 
-sudo uninstall-fenrir update
-sudo "$HOME/.fenrir/tag/src/main/fenrir/cli/install-fenrir" update
+if [ -z "$DOCKER_UPDATE" ]; then
+    echo "$PASS" | sudo -S uninstall-fenrir docker
+    echo "$PASS" | sudo -S "$HOME/.fenrir/tag/src/main/fenrir/cli/install-fenrir" docker
+else
+    sudo uninstall-fenrir update
+    sudo "$HOME/.fenrir/tag/src/main/fenrir/cli/install-fenrir" update
+fi
 
-fenrir-log succ -v '♪(^∇^*)' "Successfully switched to $(jq '.version' '/etc/fenrir/main.json') version"
+fenrir-log succ "$DOCKER_UPDATE" '♪(^∇^*)' "Successfully switched to $(jq '.version' '/etc/fenrir/main.json') version"

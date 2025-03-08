@@ -36,6 +36,11 @@ if [ "$1" = "update" ]; then
     update=true
 fi
 
+if [ "$1" = "docker" ]; then
+    echo "[ INFO  ] Uninstalling previous version of fenrir: $(jq '.version' '/etc/fenrir/main.json')"
+    update=true
+fi
+
 #################################################################
 
 if [ "$(id -u)" -ne 0 ]; then
