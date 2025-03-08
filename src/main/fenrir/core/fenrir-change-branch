@@ -1,8 +1,7 @@
 #! /bin/bash
 
-#repo=$1
-verbosity=$2
-branch=$3
+verbosity=$1
+branch=$2
 destination=$(fenrir-getroot)
 out="/var/fenrir/out"
 err="/var/fenrir/err"

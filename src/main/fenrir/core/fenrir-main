@@ -2,8 +2,7 @@
 
 #UNCOMMENT# cat ~/key > ~/.ssh/id_rsa
 
-repo=$1
-v="-v" # verbosity (replace with "" to mute hints and info logs)
+v=${1-"-v"} # verbosity (replace with "" to mute hints and info logs)
 config_file="/etc/fenrir/main.json"
 pipeline="$HOME/.fenrir/custom/pipeline.json"
 out="/var/fenrir/out"
@@ -35,7 +34,7 @@ function switch_solution {
         fi
     fi
 
-    if fenrir-change-branch "$repo" "$v" "$branch"; then
+    if fenrir-change-branch "$v" "$branch"; then
         if cd "$destination/$branch" > "$out" 2> "$err"; then
             fenrir-log succ "$v" "Inside solution's directory"
         else
@@ -56,7 +55,7 @@ echo -n 0 > "$score_file"
 
 for script in $pre; do
     fenrir-log info "$v" "--------------------------($script)--------------------------"
-    if ! "$HOME/.fenrir/custom/$script" "$repo" "$v"; then
+    if ! "$HOME/.fenrir/custom/$script" "$v"; then
         finish
     fi
 done
@@ -69,7 +68,7 @@ fi
 
 for script in $main; do
     fenrir-log info "$v" "--------------------------($script)--------------------------"
-    if ! "$HOME/.fenrir/custom/$script" "$repo" "$v" && [ "$blocking" -ne 0 ]; then
+    if ! "$HOME/.fenrir/custom/$script" "$v" && [ "$blocking" -ne 0 ]; then
         finish
     fi
 done

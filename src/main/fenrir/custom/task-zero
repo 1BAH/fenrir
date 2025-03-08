@@ -1,7 +1,6 @@
 #! /bin/bash
 
-repo=$1
-verbosity=$2
+verbosity=$1
 destination=$(fenrir-getroot)
 out="/var/fenrir/out"
 err="/var/fenrir/err"
@@ -10,7 +9,7 @@ err="/var/fenrir/err"
 
 fenrir-log info "$verbosity" "TZ: Validating task0"
 
-if fenrir-change-branch "$repo" "$verbosity" "task0"; then
+if fenrir-change-branch "$verbosity" "task0"; then
     if pushd "$destination/task0" > "$out" 2> "$err"; then
         if [ -x "run.sh" ]; then
             fenrir-log succ "$verbosity" "TZ: task0 is completed"

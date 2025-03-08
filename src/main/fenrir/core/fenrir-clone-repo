@@ -2,13 +2,18 @@
 
 repo=$1
 verbosity=$2
-destination=$(fenrir-getroot)
+destination="$HOME/solution"
 out="/var/fenrir/out"
 err="/var/fenrir/err"
 
 ##############
 
 fenrir-log info "$verbosity" "Cloning repo $repo"
+
+if [ -d "$destination" ]; then
+    fenrir-log warn "$verbosity" "Remove previously cloned repo"
+    rm -fr "$destination"
+fi
 
 if git clone "$repo" "$destination" > "$out" 2> "$err"
 then

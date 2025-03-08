@@ -1,6 +1,6 @@
 #! /bin/bash
 
-v="$2"
+v="$1"
 config="/etc/fenrir/walk.json"
 
 fenrir-log info "$v" "WI: Start"
