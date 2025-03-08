@@ -5,7 +5,12 @@ CORE_UTILS_DIR=$(realpath "${CLI_DIR}/../core")
 CFGS_DIR=$(realpath "${CLI_DIR}/../configs")
 BASIC_UTILS_DIR=$(realpath "${CLI_DIR}/../custom")
 
-VERSION=$(sed -nE 's/.*version=([0-9])\.([0-9])\.([0-9]).*/\1.\2.\3/p' "$CLI_DIR/fenrir.properties")
+while IFS='=' read -r key value; do
+    if [ "$key" = "version" ]; then
+        VERSION=$value
+    fi
+done < "$CLI_DIR/fenrir.properties"
+
 update=""
 
 ###################################################################
@@ -22,7 +27,7 @@ function info {
 }
 
 function warn {
-    [ -z "$update" ] && echo -e "${YELLOW}[WARNING]${ENDC} $*" # > /dev/tty
+    echo -e "${YELLOW}[WARNING]${ENDC} $*" # > /dev/tty
 }
 
 function err {

@@ -1,0 +1,81 @@
+#! /bin/bash
+
+TMP=$(fenrir-tmp -v)
+LOCAL_REPO="$HOME/.fenrir/repo"
+LOCAL_CFGS="$HOME/.fenrir/cfgs"
+
+######################################################################
+##                         PARSE ARGUMENTS                          ##
+######################################################################
+
+INSTALL=0
+
+if [ "$1" = "-f" ] || [ "$1" = "--force" ]; then
+    INSTALL=1
+    shift
+fi
+
+if [ "$#" -ne "1" ]; then
+    fenrir-log err -v '(＃°Д°)' Wrong arguments count!
+    fenrir-log err -v "Expected <1> but got <$#>"
+    exit 15
+fi
+
+TASK=$1
+
+if ! [ -d "$LOCAL_REPO/$TASK" ]; then
+    INSTALL=1
+    fenrir-log warn -v "Task '$TASK' has not been installed yet"
+else
+    fenrir-log info -v "Task '$TASK' has already been installed"
+fi
+
+######################################################################
+##                            FUNCTIONS                             ##
+######################################################################
+
+function get_local_cfgs {
+    if [ "$(ls "$LOCAL_CFGS/$TASK" | wc -w)" -eq 0 ]; then
+        return
+    fi
+
+    for cfg in "$LOCAL_CFGS/$TASK"/*; do
+        if [ -f "/etc/fenrir/$(basename "$cfg")" ]; then
+            rm -f "/etc/fenrir/$(basename "$cfg")"
+        fi
+
+        cp "$cfg" "/etc/fenrir/$(basename "$cfg")"
+    done
+}
+
+function get_local_task {
+    for file in "$LOCAL_REPO/$TASK"/*; do
+        cp "$file" "$HOME/.fenrir/custom/$(basename "$file")"
+    done
+}
+
+function set_meta {
+    branch=$(jq -r .branch "$LOCAL_REPO/$TASK/index.json")
+    jq ".branch = \"$branch\"" "/etc/fenrir/main.json" > "$TMP/TMP_FENRIR"
+    cat "$TMP/TMP_FENRIR" > "/etc/fenrir/main.json"
+
+    block=$(jq -r .blocking "$LOCAL_REPO/$TASK/index.json")
+    jq ".blocking = \"$block\"" "/etc/fenrir/main.json" > "$TMP/TMP_FENRIR"
+    cat "$TMP/TMP_FENRIR" > "/etc/fenrir/main.json"
+}
+
+######################################################################
+##                           MAIN PROGRAM                           ##
+######################################################################
+
+if [ "$INSTALL" -ne 0 ]; then
+    if ! fenrir-install-task "$TASK"; then
+        exit 56
+    fi
+fi
+
+get_local_cfgs
+get_local_task
+set_meta
+
+fenrir-log succ -v '[]~(￣▽￣)~*' "Fenrir is ready to check task '$TASK'"

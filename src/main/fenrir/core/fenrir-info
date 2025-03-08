@@ -1,0 +1,66 @@
+#! /bin/bash
+
+######################################################################
+##                         VERIFY ARGUMENTS                         ##
+######################################################################
+
+exp=0
+real=$#
+
+if [ "$exp" -ne "$real" ]; then
+    fenrir-log err -v '(＃°Д°)' Wrong arguments count!
+    fenrir-log err -v "Expected <$exp> but got <$real>"
+    exit 15
+fi
+
+######################################################################
+##                           MAIN PROGRAM                           ##
+######################################################################
+
+cat <<____HEREDOC
+Possible options:
+fenrir help
+fenrir remote <URL>
+fenrir task <TASK ID>
+fenrir run <SOLUTION DIR>
+
+fenrir versions
+fenrir switch [<VERSION> | latest]
+------------------------------------------------------------------
+fenrir help:
+    Info about fenrir util
+    See https://gitlab.com/atpd/progtech/fenrir
+
+fenrir remote <URL>:
+    Set remote task repository
+
+fenrir task <TASK ID>:
+    Set task tests
+
+fenrir run <SOLUTION DIR>:
+    Run local tests on the specified local repository
+
+fenrir versions
+    Get all available versions
+
+fenrir switch latest
+    Update up to the latest version
+
+fenrir switch <VERSION>
+    Switch to the specified version (Error is thrown if the version is not available)
+    Run 'fenrir version' to list all available versions
+------------------------------------------------------------------
+Current settings:
+    * Remote: $(fenrir-getremote)
+    * Solution branch: $(jq '.branch' '/etc/fenrir/main.json')
+    * Blocking: $(jq '.blocking' '/etc/fenrir/main.json')
+    * Last installed task: $(jq '.task' '/etc/fenrir/main.json')
+------------------------------------------------------------------
+Run settings:
+$(jq . "$HOME/.fenrir/custom/pipeline.json")
+------------------------------------------------------------------
+fenrir $(jq '.version' '/etc/fenrir/main.json'), 2025
+@_1BAH_
+____HEREDOC
+
+

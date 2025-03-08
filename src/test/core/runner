@@ -8,35 +8,35 @@ export PATH=$(cat PATH_NEW)
 
 
 function info {
-    log info -v "$@"
+    fenrir-log info -v "$@"
 }
 
 function warn {
-    log warn -v "$@"
+    fenrir-log warn -v "$@"
 }
 
 function err {
-    log err -v "$@"
+    fenrir-log err -v "$@"
 }
 
 function succ {
-    log succ -v "$@"
+    fenrir-log succ -v "$@"
 }
 
 return_code=0
 
+cat <<__HEREDOC
+==================================================================
+                          Running tests
+==================================================================
+__HEREDOC
 
-echo "=================================================================="
-echo "                        Running tests"
-echo "=================================================================="
-
-
-for test_file in $(ls ../*Tests.sh); do
+for test_file in ../*Tests.sh; do
     if [ -d "../$test_file" ]; then
         continue
     fi
 
-    if ! "../$test_file"; then
+    if ! "$test_file"; then
         err "Test failed"
         (( return_code++ ))
     else
