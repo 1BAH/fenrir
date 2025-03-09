@@ -7,6 +7,7 @@
         "build"
     ],
     "filePatterns": [
+        ".DS_Store",
         "*.iml"
     ]
 }
