@@ -2,7 +2,7 @@
 
 #UNCOMMENT# cat ~/key > ~/.ssh/id_rsa
 
-v=${1-"-v"} # verbosity (replace with "" to mute hints and info logs)
+v=${1} # verbosity (replace with "" to mute hints and info logs)
 config_file="/etc/fenrir/main.json"
 pipeline="$HOME/.fenrir/custom/pipeline.json"
 out="/var/fenrir/out"
