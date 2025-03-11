@@ -1,5 +1,8 @@
 #! /bin/bash
 
+out="/var/fenrir/out"
+err="/var/fenrir/err"
+
 ######################################################################
 ##                         VERIFY ARGUMENTS                         ##
 ######################################################################
@@ -61,8 +64,38 @@ fi
 jq ".root = \"$src\"" "/etc/fenrir/main.json" > /tmp/TMP_FENRIR
 cat /tmp/TMP_FENRIR > "/etc/fenrir/main.json"
 
-# Move to project beforehand to avoid getcwd error ????
-cd "$HOME"
+
+
+# Validate diff
+fenrir-log info "$SILENT" "Validating diff.."
+REQUIRES_ROLLBACK=""
+
+cd "$src" || exit 14
+
+if ! git diff-index --quiet HEAD; then
+    fenrir-log warn "$SILENT" "AUTOCOMMITING CHANGES.."
+
+    if ! git add . > "$out" 2> "$err"; then
+        fenrir-log err  "$SILENT" "Failed to run 'git add'"
+        fenrir-log warn "$SILENT" "<stdout>" "$(cat "$out")"
+        fenrir-log err  "$SILENT" "<stderr>" "$(cat "$err")"
+        exit 56
+    fi
+
+    if ! git commit -m "dummy-commit" > "$out" 2> "$err"; then
+        fenrir-log err  "$SILENT" "Failed to run 'git commit'"
+        fenrir-log warn "$SILENT" "<stdout>" "$(cat "$out")"
+        fenrir-log err  "$SILENT" "<stderr>" "$(cat "$err")"
+        exit 56
+    fi
+
+    REQUIRES_ROLLBACK=YES
+fi
+
+fenrir-log succ "$SILENT" "Done"
+# End
+
+
 
 if [ -n "$NO_LINT" ]; then
     if [ -n "$NO_ZERO" ]; then
@@ -75,5 +108,18 @@ else
         fenrir-main nz "$SILENT"
     else
         fenrir-main "$SILENT"
+    fi
+fi
+
+cd "$INVOCATION_DIR"
+
+if [ -n "$REQUIRES_ROLLBACK" ]; then
+    fenrir-log warn "$SILENT" "Rolling back the changes"
+
+    if ! git reset --mixed HEAD~1 > "$out" 2> "$err"; then
+        fenrir-log err  "$SILENT" "Failed to run 'git reset': You might need to do it manually!"
+        fenrir-log warn "$SILENT" "<stdout>" "$(cat "$out")"
+        fenrir-log err  "$SILENT" "<stderr>" "$(cat "$err")"
+        exit 56
     fi
 fi
