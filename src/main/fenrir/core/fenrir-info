@@ -24,7 +24,7 @@ fenrir help
 fenrir gc
 fenrir remote <URL>
 fenrir task [-s] <TASK ID>
-fenrir run [-s] <SOLUTION DIR>
+fenrir run [-s] [--no-lint | -nl] [--no-zero | -nz] <SOLUTION DIR>
 
 fenrir [-v|--version|version]
 fenrir version
@@ -43,9 +43,11 @@ fenrir task [-s] [-f|--force] <TASK ID>:
     '-f' or '--force': Install anyway
     '-s': Mute colours
 
-fenrir run [-s] <SOLUTION DIR>:
+fenrir run [-s] [--no-lint|-nl] [--no-zero|-nz] <SOLUTION DIR>:
     Run local tests on the specified local repository
     '-s': Mute colours
+    '--no-lint' or '-nl': Skip linters
+    '--no-zero' or '-nz': Skip task0 tests
 
 fenrir gc:
     Clean local repository. Removes all installed tasks and dependencies, fenrir-tmp.

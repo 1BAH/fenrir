@@ -5,18 +5,45 @@
 ######################################################################
 
 SILENT="-v"
+NO_LINT=""
+NO_ZERO=""
 
-if [ "$1" = "-s" ]; then
-    SILENT=""
+hit=0
+path=""
+
+while [ "$#" -ne 0 ]; do
+    case $1 in
+        "--no-lint" | "-nl")
+            NO_LINT=YES
+        ;;
+
+        "--no-zero" | "-nz")
+            NO_ZERO=YES
+        ;;
+
+        "-s")
+            SILENT=""
+        ;;
+
+        *)
+            if [ $hit -ge 1 ]; then
+                fenrir-log err "$SILENT" '(＃°Д°)' Wrong arguments count!
+                fenrir-log err "$SILENT" "Expected <1> but got <$(( $# + hit ))>"
+                exit 15
+            fi
+
+            path=$1
+
+            (( hit++ ))
+        ;;
+    esac
+
     shift
-fi
+done
 
-exp=1
-real=$#
-
-if [ "$exp" -ne "$real" ]; then
+if [ "$hit" -ne 1 ]; then
     fenrir-log err "$SILENT" '(＃°Д°)' Wrong arguments count!
-    fenrir-log err "$SILENT" "Expected <$exp> but got <$real>"
+    fenrir-log err "$SILENT" "Expected <1> but got <$hit>"
     exit 15
 fi
 
@@ -24,7 +51,7 @@ fi
 ##                           MAIN PROGRAM                           ##
 ######################################################################
 
-src=$(realpath "$1")
+src=$(realpath "$path")
 
 if ! [ -d "$src/.git" ]; then
     fenrir-log err "$SILENT" '(╬▔皿▔)╯' "The provided file is not a project root"
@@ -34,4 +61,19 @@ fi
 jq ".root = \"$src\"" "/etc/fenrir/main.json" > /tmp/TMP_FENRIR
 cat /tmp/TMP_FENRIR > "/etc/fenrir/main.json"
 
-fenrir-main "$SILENT"
+# Move to project beforehand to avoid getcwd error ????
+cd "$HOME"
+
+if [ -n "$NO_LINT" ]; then
+    if [ -n "$NO_ZERO" ]; then
+        fenrir-main nl nz "$SILENT"
+    else
+        fenrir-main nl "$SILENT"
+    fi
+else
+    if [ -n "$NO_ZERO" ]; then
+        fenrir-main nz "$SILENT"
+    else
+        fenrir-main "$SILENT"
+    fi
+fi

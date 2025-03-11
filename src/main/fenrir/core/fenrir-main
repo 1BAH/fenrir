@@ -2,6 +2,16 @@
 
 #UNCOMMENT# cat ~/key > ~/.ssh/id_rsa
 
+if [ "$1" = "nl" ]; then
+    NL=1
+    shift
+fi
+
+if [ "$1" = "nz" ]; then
+    NZ=1
+    shift
+fi
+
 v=${1} # verbosity (replace with "" to mute hints and info logs)
 config_file="/etc/fenrir/main.json"
 pipeline="$HOME/.fenrir/custom/pipeline.json"
@@ -55,6 +65,11 @@ echo -n 0 > "$score_file"
 
 for script in $pre; do
     fenrir-log info "$v" "--------------------------($script)--------------------------"
+    if [ -n "$NZ" ] && [ "$script" = "task-zero" ]; then
+        fenrir-log warn "$v" "Running with '--no-zero' option"
+        continue
+    fi
+
     if ! "$HOME/.fenrir/custom/$script" "$v"; then
         finish
     fi
@@ -68,13 +83,16 @@ fi
 
 for script in $main; do
     fenrir-log info "$v" "--------------------------($script)--------------------------"
+    if [ -n "$NL" ] && [ "$script" = "walk-inspections" ]; then
+        fenrir-log warn "$v" "Running with '--no-lint' option"
+        continue
+    fi
+
     if ! "$HOME/.fenrir/custom/$script" "$v" && [ "$blocking" -ne 0 ]; then
         finish
     fi
 done
 
 fenrir-log info "$v" "-----------------------------------------------------------"
-
-
 
 finish
