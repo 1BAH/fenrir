@@ -75,6 +75,12 @@ cd "$src" || exit 14
 if ! git diff-index --quiet HEAD; then
     fenrir-log warn "$SILENT" "AUTOCOMMITING CHANGES.."
 
+    if [ "$(jq -r '.branch' /etc/fenrir/main.json)" = "git/ess" ]; then
+        fenrir-log err "$SILENT" "CANNOT AUTOCOMMIT: git task! (Currently is not supported)"
+        fenrir-log err "$SILENT" "Please, commit your changes so that fenrir can test your solution."
+        exit 78
+    fi
+
     if ! git add . > "$out" 2> "$err"; then
         fenrir-log err  "$SILENT" "Failed to run 'git add'"
         fenrir-log warn "$SILENT" "<stdout>" "$(cat "$out")"
