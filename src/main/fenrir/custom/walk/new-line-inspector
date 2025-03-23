@@ -5,22 +5,18 @@ file=$1
 fenrir-log info "$2" "NLI: Inspecting '$file'"
 
 if [[ $file == *.png ]]; then
-    fenrir-log info "$2" "NLI: Skipping image"
     exit 0
 fi
 
 if [[ $file == *.jpg ]]; then
-    fenrir-log info "$2" "NLI: Skipping image"
     exit 0
 fi
 
 if [[ $file == *.jpeg ]]; then
-    fenrir-log info "$2" "NLI: Skipping image"
     exit 0
 fi
 
 if [[ $file == *.svg ]]; then
-    fenrir-log info "$2" "NLI: Skipping image"
     exit 0
 fi
 
