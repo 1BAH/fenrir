@@ -24,3 +24,6 @@ else
     fenrir-log err "$verbosity" "<stderr>" "$(cat "$err")"
     exit 1
 fi
+
+git switch task0
+git switch "$(jq -r '.branch' "/etc/fenrir/main.json")"
