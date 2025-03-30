@@ -28,4 +28,11 @@ fi
 pushd "$destination" &> /dev/null
 git switch task0
 git switch "$(jq -r '.branch' "/etc/fenrir/main.json")"
+
+if [ "$(jq -r '.task' "/etc/fenrir/main.json")" = "git/ess" ]; then
+    for i in $(seq 1 17); do
+        git switch $i &> /dev/null
+    done
+fi
 pod &> /dev/null
+
