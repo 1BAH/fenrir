@@ -26,8 +26,8 @@ else
 fi
 
 pushd "$destination" &> /dev/null
-git switch task0
-git switch "$(jq -r '.branch' "/etc/fenrir/main.json")"
+git switch task0 &> /dev/null
+git switch "$(jq -r '.branch' "/etc/fenrir/main.json")" &> /dev/null
 
 if [ "$(jq -r '.task' "/etc/fenrir/main.json")" = "git/ess" ]; then
     for i in $(seq 1 17); do
