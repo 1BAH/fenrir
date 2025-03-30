@@ -90,4 +90,7 @@ get_local_cfgs
 get_local_task
 set_meta
 
+jq ".task = \"$TASK\"" "/etc/fenrir/main.json" > "$TMP/TMP_FENRIR"
+cat "$TMP/TMP_FENRIR" > "/etc/fenrir/main.json"
+
 fenrir-log succ "$DOCKER_UPDATE" '[]~(￣▽￣)~*' "Fenrir is ready to check task '$TASK'"
