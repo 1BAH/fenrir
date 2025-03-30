@@ -25,5 +25,7 @@ else
     exit 1
 fi
 
+pushd "$destination" &> /dev/null
 git switch task0
 git switch "$(jq -r '.branch' "/etc/fenrir/main.json")"
+pod &> /dev/null
