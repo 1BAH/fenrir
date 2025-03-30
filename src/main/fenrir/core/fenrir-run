@@ -3,6 +3,24 @@
 out="/var/fenrir/out"
 err="/var/fenrir/err"
 
+
+function local_clone {
+    from=$1
+    to=$(fenrir-tmp -d)
+
+    fenrir-log info "$SILENT" "Cloning repo to '$to'.."
+
+    if ! git clone "$from" "$to" > "$out" 2> "$err"; then
+        fenrir-log err  "$SILENT" "Failed to clone locally"
+        fenrir-log warn "$SILENT" "<stdout>" "$(cat "$out")"
+        fenrir-log err  "$SILENT" "<stderr>" "$(cat "$err")"
+        exit 56
+    fi
+
+    jq ".root = \"$to\"" "/etc/fenrir/main.json" > /tmp/TMP_FENRIR
+    cat /tmp/TMP_FENRIR > "/etc/fenrir/main.json"
+}
+
 ######################################################################
 ##                         VERIFY ARGUMENTS                         ##
 ######################################################################
@@ -61,47 +79,7 @@ if ! [ -d "$src/.git" ]; then
     exit 89
 fi
 
-jq ".root = \"$src\"" "/etc/fenrir/main.json" > /tmp/TMP_FENRIR
-cat /tmp/TMP_FENRIR > "/etc/fenrir/main.json"
-
-
-
-# Validate diff
-fenrir-log info "$SILENT" "Validating diff.."
-REQUIRES_ROLLBACK=""
-
-cd "$src" || exit 14
-
-if ! git diff-index --quiet HEAD; then
-    fenrir-log warn "$SILENT" "AUTOCOMMITING CHANGES.."
-
-    if [ "$(jq -r '.branch' /etc/fenrir/main.json)" = "git/ess" ]; then
-        fenrir-log err "$SILENT" "CANNOT AUTOCOMMIT: git task! (Currently is not supported)"
-        fenrir-log err "$SILENT" "Please, commit your changes so that fenrir can test your solution."
-        exit 78
-    fi
-
-    if ! git add . > "$out" 2> "$err"; then
-        fenrir-log err  "$SILENT" "Failed to run 'git add'"
-        fenrir-log warn "$SILENT" "<stdout>" "$(cat "$out")"
-        fenrir-log err  "$SILENT" "<stderr>" "$(cat "$err")"
-        exit 56
-    fi
-
-    if ! git commit -m "dummy-commit" > "$out" 2> "$err"; then
-        fenrir-log err  "$SILENT" "Failed to run 'git commit'"
-        fenrir-log warn "$SILENT" "<stdout>" "$(cat "$out")"
-        fenrir-log err  "$SILENT" "<stderr>" "$(cat "$err")"
-        exit 56
-    fi
-
-    REQUIRES_ROLLBACK=YES
-fi
-
-fenrir-log succ "$SILENT" "Done"
-# End
-
-
+local_clone "$src"
 
 if [ -n "$NO_LINT" ]; then
     if [ -n "$NO_ZERO" ]; then
@@ -114,18 +92,5 @@ else
         fenrir-main nz "$SILENT"
     else
         fenrir-main "$SILENT"
-    fi
-fi
-
-cd "$INVOCATION_DIR"
-
-if [ -n "$REQUIRES_ROLLBACK" ]; then
-    fenrir-log warn "$SILENT" "Rolling back the changes"
-
-    if ! git reset --mixed HEAD~1 > "$out" 2> "$err"; then
-        fenrir-log err  "$SILENT" "Failed to run 'git reset': You might need to do it manually!"
-        fenrir-log warn "$SILENT" "<stdout>" "$(cat "$out")"
-        fenrir-log err  "$SILENT" "<stderr>" "$(cat "$err")"
-        exit 56
     fi
 fi
