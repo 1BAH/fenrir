@@ -21,7 +21,7 @@ cat <<____HEREDOC
 Possible options:
 fenrir help
 
-fenrir gc
+fenrir gc [-s]
 fenrir remote <URL>
 fenrir task [-s] <TASK ID>
 fenrir run [-s] [--no-lint | -nl] [--no-zero | -nz] <SOLUTION DIR>
@@ -49,8 +49,9 @@ fenrir run [-s] [--no-lint|-nl] [--no-zero|-nz] <SOLUTION DIR>:
     '--no-lint' or '-nl': Skip linters
     '--no-zero' or '-nz': Skip task0 tests
 
-fenrir gc:
+fenrir gc [-s]:
     Clean local repository. Removes all installed tasks and dependencies, fenrir-tmp.
+    '-s': Soft mode. Removes only tmp & tag directories
 
 fenrir versions:
     Get all available versions
