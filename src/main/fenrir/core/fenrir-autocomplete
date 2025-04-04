@@ -1,0 +1,38 @@
+#! /usr/bin/env bash
+
+_fenrir()
+{
+    local IFS=$' \t\n'    # normalize IFS
+
+    if (( COMP_CWORD == 1 )); then # Select cmd
+        CMDS=("help")
+        CMDS+=("gc")
+        CMDS+=("remote")
+        CMDS+=("task")
+        CMDS+=("run")
+        CMDS+=("-v")
+        CMDS+=("--version")
+        CMDS+=("-version")
+        CMDS+=("version")
+        CMDS+=("versions")
+        CMDS+=("switch")
+
+        COMPREPLY=($(compgen -W "${CMDS[*]}" -- "${COMP_WORDS[1]}"))
+    elif (( COMP_CWORD == 2 )); then # Extra completion
+        case "${COMP_WORDS[1]}" in
+            gc|task)
+                COMPREPLY=($(compgen -W "-s" -- "${COMP_WORDS[2]}"))
+                ;;
+            run)
+                COMPREPLY=($(compgen -W "-s -nl -nz --no-lint --no-zero" -- "${COMP_WORDS[2]}"))
+                ;;
+            switch)
+                COMPREPLY=($(compgen -W "latest" -- "${COMP_WORDS[2]}"))
+                ;;
+            *)
+                ;;
+        esac
+    fi
+}
+
+complete -F _fenrir fenrir

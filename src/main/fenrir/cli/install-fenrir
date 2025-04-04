@@ -264,6 +264,16 @@ succ "> Done"
 
 ###################################################################
 
+info "> Installing autocompletion.."
+
+cp "`which fenrir-autocomplete`" "/etc/bash_completion.d/"
+
+warn "> Run 'source ~/.bashrc' or reload terminal to apply autocompletion"
+
+succ "> Done"
+
+###################################################################
+
 info "> Installing uninstaller.."
 
 if ! {
