@@ -16,10 +16,19 @@ function check_arg_count {
     fi
 }
 
+function verify_non_sudo {
+    if [ "$(id -u)" -eq 0 ]; then
+
+        fenrir-log err -v 'ᕙ( •̀ ᗜ •́ )ᕗ' "The script must not be run under sudo!"
+        exit 123
+    fi
+}
+
 ######################################################################
 
 case "$cmd" in
     "remote")
+        verify_non_sudo
         check_arg_count $# 1
 
         url=$1
@@ -28,23 +37,30 @@ case "$cmd" in
     ;;
 
     "--help" | "-h" | "help")
+        verify_non_sudo
         fenrir-info "$@"
     ;;
 
     "task")
+        verify_non_sudo
         fenrir-task "$@"
     ;;
 
     "run")
+        verify_non_sudo
         fenrir-run "$@"
     ;;
 
     "switch")
+        verify_non_sudo
         update-fenrir "$@"
     ;;
 
     "versions")
+        verify_non_sudo
         check_arg_count $# 0
+
+        # FIXME: curl was not found!
 
         # TODO Handle errors
         tags=$(curl https://gitlab.com/api/v4/projects/67614102/repository/tags 2> /dev/null)
@@ -52,12 +68,14 @@ case "$cmd" in
     ;;
 
     "-v" | "--version" | "version" | "-version")
+        verify_non_sudo
         check_arg_count $# 0
 
         jq '.version' '/etc/fenrir/main.json'
     ;;
 
     "gc")
+        verify_non_sudo
         fenrir-gc "$@"
     ;;
 

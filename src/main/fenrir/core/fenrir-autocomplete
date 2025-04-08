@@ -24,7 +24,11 @@ _fenrir()
                 COMPREPLY=($(compgen -W "-s" -- "${COMP_WORDS[2]}"))
                 ;;
             run)
-                COMPREPLY=($(compgen -W "-s -nl -nz --no-lint --no-zero" -- "${COMP_WORDS[2]}"))
+                if [[ "${COMP_WORDS[2]}" == -*  ]]; then
+                    COMPREPLY=($(compgen -W "-s -nl -nz --no-lint --no-zero" -- "${COMP_WORDS[2]}"))
+                else
+                    COMPREPLY=($(compgen -d -- "${COMP_WORDS[2]}"))
+                fi
                 ;;
             switch)
                 COMPREPLY=($(compgen -W "latest" -- "${COMP_WORDS[2]}"))
@@ -32,6 +36,14 @@ _fenrir()
             *)
                 ;;
         esac
+    else  # run completion
+        if [[ "${COMP_WORDS[1]}" == run ]]; then
+            if [[ "${COMP_WORDS[COMP_CWORD]}" == -*  ]]; then
+                COMPREPLY=($(compgen -W "-s -nl -nz --no-lint --no-zero" -- "${COMP_WORDS[COMP_CWORD]}"))
+            else
+                COMPREPLY=($(compgen -d -- "${COMP_WORDS[COMP_CWORD]}"))
+            fi
+        fi
     fi
 }
 

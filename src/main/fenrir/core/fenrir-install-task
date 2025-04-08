@@ -109,6 +109,7 @@ mkdir -p "$LOCAL_REPO/$task" "$LOCAL_CFGS/$task"
 echo -n "DOWNLOADING '$task' ["
 
 if ! get_index "$task"; then
+    rm -fr "$LOCAL_REPO/$task"
     exit 13
 fi
 
