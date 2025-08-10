@@ -1,0 +1,7 @@
+#! /usr/bin/env bash
+
+out="/var/fenrir/out"
+err="/var/fenrir/err"
+
+$* > $out 2> $err
+exit $?
