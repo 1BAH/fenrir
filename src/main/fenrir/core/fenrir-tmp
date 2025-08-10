@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /usr/bin/env bash
 
 FENRIR_LOCAL_TMP="$HOME/.fenrir/tmp"
 

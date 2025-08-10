@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /usr/bin/env bash
 
 url="https://gitlab.com/atpd/progtech/fenrir.git"
 out="/var/fenrir/out"

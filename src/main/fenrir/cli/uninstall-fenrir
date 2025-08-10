@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /usr/bin/env bash
 
 [ -n "$SUDO_USER" ] && user=$SUDO_USER || user=$USER
 

@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /usr/bin/env bash
 
 verbosity=$1
 destination=$(fenrir-getroot)

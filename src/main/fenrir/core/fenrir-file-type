@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /usr/bin/env bash
 
 meta=(`git ls-files -s "$1"`)
 echo "${meta[0]}"

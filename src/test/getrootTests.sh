@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /usr/bin/env bash
 
 test_env_dir=$(cat TEST_ENV_DIR)
 

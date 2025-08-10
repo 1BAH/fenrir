@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /usr/bin/env bash
 
 CLI_DIR=$(dirname "$(realpath "$0")")
 CORE_UTILS_DIR=$(realpath "${CLI_DIR}/../core")

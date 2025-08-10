@@ -1,7 +1,11 @@
-#! /bin/bash
+#! /usr/bin/env bash
 
 cmd=$1
 shift
+
+PURPLE="\033[1m\033[38;5;141m"
+EMERALD="\033[1m\033[38;5;30m"
+GRAY="\033[1m\033[38;5;249m"
 
 GREEN="\033[1m\033[38;5;112m"
 BLUE="\033[1m\033[38;5;4m"
@@ -9,6 +13,8 @@ YELLOW="\033[1m\033[38;5;214m"
 RED="\033[1m\033[38;5;196m"
 ENDC="\033[0m"
 
+outf="/var/fenrir/out"
+errf="/var/fenrir/err"
 
 function info {
     if [ "$1" = "-v" ]; then
@@ -46,6 +52,16 @@ function succ {
     fi
 }
 
+function line {
+    LINE="***----------------------------------------------------------------------------------***"
+
+    if [ "$1" = "-v" ]; then
+        echo -e "${GRAY}${LINE}${ENDC}"
+    else
+        echo "${LINE}"
+    fi
+}
+
 
 ######################################################################
 
@@ -61,6 +77,30 @@ case "$cmd" in
         ;;
     "succ")
         succ "$@"
+        ;;
+    "fail")
+        err "$@"
+
+        stdout_desc="| STDOUT ||  "
+        stderr_desc="| STDERR ||  "
+
+        line "$1"
+
+        if [ "$1" = "-v" ]; then
+            cat -- "$outf" | sed "s/^/$(echo -e "${EMERALD}${stdout_desc}${ENDC}")/"
+        else
+            cat -- "$outf" | sed "s/^/${stdout_desc}/"
+        fi
+
+        line "$1"
+
+        if [ "$1" = "-v" ]; then
+            cat -- "$errf" | sed "s/^/$(echo -e "${PURPLE}${stderr_desc}${ENDC}")/"
+        else
+            cat -- "$errf" | sed "s/^/${stderr_desc}/"
+        fi
+
+        line "$1"
         ;;
     *)
         err -v "Command not found"
