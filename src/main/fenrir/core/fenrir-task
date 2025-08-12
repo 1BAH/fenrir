@@ -8,6 +8,11 @@ LOCAL_CFGS="$HOME/.fenrir/cfgs"
 ##                         PARSE ARGUMENTS                          ##
 ######################################################################
 
+# Since we execute via 'Loki', we have to shift args
+if [[ $1 == "${BASH_SOURCE[0]}" ]]; then
+    shift
+fi
+
 INSTALL=0
 DOCKER_UPDATE="-v"
 

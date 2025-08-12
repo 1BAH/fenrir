@@ -25,6 +25,11 @@ function local_clone {
 ##                         VERIFY ARGUMENTS                         ##
 ######################################################################
 
+# Since we execute via 'Loki', we have to shift args
+if [[ $1 == "${BASH_SOURCE[0]}" ]]; then
+    shift
+fi
+
 SILENT="-v"
 NO_LINT=""
 NO_ZERO=""

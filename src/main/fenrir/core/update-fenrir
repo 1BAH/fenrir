@@ -8,6 +8,11 @@ err="/var/fenrir/err"
 ##                         VERIFY ARGUMENTS                         ##
 ######################################################################
 
+# Since we execute via 'Loki', we have to shift args
+if [[ $1 == "${BASH_SOURCE[0]}" ]]; then
+    shift
+fi
+
 DOCKER_UPDATE="-v"
 
 if [ "$1" = "-d" ]; then
