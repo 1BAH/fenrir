@@ -1,8 +1,8 @@
-#! /usr/bin/env bash
+#! /usr/bin/env loki
 
 file=$1
 
-fenrir-log info "$2" "NLI: Inspecting '$file'"
+loki-log info "$2" "NLI: Inspecting '$file'"
 
 if [[ $file == *.png ]]; then
     exit 0
@@ -23,6 +23,6 @@ fi
 last_sym=$(tail -c 1 "$file")
 
 if [ -n "$last_sym" ]; then
-    fenrir-log err "$2" "NLI: File '$file' has no EOL at the end."
+    loki-log err "$2" "NLI: File '$file' has no EOL at the end."
     exit 3
 fi

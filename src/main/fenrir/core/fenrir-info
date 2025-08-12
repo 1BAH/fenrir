@@ -1,4 +1,4 @@
-#! /usr/bin/env bash
+#! /usr/bin/env loki
 
 ######################################################################
 ##                         VERIFY ARGUMENTS                         ##
@@ -8,8 +8,8 @@ exp=0
 real=$#
 
 if [ "$exp" -ne "$real" ]; then
-    fenrir-log err -v '(＃°Д°)' Wrong arguments count!
-    fenrir-log err -v "Expected <$exp> but got <$real>"
+    loki-log err -v '(＃°Д°)' Wrong arguments count!
+    loki-log err -v "Expected <$exp> but got <$real>"
     exit 15
 fi
 

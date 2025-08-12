@@ -1,4 +1,4 @@
-#! /usr/bin/env bash
+#! /usr/bin/env loki
 
 TMP="/tmp"
 LOCAL_REPO="$HOME/.fenrir/repo"
@@ -19,8 +19,8 @@ exp=1
 real=$#
 
 if [ "$exp" -ne "$real" ]; then
-    fenrir-log err "$DOCKER_UPDATE" '(＃°Д°)' Wrong arguments count!
-    fenrir-log err "$DOCKER_UPDATE" "Expected <$exp> but got <$real>"
+    loki-log err "$DOCKER_UPDATE" '(＃°Д°)' Wrong arguments count!
+    loki-log err "$DOCKER_UPDATE" "Expected <$exp> but got <$real>"
     exit 15
 fi
 
@@ -35,8 +35,8 @@ function get_file {
 
     if ! wget -o "$TMP/FENRIR_DOWNLOAD" -O "$output" "$url"; then
         echo "!]" # Terminate processing line
-        fenrir-log err  "$DOCKER_UPDATE" '(っ °Д °;)っ' "$err_msg"
-        fenrir-log warn "$DOCKER_UPDATE" "$(cat "$TMP/FENRIR_DOWNLOAD")"
+        loki-log err  "$DOCKER_UPDATE" '(っ °Д °;)っ' "$err_msg"
+        loki-log warn "$DOCKER_UPDATE" "$(cat "$TMP/FENRIR_DOWNLOAD")"
         return 13
     else
         echo -n "*"
@@ -135,4 +135,4 @@ echo "]"
 jq ".task = \"$task\"" "/etc/fenrir/main.json" > "$TMP/TMP_FENRIR"
 cat "$TMP/TMP_FENRIR" > "/etc/fenrir/main.json"
 
-fenrir-log succ "$DOCKER_UPDATE" '[]~(￣▽￣)~*' "Task '$task' has been downloaded"
+loki-log succ "$DOCKER_UPDATE" '[]~(￣▽￣)~*' "Task '$task' has been downloaded"

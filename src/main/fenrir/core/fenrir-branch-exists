@@ -1,14 +1,14 @@
-#! /usr/bin/env bash
+#! /usr/bin/env loki
 
 verbosity=$1
 branch=$2
 
 
-fenrir-log info "$verbosity" "Checking whether branch <$branch> exists.."
+loki-log info "$verbosity" "Checking whether branch <$branch> exists.."
 
 if git branch | grep -q "$branch"; then
-    fenrir-log succ "$verbosity" "Branch exists"
+    loki-log succ "$verbosity" "Branch exists"
 else
-    fenrir-log err "$verbosity" "Branch does not exist"
+    loki-log err "$verbosity" "Branch does not exist"
     exit 1
 fi

@@ -74,6 +74,27 @@ succ "Done"
 
 #################################################################
 
+info "Removing Loki.."
+
+for cmd in /usr/local/bin/loki*; do
+    if [ "$cmd" = "/usr/local/bin/loki*" ]; then
+        warn "No core commands were found!"
+        break
+    fi
+
+    name=$(basename "$cmd") # TODO simplify
+
+    if ! rm "/usr/local/bin/$name"; then
+        err "Terminating.."
+        exit 10
+    fi
+done
+
+succ "Done"
+
+
+#################################################################
+
 info "Removing core.."
 
 for cmd in /usr/local/bin/fenrir-*; do

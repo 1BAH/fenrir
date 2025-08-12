@@ -1,4 +1,4 @@
-#! /usr/bin/env bash
+#! /usr/bin/env loki
 
 repo=$1
 verbosity=$2
@@ -8,20 +8,20 @@ err="/var/fenrir/err"
 
 ##############
 
-fenrir-log info "$verbosity" "Cloning repo $repo"
+loki-log info "$verbosity" "Cloning repo $repo"
 
 if [ -d "$destination" ]; then
-    fenrir-log warn "$verbosity" "Remove previously cloned repo"
+    loki-log warn "$verbosity" "Remove previously cloned repo"
     rm -fr "$destination"
 fi
 
 if git clone "$repo" "$destination" > "$out" 2> "$err"
 then
-    fenrir-log succ "$verbosity" "Cloned repo to directory 'solution'"
+    loki-log succ "$verbosity" "Cloned repo to directory 'solution'"
 else
-    fenrir-log err "$verbosity" "Failed"
-    fenrir-log warn "$verbosity" "<stdout>" "$(cat "$out")"
-    fenrir-log err "$verbosity" "<stderr>" "$(cat "$err")"
+    loki-log err "$verbosity" "Failed"
+    loki-log warn "$verbosity" "<stdout>" "$(cat "$out")"
+    loki-log err "$verbosity" "<stderr>" "$(cat "$err")"
     exit 1
 fi
 

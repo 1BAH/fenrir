@@ -1,13 +1,13 @@
-#! /usr/bin/env bash
+#! /usr/bin/env loki
 
 config="/etc/fenrir/forbidden-files.json"
 
-fenrir-log info "$2" "FDI: Inspecting '$1'"
+loki-log info "$2" "FDI: Inspecting '$1'"
 
 name=$(basename "$1")
 
 if [ "$(jq "isempty( .directories[] | select(. == \"$name\") )" "$config")" = 'false' ]; then
-    fenrir-log err "$2" "FDI: Found forbidden directory: '$1'"
+    loki-log err "$2" "FDI: Found forbidden directory: '$1'"
     exit 4
 fi
 
@@ -15,7 +15,7 @@ pushd "$1" &> /dev/null
 
 for pattern in $(jq -r '.filePatterns[]' "$config"); do
     if ls "$pattern" &> /var/fenrir/out; then
-        fenrir-log err -v "FDI: Found forbidden file pattern '$(cat /var/fenrir/out)'"
+        loki-log err -v "FDI: Found forbidden file pattern '$(cat /var/fenrir/out)'"
         popd &> /dev/null
         exit 3
     fi

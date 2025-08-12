@@ -1,4 +1,4 @@
-#! /usr/bin/env bash
+#! /usr/bin/env loki
 
 TMP=$(fenrir-tmp -v)
 LOCAL_REPO="$HOME/.fenrir/repo"
@@ -22,8 +22,8 @@ if [ "$1" = "-f" ] || [ "$1" = "--force" ]; then
 fi
 
 if [ "$#" -ne "1" ]; then
-    fenrir-log err "$DOCKER_UPDATE" '(＃°Д°)' Wrong arguments count!
-    fenrir-log err "$DOCKER_UPDATE" "Expected <1> but got <$#>"
+    loki-log err "$DOCKER_UPDATE" '(＃°Д°)' Wrong arguments count!
+    loki-log err "$DOCKER_UPDATE" "Expected <1> but got <$#>"
     exit 15
 fi
 
@@ -31,9 +31,9 @@ TASK=$1
 
 if ! [ -d "$LOCAL_REPO/$TASK" ]; then
     INSTALL=1
-    fenrir-log warn "$DOCKER_UPDATE" "Task '$TASK' has not been installed yet"
+    loki-log warn "$DOCKER_UPDATE" "Task '$TASK' has not been installed yet"
 else
-    fenrir-log info "$DOCKER_UPDATE" "Task '$TASK' has already been installed"
+    loki-log info "$DOCKER_UPDATE" "Task '$TASK' has already been installed"
 fi
 
 ######################################################################
@@ -93,4 +93,4 @@ set_meta
 jq ".task = \"$TASK\"" "/etc/fenrir/main.json" > "$TMP/TMP_FENRIR"
 cat "$TMP/TMP_FENRIR" > "/etc/fenrir/main.json"
 
-fenrir-log succ "$DOCKER_UPDATE" '[]~(￣▽￣)~*' "Fenrir is ready to check task '$TASK'"
+loki-log succ "$DOCKER_UPDATE" '[]~(￣▽￣)~*' "Fenrir is ready to check task '$TASK'"

@@ -1,4 +1,4 @@
-#! /usr/bin/env bash
+#! /usr/bin/env loki
 
 #UNCOMMENT# cat ~/key > ~/.ssh/id_rsa
 
@@ -34,23 +34,23 @@ function finish {
 function switch_solution {
     if [ "$branch" = "--" ]; then
         if cd "$destination" > "$out" 2> "$err"; then
-            fenrir-log succ "$v" "Inside solution's directory"
+            loki-log succ "$v" "Inside solution's directory"
             return
         else
-            fenrir-log err "$v" "Failed"
-            fenrir-log warn "$v" "<stdout>" "$(cat "$out")"
-            fenrir-log err "$v" "<stderr>" "$(cat "$err")"
+            loki-log err "$v" "Failed"
+            loki-log warn "$v" "<stdout>" "$(cat "$out")"
+            loki-log err "$v" "<stderr>" "$(cat "$err")"
             return 3
         fi
     fi
 
     if fenrir-change-branch "$v" "$branch"; then
         if cd "$destination/$branch" > "$out" 2> "$err"; then
-            fenrir-log succ "$v" "Inside solution's directory"
+            loki-log succ "$v" "Inside solution's directory"
         else
-            fenrir-log err "$v" "Failed"
-            fenrir-log warn "$v" "<stdout>" "$(cat "$out")"
-            fenrir-log err "$v" "<stderr>" "$(cat "$err")"
+            loki-log err "$v" "Failed"
+            loki-log warn "$v" "<stdout>" "$(cat "$out")"
+            loki-log err "$v" "<stderr>" "$(cat "$err")"
             return 3
         fi
     else
@@ -64,9 +64,9 @@ score_file=$(jq -r '.score' "$config_file")
 echo -n 0 > "$score_file"
 
 for script in $pre; do
-    fenrir-log info "$v" "--------------------------($script)--------------------------"
+    loki-log info "$v" "--------------------------($script)--------------------------"
     if [ -n "$NZ" ] && [ "$script" = "task-zero" ]; then
-        fenrir-log warn "$v" "Running with '--no-zero' option"
+        loki-log warn "$v" "Running with '--no-zero' option"
         continue
     fi
 
@@ -75,16 +75,16 @@ for script in $pre; do
     fi
 done
 
-fenrir-log info "$v" "--------------------------(switch-solution)--------------------------"
+loki-log info "$v" "--------------------------(switch-solution)--------------------------"
 
 if ! switch_solution; then
     finish
 fi
 
 for script in $main; do
-    fenrir-log info "$v" "--------------------------($script)--------------------------"
+    loki-log info "$v" "--------------------------($script)--------------------------"
     if [ -n "$NL" ] && [ "$script" = "walk-inspections" ]; then
-        fenrir-log warn "$v" "Running with '--no-lint' option"
+        loki-log warn "$v" "Running with '--no-lint' option"
         continue
     fi
 
@@ -93,6 +93,6 @@ for script in $main; do
     fi
 done
 
-fenrir-log info "$v" "-----------------------------------------------------------"
+loki-log info "$v" "-----------------------------------------------------------"
 
 finish

@@ -1,4 +1,4 @@
-#! /usr/bin/env bash
+#! /usr/bin/env loki
 
 cmd=$1
 shift
@@ -10,8 +10,8 @@ function check_arg_count {
     real=$2
 
     if [ "$exp" -ne "$real" ]; then
-        fenrir-log err -v '(＃°Д°)' Wrong arguments count!
-        fenrir-log err -v "Expected <$exp> but got <$real>"
+        loki-log err -v '(＃°Д°)' Wrong arguments count!
+        loki-log err -v "Expected <$exp> but got <$real>"
         exit 15
     fi
 }
@@ -19,7 +19,7 @@ function check_arg_count {
 function verify_non_sudo {
     if [ "$(id -u)" -eq 0 ]; then
 
-        fenrir-log err -v 'ᕙ( •̀ ᗜ •́ )ᕗ' "The script must not be run under sudo!"
+        loki-log err -v 'ᕙ( •̀ ᗜ •́ )ᕗ' "The script must not be run under sudo!"
         exit 123
     fi
 }
@@ -80,7 +80,7 @@ case "$cmd" in
     ;;
 
     *)
-        fenrir-log err -v '(+_+)?' "Command not found"
+        loki-log err -v '(+_+)?' "Command not found"
         exit 1
     ;;
 esac

@@ -1,9 +1,9 @@
-#! /usr/bin/env bash
+#! /usr/bin/env loki
 
 # WARNING! Requires shellcheck to be installed!
 
 if ! type shellcheck &> /dev/null; then
-    fenrir-log err "$2" "shellcheck is not installed"
+    loki-log err "$2" "shellcheck is not installed"
 fi
 
 file=$1
@@ -13,16 +13,16 @@ if ! [[ $file == *.sh ]]; then
 fi
 
 
-fenrir-log info "$2" "BI: Inspecting '$file'"
+loki-log info "$2" "BI: Inspecting '$file'"
 
 if [ "$2" == "-v" ]; then
     if ! shellcheck -a -Calways "$file" ; then
-        fenrir-log err "$2" "BI: File '$file' contains violations."
+        loki-log err "$2" "BI: File '$file' contains violations."
         exit 2
     fi
 else
     if ! shellcheck -a -Cnever "$file" ; then
-        fenrir-log err "$2" "BI: File '$file' contains violations."
+        loki-log err "$2" "BI: File '$file' contains violations."
         exit 3
     fi
 fi

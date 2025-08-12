@@ -1,7 +1,4 @@
-#! /usr/bin/env bash
+#! /usr/bin/env loki
 
-out="/var/fenrir/out"
-err="/var/fenrir/err"
-
-$* > $out 2> $err
+$* > "$OUT_FILE" 2> "$ERR_FILE"
 exit $?

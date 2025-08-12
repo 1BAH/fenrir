@@ -1,16 +1,16 @@
-#! /usr/bin/env bash
+#! /usr/bin/env loki
 
 v="$1"
 config="/etc/fenrir/walk.json"
 
-fenrir-log info "$v" "WI: Start"
+loki-log info "$v" "WI: Start"
 
 root_dir=$(fenrir-getroot)
 reg_files_inspections=$(jq -r '.files[]' "$config")
 dir_inspections=$(jq -r '.dirs[]' "$config")
 
 function terminate {
-    fenrir-log err "$v" "WI: terminate"
+    loki-log err "$v" "WI: terminate"
     exit 3
 }
 
@@ -26,7 +26,7 @@ function dir_check {
 
         inspect_dir "$dir"
 #    else
-#        fenrir-log info "mute" "WI: Skipping $dir" # muted
+#        loki-log info "mute" "WI: Skipping $dir" # muted
     fi
 }
 
@@ -50,4 +50,4 @@ function inspect_dir {
 
 dir_check "$root_dir"
 
-fenrir-log succ "$v" "WI: All inspections have passed"
+loki-log succ "$v" "WI: All inspections have passed"

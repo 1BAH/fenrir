@@ -1,5 +1,7 @@
 #! /usr/bin/env bash
 
+#shopt -s globstar
+
 CLI_DIR=$(dirname "$(realpath "$0")")
 CORE_UTILS_DIR=$(realpath "${CLI_DIR}/../core")
 CFGS_DIR=$(realpath "${CLI_DIR}/../configs")
@@ -13,36 +15,27 @@ done < "$CLI_DIR/fenrir.properties"
 
 update=""
 docker_update=""
+v="-v"
 
 ###################################################################
 
-GREEN="\033[38;5;112m"
-BLUE="\033[38;5;4m"
-YELLOW="\033[38;5;214m"
-RED="\033[38;5;196m"
-ENDC="\033[0m"
+pushd "$CORE_UTILS_DIR" &> /dev/null
 
+cd loki
 
-function info {
-    [ -z "$update" ] && echo -e "${BLUE}[ INFO  ]${ENDC} $*" # > /dev/tty
-}
+./install.loki
 
-function warn {
-    echo -e "${YELLOW}[WARNING]${ENDC} $*" # > /dev/tty
-}
+sudo mv /tmp/FENRIR_HEADER /usr/local/bin/loki
+sudo chmod +x /usr/local/bin/loki
 
-function err {
-    echo -e "${RED}[ ERROR ]${ENDC} $*" # > /dev/tty
-}
+source /usr/local/bin/loki
 
-function succ {
-    [ -z "$update" ] && echo -e "${GREEN}[SUCCESS]${ENDC} $*" # > /dev/tty
-}
+popd &> /dev/null
 
 #################################################################
 
 if [ "$1" = "update" ]; then
-    info "Updating fenrir up to version @$VERSION"
+    loki-log info "$v" "Updating fenrir up to version @$VERSION"
     update=true
 fi
 
@@ -50,36 +43,37 @@ if [ "$1" = "docker" ]; then
     echo "[ INFO  ] Updating fenrir up to the latest version: \"$VERSION\""
     update=true
     docker_update=true
+    v=""
 fi
 
 #################################################################
 
 if [ "$(id -u)" -ne 0 ]; then
     if [ -n "$update" ]; then
-        err "THIS SHOULD NOT HAVE HAPPENED! CONTACT US!"
+        loki-log err "$v" "THIS SHOULD NOT HAVE HAPPENED! CONTACT US!"
     fi
 
-    err "The script must be run under sudo!"
+    loki-log err "$v" "The script must be run under sudo!"
     exit 111
 fi
 
 ###################################################################
 
 [ -n "$SUDO_USER" ] && user=$SUDO_USER || user=$USER
-info "Installing fenrir @$VERSION for '$user' user"
+loki-log info "$v" "Installing fenrir @$VERSION for '$user' user"
 
 #################################################################
 
-info "> Identifying OS.."
+loki-log info "$v" "> Identifying OS.."
 
 case "$(uname -s)" in
     Linux*)
         os_pref_home="/home"
-        info ">> OS is LINUX"
+        loki-log info "$v" ">> OS is LINUX"
     ;;
     Darwin*)
         os_pref_home="/Users"
-        info ">> OS is MACOS"
+        loki-log info "$v" ">> OS is MACOS"
     ;;
 #    CYGWIN*)
 #        os=Cygwin
@@ -91,12 +85,12 @@ case "$(uname -s)" in
 #        os=MSys
 #    ;;
     *)
-        warn ">> Unsupported OS: '$(uname -s)'"
-        warn ">> Do you agree to continue? (Potentially dangerous) [yes|no]"
+        loki-log warn "$v" ">> Unsupported OS: '$(uname -s)'"
+        loki-log warn "$v" ">> Do you agree to continue? (Potentially dangerous) [yes|no]"
         read -r op
 
         if [ "$op" != "yes" ]; then
-            err "Terminating.."
+            loki-log err "$v" "Terminating.."
             exit 3
         fi
     ;;
@@ -104,47 +98,51 @@ esac
 
 #################################################################
 
-info "> Validating environment.."
+loki-log info "$v" "> Validating environment.."
 
 if [ -d "/etc/fenrir" ]; then
-    warn ">> Directory '/etc/fenrir' already exists"
-    warn ">> Remove existing '/etc/fenrir' [yes|no]"
+    loki-log warn "$v" ">> Directory '/etc/fenrir' already exists"
+    loki-log warn "$v" ">> Remove existing '/etc/fenrir' [yes|no]"
     read -r op
 
     if [ "$op" = "yes" ]; then
-        info ">>> Removing '/etc/fenrir'.."
+        loki-log info "$v" ">>> Removing '/etc/fenrir'.."
         rm -fr /etc/fenrir
     else
-        err "Terminating.."
+        loki-log err "$v" "Terminating.."
         exit 3
     fi
 fi
 
 if [ -d "/var/fenrir" ]; then
-    warn ">> Directory '/var/fenrir' already exists. Run uninstaller to remove it"
-    warn ">> Remove existing '/var/fenrir'? [yes|no]"
+    loki-log warn "$v" ">> Directory '/var/fenrir' already exists. Run uninstaller to remove it"
+    loki-log warn "$v" ">> Remove existing '/var/fenrir'? [yes|no]"
     read -r op
 
     if [ "$op" = "yes" ]; then
-        info ">>> Removing '/var/fenrir'.."
+        loki-log info "$v" ">>> Removing '/var/fenrir'.."
         rm -fr /var/fenrir
     else
-        err "Terminating.."
+        loki-log err "$v" "Terminating.."
         exit 3
     fi
 fi
 
 if ! type jq &> /dev/null; then
-    err ">> 'jq' is not installed"
+    loki-log err "$v" ">> 'jq' is not installed"
     exit 4
 fi
 
 if ! type wget &> /dev/null; then
-    err ">> 'wget' is not installed"
+    loki-log err "$v" ">> 'wget' is not installed"
     exit 4
 fi
 
 for cmd in "$CORE_UTILS_DIR"/*; do
+    if ! [ -f "$cmd" ]; then
+        continue
+    fi
+
     name=$(basename "$cmd")
 
     if type "$name" &> /dev/null; then
@@ -153,55 +151,59 @@ for cmd in "$CORE_UTILS_DIR"/*; do
             continue
         fi
 
-        warn ">> Command <$name> already exists: '${location[2]}'"
-        warn ">> After installation it will be overridden. Continue? [yes|no]"
+        loki-log warn "$v" ">> Command <$name> already exists: '${location[2]}'"
+        loki-log warn "$v" ">> After installation it will be overridden. Continue? [yes|no]"
         read -r op
 
         if [ "$op" != "yes" ]; then
-            err "Terminating.."
+            loki-log err "$v" "Terminating.."
             exit 3
         fi
     fi
 done
 
-succ "> Ready to be installed!"
+loki-log succ "$v" "> Ready to be installed!"
 
 #################################################################
 
-info "> Creating '/etc/fenrir'.."
+loki-log info "$v" "> Creating '/etc/fenrir'.."
 
 mkdir -p /etc/fenrir
 chown "$user" /etc/fenrir
 
-succ "> Done"
+loki-log succ "$v" "> Done"
 
 #################################################################
 
-info "> Creating '/var/fenrir'.."
+loki-log info "$v" "> Creating '/var/fenrir'.."
 
 mkdir -p /var/fenrir
 chown "$user" /var/fenrir
 
-succ "> Done"
+loki-log succ "$v" "> Done"
 
 #################################################################
 
-info "> Installing core.."
+loki-log info "$v" "> Installing core.."
 
 for cmd in "$CORE_UTILS_DIR"/*; do
     name=$(basename "$cmd")
 
+    if [ -d "$cmd" ]; then
+        continue
+    fi
+
     if ! cp "$cmd" "/usr/local/bin/$name"; then
-        err "Terminating.."
+        loki-log err "$v" "Terminating.."
         exit 10
     fi
 done
 
-succ "> Done"
+loki-log succ "$v" "> Done"
 
 #################################################################
 
-info "> Setting all configs.."
+loki-log info "$v" "> Setting all configs.."
 
 for cfg in "$CFGS_DIR"/*; do
     name=$(basename "$cfg")
@@ -210,7 +212,7 @@ for cfg in "$CFGS_DIR"/*; do
         cp "$cfg" "/etc/fenrir/$name" &&
         chown "$user" "/etc/fenrir/$name"
     }; then
-        err "Terminating.."
+        loki-log err "$v" "Terminating.."
         exit 10
     fi
 done
@@ -220,14 +222,14 @@ jq ".version = \"$VERSION\"" "/etc/fenrir/main.json" > /tmp/INSTALL_FENRIR
 cat /tmp/INSTALL_FENRIR > "/etc/fenrir/main.json"
 sudo chmod +t /tmp
 
-succ "> Done"
+loki-log succ "$v" "> Done"
 
 #################################################################
 
-info "> Installing basic utils.."
+loki-log info "$v" "> Installing basic utils.."
 
 if ! mkdir -p "$os_pref_home/$user/.fenrir/custom/walk"; then
-    err "> Unable to create local storage"
+    loki-log err "$v" "> Unable to create local storage"
     exit 189
 fi
 
@@ -246,48 +248,48 @@ for util in "$BASIC_UTILS_DIR"/* "$BASIC_UTILS_DIR"/**/*; do
         cp "$util" "$os_pref_home/$user/.fenrir/custom/$relative_path" &&
         chown "$user" "$os_pref_home/$user/.fenrir/custom/$relative_path"
     }; then
-        err "Terminating.."
+        loki-log err "$v" "Terminating.."
         exit 10
     fi
 done
 
-succ "> Done"
+loki-log succ "$v" "> Done"
 
 ###################################################################
 
-info "> Installing cli tool.."
+loki-log info "$v" "> Installing cli tool.."
 
 cat "$CLI_DIR/fenrir" > "/usr/local/bin/fenrir"
 chmod +x "/usr/local/bin/fenrir"
 
-succ "> Done"
+loki-log succ "$v" "> Done"
 
 ###################################################################
 
-info "> Installing autocompletion.."
+loki-log info "$v" "> Installing autocompletion.."
 
 cp "`which fenrir-autocomplete`" "/etc/bash_completion.d/"
 
-warn "> Run 'source ~/.bashrc' or reload terminal to apply autocompletion"
+loki-log warn "$v" "> Run 'source ~/.bashrc' or reload terminal to apply autocompletion"
 
-succ "> Done"
+loki-log succ "$v" "> Done"
 
 ###################################################################
 
-info "> Installing uninstaller.."
+loki-log info "$v" "> Installing uninstaller.."
 
 if ! {
     cp "$CLI_DIR/uninstall-fenrir" "/usr/local/bin/uninstall-fenrir" &&
     chmod +x "/usr/local/bin/uninstall-fenrir"
 }; then
-    err "Terminating.."
+    loki-log err "$v" "Terminating.."
     exit 19
 fi
 
-succ "> Done"
+loki-log succ "$v" "> Done"
 
 ###################################################################
 
 update="" # Unmute
 
-[ -z "$docker_update" ] && succ "Installation has finished!"
+[ -z "$docker_update" ] && loki-log succ "$v" "Installation has finished!"

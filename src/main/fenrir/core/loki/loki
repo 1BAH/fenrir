@@ -1,0 +1,46 @@
+#! /usr/bin/env bash
+
+set -T
+shopt -s extdebug
+
+# Alternative
+
+#include <loki-common-const>
+#include <loki-common-funs>
+
+# When no args, we just want to load all global functions and global consts
+if (( $# != 0 )); then
+    function save_cmd {
+        if [[ $BASH_COMMAND =~ ^source.*$ ]]; then
+#            echo >
+            return 0
+        fi
+
+#        if [[ $BASH_COMMAND =~ ^fenrir.+$ ]]; then
+#            echo "<$FENRIR_DEPTH> $BASH_COMMAND"
+#            (( FENRIR_DEPTH++ ))
+#        fi
+
+        if [[ $BASH_COMMAND =~ ^loki.+$ ]]; then
+            (( FENRIR_DEPTH++ ))
+        fi
+
+        if ! [[ $BASH_COMMAND =~ ^loki.*$ || $BASH_COMMAND =~ ^fenrir.*$ ]] ; then
+            if (( FENRIR_DEPTH == 0 )); then
+                echo "$BASH_COMMAND" >> "$CMD_FILE"
+            fi
+        fi
+    }
+
+    file=$(realpath "$1")
+    other=("$@")
+    other=("${other[@]:1}")
+
+    if ! [[ $(basename "$file") =~ ^fenrir.*$ ]]; then
+#        echo "IN <$file>"
+        echo -n > "$CMD_FILE"
+        trap 'save_cmd' DEBUG
+    fi
+
+    source "$file" "${other[@]}"
+fi

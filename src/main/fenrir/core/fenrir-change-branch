@@ -1,4 +1,4 @@
-#! /usr/bin/env bash
+#! /usr/bin/env loki
 
 verbosity=$1
 branch=$2
@@ -10,15 +10,15 @@ err="/var/fenrir/err"
 
 pushd "$destination" &> /dev/null
 
-fenrir-log info "$verbosity" "Switching branch to '$branch'"
+loki-log info "$verbosity" "Switching branch to '$branch'"
 
 if git switch "$branch" > "$out" 2> "$err"
 then
-    fenrir-log succ "$verbosity" "Switched to '$branch'"
+    loki-log succ "$verbosity" "Switched to '$branch'"
 else
-    fenrir-log err "$verbosity" "Failed"
-    fenrir-log warn "$verbosity" "<stdout>" "$(cat "$out")"
-    fenrir-log err "$verbosity" "<stderr>" "$(cat "$err")"
+    loki-log err "$verbosity" "Failed"
+    loki-log warn "$verbosity" "<stdout>" "$(cat "$out")"
+    loki-log err "$verbosity" "<stderr>" "$(cat "$err")"
     popd &> /dev/null
     exit 1
 fi

@@ -1,4 +1,4 @@
-#! /usr/bin/env bash
+#! /usr/bin/env loki
 
 out="/var/fenrir/out"
 err="/var/fenrir/err"
@@ -8,12 +8,12 @@ function local_clone {
     from=$1
     to=$(fenrir-tmp -d)
 
-    fenrir-log info "$SILENT" "Cloning repo to '$to'.."
+    loki-log info "$SILENT" "Cloning repo to '$to'.."
 
     if ! git clone "$from" "$to" > "$out" 2> "$err"; then
-        fenrir-log err  "$SILENT" "Failed to clone locally"
-        fenrir-log warn "$SILENT" "<stdout>" "$(cat "$out")"
-        fenrir-log err  "$SILENT" "<stderr>" "$(cat "$err")"
+        loki-log err  "$SILENT" "Failed to clone locally"
+        loki-log warn "$SILENT" "<stdout>" "$(cat "$out")"
+        loki-log err  "$SILENT" "<stderr>" "$(cat "$err")"
         exit 56
     fi
 
@@ -48,8 +48,8 @@ while [ "$#" -ne 0 ]; do
 
         *)
             if [ $hit -ge 1 ]; then
-                fenrir-log err "$SILENT" '(＃°Д°)' Wrong arguments count!
-                fenrir-log err "$SILENT" "Expected <1> but got <$(( $# + hit ))>"
+                loki-log err "$SILENT" '(＃°Д°)' Wrong arguments count!
+                loki-log err "$SILENT" "Expected <1> but got <$(( $# + hit ))>"
                 exit 15
             fi
 
@@ -63,8 +63,8 @@ while [ "$#" -ne 0 ]; do
 done
 
 if [ "$hit" -ne 1 ]; then
-    fenrir-log err "$SILENT" '(＃°Д°)' Wrong arguments count!
-    fenrir-log err "$SILENT" "Expected <1> but got <$hit>"
+    loki-log err "$SILENT" '(＃°Д°)' Wrong arguments count!
+    loki-log err "$SILENT" "Expected <1> but got <$hit>"
     exit 15
 fi
 
@@ -75,7 +75,7 @@ fi
 src=$(realpath "$path")
 
 if ! [ -d "$src/.git" ]; then
-    fenrir-log err "$SILENT" '(╬▔皿▔)╯' "The provided file is not a project root"
+    loki-log err "$SILENT" '(╬▔皿▔)╯' "The provided file is not a project root"
     exit 89
 fi
 

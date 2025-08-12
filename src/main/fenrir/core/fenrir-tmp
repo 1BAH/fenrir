@@ -1,4 +1,4 @@
-#! /usr/bin/env bash
+#! /usr/bin/env loki
 
 FENRIR_LOCAL_TMP="$HOME/.fenrir/tmp"
 
@@ -10,8 +10,8 @@ exp=1
 real=$#
 
 if [ "$real" -gt "$exp" ]; then
-    fenrir-log err -v '(＃°Д°)' Wrong arguments count!
-    fenrir-log err -v "Expected no more than <$exp> but got <$real>"
+    loki-log err -v '(＃°Д°)' Wrong arguments count!
+    loki-log err -v "Expected no more than <$exp> but got <$real>"
     exit 15
 fi
 

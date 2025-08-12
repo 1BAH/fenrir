@@ -1,4 +1,4 @@
-#! /usr/bin/env bash
+#! /usr/bin/env loki
 
 verbosity=$1
 destination=$(fenrir-getroot)
@@ -7,22 +7,22 @@ err="/var/fenrir/err"
 
 ##############
 
-fenrir-log info "$verbosity" "TZ: Validating task0"
+loki-log info "$verbosity" "TZ: Validating task0"
 
 if fenrir-change-branch "$verbosity" "task0"; then
     if pushd "$destination/task0" > "$out" 2> "$err"; then
         if [ -x "run.sh" ]; then
-            fenrir-log succ "$verbosity" "TZ: task0 is completed"
+            loki-log succ "$verbosity" "TZ: task0 is completed"
             exit 0 # successful exit
         else
-            fenrir-log err "$verbosity" "TZ: File 'run.sh' does not exist or is not executable"
+            loki-log err "$verbosity" "TZ: File 'run.sh' does not exist or is not executable"
         fi
     else
-        fenrir-log err "$verbosity" "TZ: Failed"
-        fenrir-log warn "$verbosity" "<stdout>" "$(cat "$out")"
-        fenrir-log err "$verbosity" "<stderr>" "$(cat "$err")"
+        loki-log err "$verbosity" "TZ: Failed"
+        loki-log warn "$verbosity" "<stdout>" "$(cat "$out")"
+        loki-log err "$verbosity" "<stderr>" "$(cat "$err")"
     fi
 fi
 
-fenrir-log err "$verbosity" "TZ: Validation failed"
+loki-log err "$verbosity" "TZ: Validation failed"
 exit 3
