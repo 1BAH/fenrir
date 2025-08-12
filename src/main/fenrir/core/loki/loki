@@ -17,16 +17,16 @@ if (( $# != 0 )); then
         fi
 
 #        if [[ $BASH_COMMAND =~ ^fenrir.+$ ]]; then
-#            echo "<$FENRIR_DEPTH> $BASH_COMMAND"
-#            (( FENRIR_DEPTH++ ))
+#            echo "<$JOTUNHEIM_DEPTH> $BASH_COMMAND"
+#            (( JOTUNHEIM_DEPTH++ ))
 #        fi
 
         if [[ $BASH_COMMAND =~ ^loki.+$ ]]; then
-            (( FENRIR_DEPTH++ ))
+            (( JOTUNHEIM_DEPTH++ ))
         fi
 
         if ! [[ $BASH_COMMAND =~ ^loki.*$ || $BASH_COMMAND =~ ^fenrir.*$ ]] ; then
-            if (( FENRIR_DEPTH == 0 )); then
+            if (( JOTUNHEIM_DEPTH == 0 )); then
                 echo "$BASH_COMMAND" >> "$CMD_FILE"
             fi
         fi

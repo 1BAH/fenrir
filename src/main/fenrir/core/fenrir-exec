@@ -1,4 +1,0 @@
-#! /usr/bin/env loki
-
-$* > "$OUT_FILE" 2> "$ERR_FILE"
-exit $?
