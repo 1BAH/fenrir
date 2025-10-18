@@ -1,0 +1,19 @@
+#! /usr/bin/env loki
+
+file=$1
+
+loki-log info "NLI: Inspecting '$file'"
+
+if [[ $file == *.png ]] ||
+   [[ $file == *.jpg ]] ||
+   [[ $file == *.svg ]] ||
+   [[ $file == *.jpeg ]]; then
+    exit 0
+fi
+
+last_sym=$(tail -c 1 "$file")
+
+if [ -n "$last_sym" ]; then
+    loki-log err "NLI: File '$file' has no EOL at the end"
+    exit 3
+fi

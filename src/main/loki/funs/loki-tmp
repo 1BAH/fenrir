@@ -1,0 +1,34 @@
+##
+# Usage:
+#   loki-tmp [-v | -d]
+#
+# Returns an array of all supported versions.
+##
+function loki-get-file {
+    # Verify args
+    if (( $# > 1 )); then
+        loki-log err -v '(＃°Д°)' Wrong arguments count!
+        loki-log err -v "Expected no more than <1> but got <$#>"
+        exit 15
+    fi
+
+
+
+    local op=${1}
+
+
+    ( # Create a local scope to propagate additional data
+        source "/etc/fenrir/main.hel"
+
+        case "$op" in
+            "+")
+                echo -n $(( points + $(cat "$score_file") )) > "$score_file"
+                ;;
+            "-")
+                echo -n $(( $(cat "$score_file") - points )) > "$score_file"
+                ;;
+            *)
+                loki-log err -v "loki-points: Unsupported operation <$op>"
+        esac
+    )
+}

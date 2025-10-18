@@ -1,33 +1,20 @@
 #! /usr/bin/env loki
 
-TMP="/tmp"
-LOCAL_REPO="$HOME/.fenrir/repo"
-LOCAL_CFGS="$HOME/.fenrir/cfgs"
+
+LOCAL_REPO="$FENRIR_HOME/repo"
+LOCAL_CFGS="$FENRIR_HOME/cfgs"
+TASK_HOST=$(fenrir-read-conf main remote)
+
+task=$1
 
 ######################################################################
 ##                         VERIFY ARGUMENTS                         ##
 ######################################################################
 
-# Since we execute via 'Loki', we have to shift args
-if [[ $1 == "${BASH_SOURCE[0]}" ]]; then
-    shift
-fi
+#include <shift-args>
 
-DOCKER_UPDATE="-v"
-
-if [ "$1" = "-s" ]; then
-    DOCKER_UPDATE=""
-    shift
-fi
-
-exp=1
-real=$#
-
-if [ "$exp" -ne "$real" ]; then
-    loki-log err "$DOCKER_UPDATE" '(＃°Д°)' Wrong arguments count!
-    loki-log err "$DOCKER_UPDATE" "Expected <$exp> but got <$real>"
-    exit 15
-fi
+EXP_ARGC=1
+#include <verify-argc>
 
 ######################################################################
 ##                            FUNCTIONS                             ##
@@ -38,10 +25,9 @@ function get_file {
     output=$2
     err_msg=$3
 
-    if ! wget -o "$TMP/FENRIR_DOWNLOAD" -O "$output" "$url"; then
+    if ! lokiw wget -o "$ERR_FILE" -O "$output" "$url"; then
         echo "!]" # Terminate processing line
-        loki-log err  "$DOCKER_UPDATE" '(っ °Д °;)っ' "$err_msg"
-        loki-log warn "$DOCKER_UPDATE" "$(cat "$TMP/FENRIR_DOWNLOAD")"
+        loki-log fail '(っ °Д °;)っ' "$err_msg"
         return 13
     else
         echo -n "*"
@@ -49,40 +35,31 @@ function get_file {
 }
 
 function get_index {
-    host=$(fenrir-getremote)
-    dir=$1
-
-    if ! get_file "$host/-/raw/main/$dir/index.json" \
-                  "$LOCAL_REPO/$dir/index.json"                \
-                  "Failed to download task '$dir'"
+    if ! get_file "${TASK_HOST}/-/raw/main/${task}/index.hel" \
+                  "$LOCAL_REPO/${task}/index.hel"             \
+                  "Failed to download task '${task}'"
     then
         return 13
     fi
 }
 
-function get_custom {
-    host=$(fenrir-getremote)
-    dir=$1
-
-    for script in $(jq -r .custom[] "$LOCAL_REPO/$dir/index.json"); do
-        if ! get_file "$host/-/raw/main/$dir/$script" \
-                      "$LOCAL_REPO/$dir/$script"  \
+function get_scripts {
+    for script in $(fenrir-read-conf -a "${task}" scripts); do
+        if ! get_file "${TASK_HOST}/-/raw/main/${task}/$script" \
+                      "$LOCAL_REPO/${task}/$script"             \
                       "Failed to download file '$script'"
         then
             return 13
         fi
 
-        chmod +x "$LOCAL_REPO/$dir/$script"
+        chmod +x "$LOCAL_REPO/${task}/$script"
     done
 }
 
 function get_cfgs {
-    host=$(fenrir-getremote)
-    dir=$1
-
-    for script in $(jq -r .cfgs[] "$LOCAL_REPO/$dir/index.json"); do
-        if ! get_file "$host/-/raw/main/$dir/$script" \
-                      "$LOCAL_CFGS/$dir/$script"           \
+    for script in $(fenrir-read-conf -a "${task}" cfgs); do
+        if ! get_file "${TASK_HOST}/-/raw/main/${task}/$script" \
+                      "$LOCAL_CFGS/${task}/$script"             \
                       "Failed to download file '$script'"
         then
             return 13
@@ -91,11 +68,8 @@ function get_cfgs {
 }
 
 function get_pipeline {
-    host=$(fenrir-getremote)
-    dir=$1
-
-    if ! get_file "$host/-/raw/main/$dir/pipeline.json" \
-                  "$LOCAL_REPO/$dir/pipeline.json"  \
+    if ! get_file "${TASK_HOST}/-/raw/main/${task}/pipeline.hel" \
+                  "$LOCAL_REPO/${task}/pipeline.hel"             \
                   "Failed to download testing pipeline"
     then
         return 13
@@ -106,38 +80,31 @@ function get_pipeline {
 ##                           MAIN PROGRAM                           ##
 ######################################################################
 
-task=$1
-
-TMP=$(fenrir-tmp -v)
+rm   -fr "$LOCAL_REPO/$task" "$LOCAL_CFGS/$task" # Remove old versions
 mkdir -p "$LOCAL_REPO/$task" "$LOCAL_CFGS/$task"
 
-echo -n "DOWNLOADING '$task' ["
+echo -e -n "$(loki-wrap "${PEACH}" DOWNLOADING) '$task' ["
 
 if ! get_index "$task"; then
-    rm -fr "$LOCAL_REPO/$task"
+    rm -fr "$LOCAL_REPO/$task" "$LOCAL_CFGS/$task"
     exit 13
 fi
-
-mkdir -p "$LOCAL_REPO/$task"
 
 if ! get_cfgs "$task"; then
-    rm -fr "$LOCAL_REPO/$task"
-    exit 13
+    rm -fr "$LOCAL_REPO/$task" "$LOCAL_CFGS/$task"
+    exit 14
 fi
 
-if ! get_custom "$task"; then
-    rm -fr "$LOCAL_REPO/$task"
-    exit 13
+if ! get_scripts "$task"; then
+    rm -fr "$LOCAL_REPO/$task" "$LOCAL_CFGS/$task"
+    exit 15
 fi
 
 if ! get_pipeline "$task"; then
-    rm -fr "$LOCAL_REPO/$task"
-    exit 13
+    rm -fr "$LOCAL_REPO/$task" "$LOCAL_CFGS/$task"
+    exit 16
 fi
 
 echo "]"
 
-jq ".task = \"$task\"" "/etc/fenrir/main.json" > "$TMP/TMP_FENRIR"
-cat "$TMP/TMP_FENRIR" > "/etc/fenrir/main.json"
-
-loki-log succ "$DOCKER_UPDATE" '[]~(￣▽￣)~*' "Task '$task' has been downloaded"
+loki-log succ '[]~(￣▽￣)~*' "Task '$task' has been downloaded"

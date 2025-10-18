@@ -1,0 +1,11 @@
+# shellcheck disable=SC2164
+pushd "$BUILD_DIR/loki" &> /dev/null
+
+./install.loki
+
+sudo mv LOKI /usr/local/bin/loki
+sudo chmod +x /usr/local/bin/loki
+
+source /usr/local/bin/loki
+
+popd &> /dev/null

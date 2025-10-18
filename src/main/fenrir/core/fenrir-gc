@@ -4,59 +4,38 @@
 ##                         VERIFY ARGUMENTS                         ##
 ######################################################################
 
-# Since we execute via 'Loki', we have to shift args
-if [[ $1 == "${BASH_SOURCE[0]}" ]]; then
+#include <shift-args>
+
+HARD="YES"
+
+
+if [ "$1" = '-f' ]; then
+    loki-log warn "Running in 'forced' mode"
+    HARD=""
     shift
 fi
 
-SOFT="NO"
-
-if [ "$1" = '-s' ]; then
-    loki-log warn -v "Running in 'soft' mode"
-    SOFT=""
-    shift
-fi
-
-exp=0
-real=$#
-
-if [ "$exp" -ne "$real" ]; then
-    loki-log err -v '(＃°Д°)' Wrong arguments count!
-    loki-log err -v "Expected <$exp> but got <$real>"
-    exit 15
-fi
+EXP_ARGC=0
+#include <verify-argc>
 
 ######################################################################
 ##                           MAIN PROGRAM                           ##
 ######################################################################
 
-loki-log info -v "Removing update repo.."
-rm -fr "$HOME/.fenrir/tag"
 
-loki-log info -v "Removing tmp.."
-rm -fr "$HOME/.fenrir/tmp"
+loki-log info "Removing tmp.."
+rm -fr "${FENRIR_TMP_DIR}"
 
-[ -n "$SOFT" ] && loki-log info -v "Removing local repo.."
-[ -n "$SOFT" ] && rm -fr "$HOME/.fenrir/repo"
+# TODO -z => -n
 
-[ -n "$SOFT" ] && loki-log info -v "Removing local configs.."
-[ -n "$SOFT" ] && rm -fr "$HOME/.fenrir/cfgs"
+[ -n "$HARD" ] || loki-log info "Removing local repo.."
+[ -n "$HARD" ] || rm -fr "${FENRIR_HOME}/repo"
 
-[ -n "$SOFT" ] && loki-log info -v "Cleaning default task.."
-for file in "$HOME/.fenrir/custom"/*; do
-    if [ -d "$file" ]; then
-        continue
-    fi
+[ -n "$HARD" ] || loki-log info "Removing local configs.."
+[ -n "$HARD" ] || rm -fr "${FENRIR_HOME}/cfgs"
 
-    if [ "$file" = "$HOME/.fenrir/custom/task-zero" ] ||
-       [ "$file" = "$HOME/.fenrir/custom/walk-inspections" ]; then
-           continue
-    fi
 
-    [ -n "$SOFT" ] && rm -f "$file"
-done
-
-[ -n "$SOFT" ] && loki-log info -v "Cleaning global configs.."
+[ -n "$HARD" ] || loki-log info "Cleaning global configs.."
 for file in /etc/fenrir/*; do
     if [ "$file" = "/etc/fenrir/main.json" ] ||
        [ "$file" = "/etc/fenrir/walk.json" ] ||
@@ -64,18 +43,20 @@ for file in /etc/fenrir/*; do
            continue
     fi
 
-    [ -n "$SOFT" ] && rm -f "$file"
+    [ -n "$HARD" ] || rm -f "$file"
 done
 
-[ -n "$SOFT" ] && loki-log info -v "Setting default configs.."
+[ -n "$HARD" ] || loki-log info "Setting default configs.."
 
-TMP=$(fenrir-tmp -v)
-loki-log info -v $TMP
 
-[ -n "$SOFT" ] && jq '.branch = "-"' "/etc/fenrir/main.json" > "$TMP/TMP_FENRIR"
-[ -n "$SOFT" ] && cat "$TMP/TMP_FENRIR" > "/etc/fenrir/main.json"
+# FIXME Some old shit...
+TMP=$(fenrir-tmp)
+loki-log info $TMP
 
-[ -n "$SOFT" ] && jq '.task = "-"' "/etc/fenrir/main.json" > "$TMP/TMP_FENRIR"
-[ -n "$SOFT" ] && cat "$TMP/TMP_FENRIR" > "/etc/fenrir/main.json"
+[ -n "$HARD" ] || jq '.branch = "-"' "/etc/fenrir/main.json" > "$TMP/TMP_FENRIR"
+[ -n "$HARD" ] || cat "$TMP/TMP_FENRIR" > "/etc/fenrir/main.json"
 
-loki-log succ -v "Done"
+[ -n "$HARD" ] || jq '.task = "-"' "/etc/fenrir/main.json" > "$TMP/TMP_FENRIR"
+[ -n "$HARD" ] || cat "$TMP/TMP_FENRIR" > "/etc/fenrir/main.json"
+
+loki-log succ "Done"

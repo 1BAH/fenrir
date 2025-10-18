@@ -1,0 +1,44 @@
+##
+# Usage:
+#   loki-validate-args [-c <argc> | -max <argc> | -min <argc>]
+#
+# Validates that argc($#) satisfies the provided constrains.
+# Shifts the args when it is required (since we use custom interpreter).
+##
+function loki-validate-args {
+    # Since we execute via 'Loki', we have to shift args
+    if [[ $1 == "${BASH_SOURCE[0]}" ]]; then
+        shift
+    fi
+
+    DOCKER_UPDATE="-v"
+
+    if [ "$1" = "-d" ]; then
+        DOCKER_UPDATE=""
+        shift
+    fi
+
+    exp=1
+    real=$#
+
+    if [ "$exp" -ne "$real" ]; then
+        loki-log err "$DOCKER_UPDATE" '(＃°Д°)' Wrong arguments count!
+        loki-log err "$DOCKER_UPDATE" "Expected <$exp> but got <$real>"
+        exit 15
+    fi
+
+    ( # Create a local scope to propagate additional data
+        source "/etc/fenrir/main.hel"
+
+        case "$op" in
+            "+")
+                echo -n $(( points + $(cat "$score_file") )) > "$score_file"
+                ;;
+            "-")
+                echo -n $(( $(cat "$score_file") - points )) > "$score_file"
+                ;;
+            *)
+                loki-log err -v "loki-points: Unsupported operation <$op>"
+        esac
+    )
+}

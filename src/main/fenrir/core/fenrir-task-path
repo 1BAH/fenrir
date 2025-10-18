@@ -1,0 +1,36 @@
+#! /usr/bin/env loki
+
+##
+# Usage:
+#   fenrir-task-path (repo|cfgs)
+#
+# Returns the absolute path to the current task's scripts or configs.
+##
+
+LOCAL_REPO="$FENRIR_HOME/repo"
+LOCAL_CFGS="$FENRIR_HOME/cfgs"
+
+######################################################################
+##                         PARSE ARGUMENTS                          ##
+######################################################################
+
+#include <shift-args>
+
+EXP_ARGC=1
+#include <verify-argc>
+
+curr_task=$(fenrir-read-conf main task)
+
+case "${1}" in
+    "repo")
+        echo "${LOCAL_REPO}/${curr_task}"
+    ;;
+    "cfgs")
+        echo "${LOCAL_CFGS}/${curr_task}"
+    ;;
+    *)
+        loki-log err '(+_+)?' "Parameter '$(loki-wrap "${BOLD}" "${1}")' is invalid"
+        exit 67
+    ;;
+esac
+

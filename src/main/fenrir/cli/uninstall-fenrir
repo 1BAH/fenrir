@@ -1,5 +1,7 @@
 #! /usr/bin/env bash
 
+# TODO REMOVE ALL OLD ARTIFACTS FROM THE PREVIOUS VERSIONS
+
 [ -n "$SUDO_USER" ] && user=$SUDO_USER || user=$USER
 
 update=""
@@ -30,12 +32,13 @@ function succ {
 }
 
 #################################################################
-
+# FIXME get rid of jq
 if [ "$1" = "update" ]; then
     info "Uninstalling previous version of fenrir: $(jq '.version' '/etc/fenrir/main.json')"
     update=true
 fi
 
+# FIXME get rid of jq
 if [ "$1" = "docker" ]; then
     echo "[ INFO  ] Uninstalling previous version of fenrir: $(jq '.version' '/etc/fenrir/main.json')"
     update=true
@@ -117,6 +120,7 @@ succ "Done"
 
 info "Removing basic utils.."
 
+# FIXME moved to shared
 if [ -d "/home/$user/.fenrir/custom" ]; then
     if ! rm -r "/home/$user/.fenrir/custom"; then
         err "Terminating .."

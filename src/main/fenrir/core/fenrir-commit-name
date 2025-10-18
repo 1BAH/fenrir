@@ -1,3 +1,0 @@
-#! /usr/bin/env loki
-
-git show -s --format="%s" "$1"

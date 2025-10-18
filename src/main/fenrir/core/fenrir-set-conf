@@ -1,0 +1,36 @@
+#! /usr/bin/env loki
+
+##
+# Usage:
+#   fenrir-set-conf (main|walk|forbidden) <PARAMETER> <VALUE>
+#
+# Set the value of the provided parameter in one of internal configs.
+##
+
+#include <shift-args>
+
+CONF_FILE="/etc/fenrir"
+
+EXP_ARGC=3
+#include <verify-argc>
+
+case "$1" in
+    main)
+        CONF_FILE="${CONF_FILE}/main.hel"
+    ;;
+
+    walk)
+        CONF_FILE="${CONF_FILE}/walk.hel"
+    ;;
+
+    forbidden)
+        CONF_FILE="${CONF_FILE}/forbidden-files.hel"
+    ;;
+
+    *)
+        loki-log err "Unknown conf file: '$1'"
+        exit 1
+    ;;
+esac
+
+sed -i "s|^${2}=.*$|${2}=\"${3}\"|" "${CONF_FILE}"

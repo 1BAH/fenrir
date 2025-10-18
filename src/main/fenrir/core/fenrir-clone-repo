@@ -1,34 +1,30 @@
 #! /usr/bin/env loki
 
 repo=$1
-verbosity=$2
 destination="$HOME/solution"
-out="/var/fenrir/out"
-err="/var/fenrir/err"
 
 ##############
 
-loki-log info "$verbosity" "Cloning repo $repo"
+loki-log info "Cloning repo $repo"
 
 if [ -d "$destination" ]; then
-    loki-log warn "$verbosity" "Remove previously cloned repo"
+    loki-log warn "Remove previously cloned repo"
     rm -fr "$destination"
 fi
 
-if git clone "$repo" "$destination" > "$out" 2> "$err"
+if lokiw git clone "$repo" "$destination"
 then
-    loki-log succ "$verbosity" "Cloned repo to directory 'solution'"
+    loki-log succ "Cloned repo to directory 'solution'"
 else
-    loki-log err "$verbosity" "Failed"
-    loki-log warn "$verbosity" "<stdout>" "$(cat "$out")"
-    loki-log err "$verbosity" "<stderr>" "$(cat "$err")"
+    loki-log fail "Cannot clone the repository"
     exit 1
 fi
 
 pushd "$destination" &> /dev/null
 git switch task0 &> /dev/null
-git switch "$(jq -r '.branch' "/etc/fenrir/main.json")" &> /dev/null
+git switch "$(fenrir-read-conf main branch)" &> /dev/null
 
+# FIXME get rid of jq
 if [ "$(jq -r '.task' "/etc/fenrir/main.json")" = "git/ess" ]; then
     for i in $(seq 1 17); do
         git switch $i &> /dev/null

@@ -1,14 +1,22 @@
 #! /usr/bin/env loki
 
-verbosity=$1
-branch=$2
+##
+# Usage:
+#   fenrir-branch-exists <branch name>
+#
+# Checks whether the provided local branch exists
+##
 
+EXP_ARGC=1
+#include <verify-argc>
 
-loki-log info "$verbosity" "Checking whether branch <$branch> exists.."
+branch=$1
+
+loki-log info "Checking whether branch <$branch> exists.."
 
 if git branch | grep -q "$branch"; then
-    loki-log succ "$verbosity" "Branch exists"
+    loki-log succ "Branch exists"
 else
-    loki-log err "$verbosity" "Branch does not exist"
+    loki-log err "Branch does not exist"
     exit 1
 fi

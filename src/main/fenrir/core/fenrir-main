@@ -1,12 +1,20 @@
 #! /usr/bin/env loki
 
-#UNCOMMENT# cat ~/key > ~/.ssh/id_rsa
+##
+# Usage:
+#   fenrir-main [nl] [nz]
+#
+# Executes task validation pipeline.
+#
+# Options:
+#    nl     See fenrir-run '-nl' option
+#    nz     See fenrir-run '-nz' option
+##
 
-# TODO Simplify??
-# Since we execute via 'Loki', we have to shift args
-if [[ $1 == "${BASH_SOURCE[0]}" ]]; then
-    shift
-fi
+#include <shift-args>
+
+# TODO ???
+#UNCOMMENT# cat ~/key > ~/.ssh/id_rsa
 
 if [ "$1" = "nl" ]; then
     NL=1
@@ -18,45 +26,36 @@ if [ "$1" = "nz" ]; then
     shift
 fi
 
-v=${1} # verbosity (replace with "" to mute hints and info logs)
-config_file="/etc/fenrir/main.json"
-pipeline="$HOME/.fenrir/custom/pipeline.json"
-out="/var/fenrir/out"
-err="/var/fenrir/err"
-pre=$(jq -r '.pre[]' "$pipeline")
-main=$(jq -r '.main[]' "$pipeline")
-branch=$(jq -r '.branch' "$config_file")
-destination=$(jq -r '.root' "$config_file")
-blocking=$(jq -r '.blocking' "$config_file")
+pre=$(fenrir-read-conf -a pipeline pre)
+main=$(fenrir-read-conf -a pipeline main)
+branch=$(fenrir-read-conf main branch)
+destination=$(fenrir-read-conf main root)
+blocking=$(fenrir-read-conf main blocking)
 
 ###########################################
 
-function finish {
+function finalise {
     # Print score
     echo "Final score: $(cat "$score_file")"
     exit 0
 }
 
 function switch_solution {
-    if [ "$branch" = "--" ]; then
-        if cd "$destination" > "$out" 2> "$err"; then
-            loki-log succ "$v" "Inside solution's directory"
+    if [ "$branch" = "--" ]; then # Special alias for multi-branch tasks
+        if lokiw cd "$destination"; then
+            loki-log succ "Inside solution's directory"
             return
         else
-            loki-log err "$v" "Failed"
-            loki-log warn "$v" "<stdout>" "$(cat "$out")"
-            loki-log err "$v" "<stderr>" "$(cat "$err")"
+            loki-log fail "Failed to change directory"
             return 3
         fi
     fi
 
-    if fenrir-change-branch "$v" "$branch"; then
-        if cd "$destination/$branch" > "$out" 2> "$err"; then
-            loki-log succ "$v" "Inside solution's directory"
+    if fenrir-change-branch "$branch"; then
+        if lokiw cd "$destination/$branch"; then
+            loki-log succ "Inside solution's directory"
         else
-            loki-log err "$v" "Failed"
-            loki-log warn "$v" "<stdout>" "$(cat "$out")"
-            loki-log err "$v" "<stderr>" "$(cat "$err")"
+            loki-log fail "Cannot change directory"
             return 3
         fi
     else
@@ -66,39 +65,51 @@ function switch_solution {
 
 
 # initialise score file
-score_file=$(jq -r '.score' "$config_file")
+score_file=$(fenrir-read-conf main score)
 echo -n 0 > "$score_file"
 
 for script in $pre; do
-    loki-log info "$v" "--------------------------($script)--------------------------"
-    if [ -n "$NZ" ] && [ "$script" = "task-zero" ]; then
-        loki-log warn "$v" "Running with '--no-zero' option"
-        continue
-    fi
+    loki-log info "--------------------------($script)--------------------------"
+    if [ "$script" = "task-zero" ]; then
+        if [ -n "$NZ" ]; then
+            loki-log warn "Running with '--no-zero' option"
+            continue
+        fi
 
-    if ! "$HOME/.fenrir/custom/$script" "$v"; then
-        finish
+        if ! "${FENRIR_HOME}/shared/task-zero"; then
+            finalise
+        fi
+    else
+        if ! "$(fenrir-task-path repo)/$script"; then
+            finalise
+        fi
     fi
 done
 
-loki-log info "$v" "--------------------------(switch-solution)--------------------------"
+loki-log info "--------------------------(switch-solution)--------------------------"
 
 if ! switch_solution; then
-    finish
+    finalise
 fi
 
 for script in $main; do
-    loki-log info "$v" "--------------------------($script)--------------------------"
-    if [ -n "$NL" ] && [ "$script" = "walk-inspections" ]; then
-        loki-log warn "$v" "Running with '--no-lint' option"
-        continue
-    fi
+    loki-log info "--------------------------($script)--------------------------"
+    if [ "$script" = "walk-inspections" ]; then
+        if [ -n "$NL" ]; then
+            loki-log warn "Running with '--no-lint' option"
+            continue
+        fi
 
-    if ! "$HOME/.fenrir/custom/$script" "$v" && [ "$blocking" -ne 0 ]; then
-        finish
+        if ! "${FENRIR_HOME}/shared/walk-inspections"; then
+            finalise
+        fi
+    else
+        if ! "$(fenrir-task-path repo)/$script" && [ "$blocking" -ne 0 ]; then
+            finalise
+        fi
     fi
 done
 
-loki-log info "$v" "-----------------------------------------------------------"
+loki-log info "-----------------------------------------------------------"
 
-finish
+finalise

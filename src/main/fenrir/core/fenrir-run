@@ -1,38 +1,42 @@
 #! /usr/bin/env loki
 
-out="/var/fenrir/out"
-err="/var/fenrir/err"
-
+##
+# Usage:
+#   fenrir-run [-i] [-nl|--no-lint] [-nz|--no-zero] <SOLUTION DIRECTORY>
+#
+# Test the provided solution. The test must be set beforehand with 'fenrir-task' command.
+# This command is an interface. For the detailed execution pipeline see 'fenrir-main'.
+#
+# Options:
+#    -i                 Run test inside the provided directory without cloning it
+#                       WARNING! In case of test's impurity it might produce some side-effects
+#   -nz, --no-zero      Skip task0 validation
+#   -nl, --no-lint      Skip linting stage (walk-inspections)
+##
 
 function local_clone {
     from=$1
     to=$(fenrir-tmp -d)
 
-    loki-log info "$SILENT" "Cloning repo to '$to'.."
+    loki-log info "Cloning repo to '$to'.."
 
-    if ! git clone "$from" "$to" > "$out" 2> "$err"; then
-        loki-log err  "$SILENT" "Failed to clone locally"
-        loki-log warn "$SILENT" "<stdout>" "$(cat "$out")"
-        loki-log err  "$SILENT" "<stderr>" "$(cat "$err")"
+    if ! lokiw git clone "$from" "$to"; then
+        loki-log fail '(シ. .)シ' "Failed to clone locally"
         exit 56
     fi
 
-    jq ".root = \"$to\"" "/etc/fenrir/main.json" > /tmp/TMP_FENRIR
-    cat /tmp/TMP_FENRIR > "/etc/fenrir/main.json"
+    fenrir-set-conf main "root" "$to"
 }
 
 ######################################################################
 ##                         VERIFY ARGUMENTS                         ##
 ######################################################################
 
-# Since we execute via 'Loki', we have to shift args
-if [[ $1 == "${BASH_SOURCE[0]}" ]]; then
-    shift
-fi
+#include <shift-args>
 
-SILENT="-v"
 NO_LINT=""
 NO_ZERO=""
+INLINE=""
 
 hit=0
 path=""
@@ -47,14 +51,14 @@ while [ "$#" -ne 0 ]; do
             NO_ZERO=YES
         ;;
 
-        "-s")
-            SILENT=""
+        "-i")
+            INLINE=YES
         ;;
 
         *)
             if [ $hit -ge 1 ]; then
-                loki-log err "$SILENT" '(＃°Д°)' Wrong arguments count!
-                loki-log err "$SILENT" "Expected <1> but got <$(( $# + hit ))>"
+                loki-log err '(＃°Д°)' Wrong arguments count!
+                loki-log err "Expected <1> but got <$(( $# + hit ))>"
                 exit 15
             fi
 
@@ -68,8 +72,8 @@ while [ "$#" -ne 0 ]; do
 done
 
 if [ "$hit" -ne 1 ]; then
-    loki-log err "$SILENT" '(＃°Д°)' Wrong arguments count!
-    loki-log err "$SILENT" "Expected <1> but got <$hit>"
+    loki-log err '(＃°Д°)' Wrong arguments count!
+    loki-log err "Expected <1> but got <$hit>"
     exit 15
 fi
 
@@ -79,23 +83,32 @@ fi
 
 src=$(realpath "$path")
 
-if ! [ -d "$src/.git" ]; then
-    loki-log err "$SILENT" '(╬▔皿▔)╯' "The provided file is not a project root"
+if [ "$(fenrir-read-conf main branch)" = "-" ]; then
+    loki-log err 'ᕙ( •̀ ᗜ •́ )ᕗ' "The task was not set!"
     exit 89
 fi
 
-local_clone "$src"
+if ! [ -d "$src/.git" ]; then
+    loki-log err '(╬▔皿▔)╯' "The provided file is not a project root"
+    exit 89
+fi
+
+if [ -n "$INLINE" ]; then
+    fenrir-set-conf main "root" "$src"
+else
+    local_clone "$src"
+fi
 
 if [ -n "$NO_LINT" ]; then
     if [ -n "$NO_ZERO" ]; then
-        fenrir-main nl nz "$SILENT"
+        fenrir-main nl nz
     else
-        fenrir-main nl "$SILENT"
+        fenrir-main nl
     fi
 else
     if [ -n "$NO_ZERO" ]; then
-        fenrir-main nz "$SILENT"
+        fenrir-main nz
     else
-        fenrir-main "$SILENT"
+        fenrir-main
     fi
 fi

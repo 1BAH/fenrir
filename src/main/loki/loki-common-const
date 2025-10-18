@@ -1,0 +1,72 @@
+# >-loki-common-const-----------------------------------------------------------------> #
+
+############################################
+#>            Internal flags              <#
+############################################
+
+JOTUNHEIM_DEPTH=0
+LOKI_VERBOSE=${LOKI_VERBOSE-"-v"} # preserve emptiness
+LOKI_PROGRESS=0
+
+############################################
+#>               Work dirs                <#
+############################################
+
+FENRIR_TMP_DIR=${FENRIR_TMP_DIR:-"/tmp/fenrir/tmp"}
+FENRIR_HOME=${FENRIR_HOME:-"$HOME/.fenrir"}
+TMP_IDX_FILE="$FENRIR_TMP_DIR/idx"
+
+if [ "$(id -u)" -ne 0 ]; then # Non sudo execution
+    # Ensure FENRIR_TMP_DIR exists
+    if ! [ -d "$FENRIR_TMP_DIR" ]; then
+        mkdir -p "$FENRIR_TMP_DIR"
+    fi
+
+    # Ensure FENRIR_HOME exists
+    if ! [ -d "$FENRIR_HOME" ]; then
+        mkdir -p "$FENRIR_HOME"
+    fi
+
+    # Ensure TMP_IDX_FILE exists
+    [ -f "${TMP_IDX_FILE}" ] || echo 0 > "$TMP_IDX_FILE"
+fi
+
+############################################
+#>               Log files                <#
+############################################
+
+OUT_FILE="$FENRIR_TMP_DIR/out"
+ERR_FILE="$FENRIR_TMP_DIR/err"
+CMD_FILE="$FENRIR_TMP_DIR/cmd"
+
+############################################
+#>                Colours                 <#
+############################################
+
+BOLD="\033[1m"
+
+DARK_GREEN="${BOLD}\033[38;5;28m"
+MAGENTA="${BOLD}\033[38;5;197m"
+PEACH="${BOLD}\033[38;5;209m"
+PURPLE="${BOLD}\033[38;5;129m"
+EMERALD="${BOLD}\033[38;5;30m"
+GRAY="${BOLD}\033[38;5;249m"
+SKY="${BOLD}\033[38;5;33m"
+GREEN="${BOLD}\033[38;5;112m"
+BLUE="${BOLD}\033[38;5;4m"
+YELLOW="${BOLD}\033[38;5;214m"
+RED="${BOLD}\033[38;5;196m"
+
+ENDC="\033[0m"
+
+
+IFS= read -r -d '' FENRIR_LOGO << 'LOGO'
+  _____               _
+ |  ___|__ _ __  _ __(_)_ __
+ | |_ / _ \ '_ \| '__| | '__|
+ |  _|  __/ | | | |  | | |
+ |_|  \___|_| |_|_|  |_|_|
+LOGO
+
+# <-----------------------------------------------------------------loki-common-const-< #
+

@@ -1,0 +1,15 @@
+
+dirs=(
+    "forbidden-dirs-inspector"
+)
+
+files=(
+    "new-line-inspector"
+    "bash-inspector"
+)
+
+skip=(
+    "."
+    ".."
+    ".git"
+)

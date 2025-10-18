@@ -1,0 +1,34 @@
+#! /usr/bin/env bash
+
+LOKI_COMMON_FUNS="LOKI_COMMON_FUNS"
+
+# Build 'common-funs'
+first=1
+for part in funs/*; do
+    file=$(basename "$part")
+    pattern="#include <$file>"
+
+    if (( first == 1 )); then
+        sed -e "/$pattern/r $part" -e "/$pattern/d" loki-common-funs > $LOKI_COMMON_FUNS
+        first=0
+    else
+        sed -i -e "/$pattern/r $part" -e "/$pattern/d" $LOKI_COMMON_FUNS
+    fi
+done
+
+# Assemble loki
+first=1
+for part in loki-common-*; do
+    pattern="#include <$part>"
+
+    if [[ $part == "loki-common-funs" ]]; then
+        part=$LOKI_COMMON_FUNS
+    fi
+
+    if (( first == 1 )); then
+        sed -e "/$pattern/r $part" -e "/$pattern/d" loki > LOKI
+        first=0
+    else
+        sed -i -e "/$pattern/r $part" -e "/$pattern/d" LOKI
+    fi
+done

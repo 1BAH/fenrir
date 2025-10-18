@@ -1,24 +1,31 @@
 #! /usr/bin/env loki
 
-verbosity=$1
-branch=$2
-destination=$(fenrir-getroot)
-out="/var/fenrir/out"
-err="/var/fenrir/err"
+##
+# Usage:
+#   fenrir-change-branch <branch name>
+#
+# Checks out to the provided branch
+##
+
+EXP_ARGC=1
+#include <verify-argc>
+
+branch=$1
+destination=$(fenrir-read-conf main root)
 
 ##############
 
-pushd "$destination" &> /dev/null
+pushd "$destination" &> /dev/null || {
+    loki-log err "Cannot switch to '$destination'"
+    exit 7
+}
 
-loki-log info "$verbosity" "Switching branch to '$branch'"
+loki-log info "Switching branch to '$branch'"
 
-if git switch "$branch" > "$out" 2> "$err"
-then
-    loki-log succ "$verbosity" "Switched to '$branch'"
+if lokiw git switch "$branch"; then
+    loki-log succ "Switched to '$branch'"
 else
-    loki-log err "$verbosity" "Failed"
-    loki-log warn "$verbosity" "<stdout>" "$(cat "$out")"
-    loki-log err "$verbosity" "<stderr>" "$(cat "$err")"
+    loki-log fail "Cannot check out to '$branch'"
     popd &> /dev/null
     exit 1
 fi

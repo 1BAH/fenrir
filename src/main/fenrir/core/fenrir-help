@@ -1,38 +1,29 @@
-# Fenrir v1.0.0
+#! /usr/bin/env loki
 
-> Framework for testing
+######################################################################
+##                         VERIFY ARGUMENTS                         ##
+######################################################################
 
-## Install
+#include <shift-args>
 
-### System requirements
+# TODO UPDATE CMDS
 
-* Unix-like OS
-* `jq`
-* `wget`
-* `shellcheck`
+EXP_ARGC=0
+#include <verify-argc>
 
-### Installation
+######################################################################
+##                           MAIN PROGRAM                           ##
+######################################################################
 
-1. Clone this repository
-2. Go to `src/main/fenrir/cli`
-3. Run `./install-fenrir`
-
-## Uninstall
-
-* Clone this repository
-* Go to `src/main/fenrir/cli`
-* Run `./uninstall-fenrir`
-
-## Usage
-
-```
+# FIXME -s moved to -f with the semantic's change
+cat <<____HEREDOC
 Possible options:
 fenrir help
 
-fenrir gc
+fenrir gc [-s]
 fenrir remote <URL>
 fenrir task [-s] <TASK ID>
-fenrir run [-s] <SOLUTION DIR>
+fenrir run [-s] [--no-lint | -nl] [--no-zero | -nz] <SOLUTION DIR>
 
 fenrir [-v|--version|version]
 fenrir version
@@ -51,12 +42,15 @@ fenrir task [-s] [-f|--force] <TASK ID>:
     '-f' or '--force': Install anyway
     '-s': Mute colours
 
-fenrir run [-s] <SOLUTION DIR>:
+fenrir run [-s] [--no-lint|-nl] [--no-zero|-nz] <SOLUTION DIR>:
     Run local tests on the specified local repository
     '-s': Mute colours
+    '--no-lint' or '-nl': Skip linters
+    '--no-zero' or '-nz': Skip task0 tests
 
-fenrir gc:
+fenrir gc [-s]:
     Clean local repository. Removes all installed tasks and dependencies, fenrir-tmp.
+    '-s': Soft mode. Removes only tmp & tag directories
 
 fenrir versions:
     Get all available versions
@@ -74,14 +68,9 @@ fenrir version:
 
 fenrir [-v|--version|version]:
     Print current version
-```
+------------------------------------------------------------------
+fenrir $(fenrir-read-conf main version), 2025
+@_1BAH_
+____HEREDOC
 
-## Updates
 
-All updates are published [here](https://t.me/fenrir_updates)
-
----
-
-Authors:
-
-* Iwan Kalinin

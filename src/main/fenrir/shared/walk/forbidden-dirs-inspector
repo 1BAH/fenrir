@@ -1,0 +1,27 @@
+#! /usr/bin/env loki
+
+loki-log info "FDI: Inspecting '$1'"
+
+name=$(basename "$1")
+
+declare -A dirs
+for item in $(fenrir-read-conf -a forbidden directories); do
+    dirs+=( ["$item"]=1 )
+done
+
+if [[ ${skip_list[$name]+_} ]]; then
+    loki-log err "FDI: Found forbidden directory: '$1'"
+    exit 4
+fi
+
+pushd "$1" &> /dev/null
+
+for pattern in $(fenrir-read-conf -a forbidden filePatterns); do
+    if lokiw ls "$pattern"; then
+        loki-log fail "FDI: Found forbidden file pattern: '$pattern'"
+        popd &> /dev/null
+        exit 3
+    fi
+done
+
+popd &> /dev/null

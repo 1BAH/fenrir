@@ -1,0 +1,29 @@
+##
+# Usage:
+#   loki-points [+ | -]<number>
+#
+# Add the provided number of points to the global counter.
+# The location of the global counter is defined in '/etc/fenrir/main.hel'.
+##
+function loki-points {
+    local op=${1:0:1}
+    local points=${1:1}
+
+    ( # Create a local scope to propagate additional data
+        source "/etc/fenrir/main.hel"
+
+        case "$op" in
+            "+")
+                echo -n $(( points + $(cat "$score") )) > "$score" # 'score' comes from main.hel
+                loki-log succ '(੭>ᴗ<)੭ ' "PASSED"
+                ;;
+            "-")
+                echo -n $(( $(cat "$score") - points )) > "$score"
+                loki-log fault '𐐘💥╾━╤デ╦︻ඞා ' "FAILED"
+                ;;
+            *)
+                loki-log err "loki-points: Unsupported operation <$op>"
+                exit 56
+        esac
+    )
+}

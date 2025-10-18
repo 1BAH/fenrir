@@ -1,0 +1,13 @@
+
+directories=(
+    ".idea"
+    ".DS_Store"
+    ".vscode"
+    "target"
+    "build"
+)
+
+file_patterns=(
+    ".DS_Store"
+    "*.iml"
+)

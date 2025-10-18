@@ -1,0 +1,16 @@
+# >>= START =<<
+
+##
+# Usage:
+#   #include <verify-non-sudo>
+#
+# Verifies that current process is not executed in privileged mode.
+# Otherwise interrupts its execution with code 123.
+##
+
+if [ "$(id -u)" -eq 0 ]; then
+    loki-log err 'ᕙ( •̀ ᗜ •́ )ᕗ' "The script must not be run under sudo!"
+    exit 123
+fi
+
+# >>= END =<<

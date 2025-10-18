@@ -8,10 +8,7 @@ err="/var/fenrir/err"
 ##                         VERIFY ARGUMENTS                         ##
 ######################################################################
 
-# Since we execute via 'Loki', we have to shift args
-if [[ $1 == "${BASH_SOURCE[0]}" ]]; then
-    shift
-fi
+#include <shift-args>
 
 DOCKER_UPDATE="-v"
 
@@ -39,6 +36,8 @@ function safe_tag_clone {
     if [ -d "$HOME/.fenrir/tag" ]; then
         rm -rf "$HOME/.fenrir/tag"
     fi
+
+    # FIXME $HOME/.fenrir/tag is deprecated move to tmp!
 
     if ! git clone --depth 1 --branch "$tag" "$url" "$HOME/.fenrir/tag" > "$out" 2> "$err"; then
         loki-log err  "$DOCKER_UPDATE" 'ヽ（≧□≦）ノ' "Failed to clone repo"

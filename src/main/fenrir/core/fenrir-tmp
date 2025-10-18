@@ -1,44 +1,57 @@
 #! /usr/bin/env loki
 
-FENRIR_LOCAL_TMP="$HOME/.fenrir/tmp"
+##
+# Usage:
+#   fenrir-tmp [-d]
+#
+# Creates a new temporary file in 'FENRIR_TMP_DIR'.
+#
+# Options:
+#    none   Creates a regular file
+#    -d     Creates a directory
+#
+# Special configs:
+#    FNR_TMP_MAX_CAP    The maximum size of fenrir's tmp directory. It works according to the LRU algorithm.
+#                       When its size reaches the limits, the oldest file is removed.
+#                       The default value is 21
+#
+#    FNR_TMP_MAX_NUM    The maximum index in fenrir's tmp directory. Each invocation increments the inner counter.
+#                       When the counter reaches this constant, an alert will be shown.
+#                       The default value is 1000
+##
+
+FNR_TMP_MAX_CAP=${FNR_TMP_MAX_CAP:-21}
+FNR_TMP_MAX_NUM=${FNR_TMP_MAX_NUM:-1000}
 
 ######################################################################
 ##                         VERIFY ARGUMENTS                         ##
 ######################################################################
 
-# Since we execute via 'Loki', we have to shift args
-if [[ $1 == "${BASH_SOURCE[0]}" ]]; then
-    shift
-fi
+#include <shift-args>
 
-exp=1
-real=$#
-
-if [ "$real" -gt "$exp" ]; then
-    loki-log err -v '(＃°Д°)' Wrong arguments count!
-    loki-log err -v "Expected no more than <$exp> but got <$real>"
-    exit 15
-fi
+MAX_ARGC=1
+#include <verify-argc>
 
 ######################################################################
 ##                            FUNCTIONS                             ##
 ######################################################################
 
 function new_name {
-    # shellcheck disable=SC2012
-    last_tmp=$(ls "$FENRIR_LOCAL_TMP" | sort -nr | head -n 1)
+    if (( "$last_idx" > FNR_TMP_MAX_NUM )); then
+        loki-log warn "IT'S STRONGLY RECOMMENDED TO RUN 'fenrir gc'!" > /dev/stderr
+    fi
 
-    echo $(( last_tmp + 1 ))
+    echo $(( last_idx + 1 )) | tee "${TMP_IDX_FILE}"
 }
 
 function tmp_file {
-    name="$FENRIR_LOCAL_TMP/$(new_name)"
+    name="$FENRIR_TMP_DIR/$(new_name)"
     touch "$name"
     echo "$name"
 }
 
 function tmp_dir {
-    name="$FENRIR_LOCAL_TMP/$(new_name)"
+    name="$FENRIR_TMP_DIR/$(new_name)"
     mkdir "$name"
     echo "$name"
 }
@@ -47,8 +60,12 @@ function tmp_dir {
 ##                           MAIN PROGRAM                           ##
 ######################################################################
 
-if ! [ -d "$FENRIR_LOCAL_TMP" ]; then
-    mkdir -p "$FENRIR_LOCAL_TMP"
+last_idx=$(cat "$TMP_IDX_FILE")
+
+# shellcheck disable=SC2012
+if (( "$last_idx" >= "$FNR_TMP_MAX_CAP" )); then
+    oldest="${FENRIR_TMP_DIR}/$(( last_idx - FNR_TMP_MAX_CAP ))"
+    rm -fr "$oldest"
 fi
 
 if [ "$#" -eq 0 ]; then
@@ -60,12 +77,8 @@ case "$1" in
     "-d")
         tmp_dir
     ;;
-
-    "-f")
-        tmp_file
-    ;;
-
-    "-v")
-        echo "$FENRIR_LOCAL_TMP"
+    *)
+        loki-log err "fenrir-tmp: Unknown option '$1'"
+        exit 9
     ;;
 esac

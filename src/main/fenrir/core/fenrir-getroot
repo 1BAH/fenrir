@@ -1,3 +1,0 @@
-#! /usr/bin/env loki
-
-jq -r '.root' '/etc/fenrir/main.json'
