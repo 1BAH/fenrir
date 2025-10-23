@@ -1,0 +1,73 @@
+##
+# Usage:
+#   loki-get-out
+#
+# Prints the content of '$OUT_FILE'.
+##
+function loki-get-out {
+trap '(( JOTUNHEIM_DEPTH -= 2 ))' RETURN
+
+    cat "$OUT_FILE"
+}
+
+
+##
+# Usage:
+#   loki-get-err
+#
+# Prints the content of '$ERR_FILE'.
+##
+function loki-get-err {
+trap '(( JOTUNHEIM_DEPTH -= 2 ))' RETURN
+
+    cat "$ERR_FILE"
+}
+
+LOKI_TRAP_UNSET='trap - RETURN && (( JOTUNHEIM_DEPTH -= 2 ))'
+
+##
+# Usage:
+#   lokiw [CMD]
+#
+# Stores the command, its stdout and stderr. Preserves the return code.
+##
+function lokiw {
+trap "$LOKI_TRAP_UNSET" RETURN
+
+    echo "$@" >> "$CMD_FILE"
+    "$@" > "$OUT_FILE" 2> "$ERR_FILE"
+    return $?
+}
+
+##
+# Usage:
+#   lokiw-pipe [CMD]
+#
+# Stores the command, its stdout and stderr. Preserves the return code.
+##
+function lokiw-pipe {
+trap "$LOKI_TRAP_UNSET" RETURN
+
+    echo "$@" >> "$CMD_FILE"
+    eval "$*" > "$OUT_FILE" 2> "$ERR_FILE"
+    return $?
+}
+
+##
+# Usage:
+#   lokiw-exitable [CMD]
+#
+# Stores the command, its stdout and stderr. Preserves the return code.
+##
+function lokiw-exitable {
+trap "$LOKI_TRAP_UNSET" RETURN
+
+    echo "$@" >> "$CMD_FILE"
+    eval "$*" > "$OUT_FILE" 2> "$ERR_FILE"
+    res=$?
+    if [ $res -ne 0 ]; then
+        loki-log fail "Failed to execute the command: '$*'"
+        exit $res
+    fi
+}
+

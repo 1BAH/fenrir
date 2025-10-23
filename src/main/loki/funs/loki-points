@@ -6,6 +6,8 @@
 # The location of the global counter is defined in '/etc/fenrir/main.hel'.
 ##
 function loki-points {
+trap '(( JOTUNHEIM_DEPTH -= 2 ))' RETURN
+
     local op=${1:0:1}
     local points=${1:1}
 

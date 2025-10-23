@@ -12,14 +12,8 @@ shopt -s extdebug
 if (( $# != 0 )); then
     function save_cmd {
         if [[ $BASH_COMMAND =~ ^source.*$ ]]; then
-#            echo >
             return 0
         fi
-
-#        if [[ $BASH_COMMAND =~ ^fenrir.+$ ]]; then
-#            echo "<$JOTUNHEIM_DEPTH> $BASH_COMMAND"
-#            (( JOTUNHEIM_DEPTH++ ))
-#        fi
 
         if [[ $BASH_COMMAND =~ ^loki.+$ ]]; then
             (( JOTUNHEIM_DEPTH++ ))
@@ -37,7 +31,6 @@ if (( $# != 0 )); then
     other=("${other[@]:1}")
 
     if ! [[ $(basename "$file") =~ ^fenrir.*$ ]]; then
-#        echo "IN <$file>"
         echo -n > "$CMD_FILE"
         trap 'save_cmd' DEBUG
     fi
