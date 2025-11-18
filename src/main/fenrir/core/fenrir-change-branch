@@ -4,7 +4,7 @@
 # Usage:
 #   fenrir-change-branch <branch name>
 #
-# Checks out to the provided branch
+# Checks out to the provided branch in the current solution directory
 ##
 
 EXP_ARGC=1
@@ -15,8 +15,8 @@ destination=$(fenrir-read-conf main root)
 
 ##############
 
-pushd "$destination" &> /dev/null || {
-    loki-log err "Cannot switch to '$destination'"
+lokiw pushd "$destination" || {
+    loki-log fail "Cannot switch to '$destination'"
     exit 7
 }
 
@@ -26,8 +26,15 @@ if lokiw git switch "$branch"; then
     loki-log succ "Switched to '$branch'"
 else
     loki-log fail "Cannot check out to '$branch'"
-    popd &> /dev/null
+    lokiw popd || {
+        loki-log fail "Failed to pop directory"
+        exit 7
+    }
+
     exit 1
 fi
 
-popd &> /dev/null
+lokiw popd || {
+    loki-log fail "Failed to pop directory"
+    exit 7
+}
