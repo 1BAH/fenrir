@@ -1,11 +1,21 @@
 #! /usr/bin/env loki
 
+##
+# Usage:
+#   fenrir-help
+#
+# Show the current context of fenrir:
+#   - Tasks' remote repo
+#   - The task to be tested
+#   - Running mode of the task (is blocking)
+#   -
+##
+
 ######################################################################
 ##                         VERIFY ARGUMENTS                         ##
 ######################################################################
 
 #include <shift-args>
-
 
 EXP_ARGC=0
 #include <verify-argc>
