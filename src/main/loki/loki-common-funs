@@ -40,14 +40,18 @@ trap '(( JOTUNHEIM_DEPTH -= 2 ))' RETURN
     (( LOKI_PROGRESS++ ))
 
     loki-wrap -n "${EMERALD}" "PROGRESS $(loki-dup ">>" "$LOKI_PROGRESS")"
-    echo " $*"
+    echo " ${LOKI_LOG_PREFIX}$*"
 }
 
 function loki-gorp {
 trap '(( JOTUNHEIM_DEPTH -= 2 ))' RETURN
 
     loki-wrap -n "${PURPLE}" "PROGRESS $(loki-dup "<<" "$LOKI_PROGRESS")"
-    echo " $*"
+    if [ $# -eq 0 ]; then
+        echo " DONE"
+    else
+        echo " $*"
+    fi
 
     (( LOKI_PROGRESS-- ))
 }
@@ -89,7 +93,7 @@ trap '(( JOTUNHEIM_DEPTH -= 2 ))' RETURN
 
     if [[ "$cmd" != "fail" ]]; then
         loki-wrap -n "${colours[$cmd]}" "${descr[$cmd]}"
-        echo "$*"
+        echo "${LOKI_LOG_PREFIX}$*"
         return
     fi
 
@@ -109,6 +113,11 @@ trap '(( JOTUNHEIM_DEPTH -= 2 ))' RETURN
 function loki-strace-clean {
 trap '(( JOTUNHEIM_DEPTH -= 2 ))' RETURN
     echo -n > "$CMD_FILE"
+}
+
+function loki-set-log-prefix {
+trap '(( JOTUNHEIM_DEPTH -= 2 ))' RETURN
+    LOKI_LOG_PREFIX="$1"
 }
 
 ######################################################################

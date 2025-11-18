@@ -39,6 +39,8 @@ OUT_FILE="$FENRIR_TMP_DIR/out"
 ERR_FILE="$FENRIR_TMP_DIR/err"
 CMD_FILE="$FENRIR_TMP_DIR/cmd"
 
+LOKI_LOG_PREFIX=${LOKI_LOG_PREFIX:-""}
+
 ############################################
 #>                Colours                 <#
 ############################################
