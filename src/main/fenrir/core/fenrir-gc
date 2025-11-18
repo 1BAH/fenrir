@@ -1,17 +1,32 @@
 #! /usr/bin/env loki
 
+##
+# Usage:
+#   fenrir-gc [-f]
+#
+# Removes unused files. Has two modes: SOFT and HARD. The default is 'SOFT'
+# Soft:
+#   - temporary files
+# Hard:
+#   - temporary files
+#   - local repo
+#   - local configs
+#
+# Options:
+#    -f     Run in 'HARD' mode.
+##
+
 ######################################################################
 ##                         VERIFY ARGUMENTS                         ##
 ######################################################################
 
 #include <shift-args>
 
-HARD="YES"
-
+SOFT="YES"
 
 if [ "$1" = '-f' ]; then
     loki-log warn "Running in 'forced' mode"
-    HARD=""
+    SOFT=""
     shift
 fi
 
@@ -22,41 +37,13 @@ EXP_ARGC=0
 ##                           MAIN PROGRAM                           ##
 ######################################################################
 
-
 loki-log info "Removing tmp.."
 rm -fr "${FENRIR_TMP_DIR}"
 
-# TODO -z => -n
+[ -n "$SOFT" ] || loki-log info "Removing local repo.."
+[ -n "$SOFT" ] || rm -fr "${FENRIR_HOME}/repo"
 
-[ -n "$HARD" ] || loki-log info "Removing local repo.."
-[ -n "$HARD" ] || rm -fr "${FENRIR_HOME}/repo"
-
-[ -n "$HARD" ] || loki-log info "Removing local configs.."
-[ -n "$HARD" ] || rm -fr "${FENRIR_HOME}/cfgs"
-
-
-[ -n "$HARD" ] || loki-log info "Cleaning global configs.."
-for file in /etc/fenrir/*; do
-    if [ "$file" = "/etc/fenrir/main.json" ] ||
-       [ "$file" = "/etc/fenrir/walk.json" ] ||
-       [ "$file" = "/etc/fenrir/forbidden-files.json" ]; then
-           continue
-    fi
-
-    [ -n "$HARD" ] || rm -f "$file"
-done
-
-[ -n "$HARD" ] || loki-log info "Setting default configs.."
-
-
-# FIXME Some old shit...
-TMP=$(fenrir-tmp)
-loki-log info $TMP
-
-[ -n "$HARD" ] || jq '.branch = "-"' "/etc/fenrir/main.json" > "$TMP/TMP_FENRIR"
-[ -n "$HARD" ] || cat "$TMP/TMP_FENRIR" > "/etc/fenrir/main.json"
-
-[ -n "$HARD" ] || jq '.task = "-"' "/etc/fenrir/main.json" > "$TMP/TMP_FENRIR"
-[ -n "$HARD" ] || cat "$TMP/TMP_FENRIR" > "/etc/fenrir/main.json"
+[ -n "$SOFT" ] || loki-log info "Removing local configs.."
+[ -n "$SOFT" ] || rm -fr "${FENRIR_HOME}/cfgs"
 
 loki-log succ "Done"
