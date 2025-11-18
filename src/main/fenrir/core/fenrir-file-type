@@ -1,4 +1,0 @@
-#! /usr/bin/env loki
-
-meta=(`git ls-files -s "$1"`)
-echo "${meta[0]}"
