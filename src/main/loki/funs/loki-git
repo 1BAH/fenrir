@@ -1,10 +1,11 @@
+# >-loki-git--------------------------------------------------------------------------> #
 ###############################################################
 ##          COMMON FUNCTIONS USED TO WORK WITH GIT           ##
 ###############################################################
 #                  loki-commit-hash                           #
 #                  loki-commit-name                           #
 #                  loki-commit-parent                         #
-#                  loki-commit-                               #
+#                  loki-commit-branch-exists                  #
 #                  loki-commit-                               #
 ###############################################################
 
@@ -43,21 +44,20 @@ function loki-commit-parent {
 
 ##
 # Usage:
-#   loki-branch-exists <COLOURED> <BRANCH_NAME>
+#   loki-branch-exists <BRANCH_NAME>
 #
 # Returns 0 if the specified branch exists, otherwise returns 1.
-# To
 ##
 function loki-branch-exists {
-    local verbosity=$1
-    local branch=$2
+    local branch=$1
 
-    loki-log info "$verbosity" "Checking whether branch <$branch> exists.."
+    loki-log info "Checking whether branch <$branch> exists.."
 
     if git branch | grep -q "$branch"; then
-        loki-log succ "$verbosity" "Branch exists"
+        loki-log succ "Branch exists"
     else
-        loki-log err  "$verbosity" "Branch does not exist"
+        loki-log err  "Branch does not exist"
         return 1
     fi
 }
+# <--------------------------------------------------------------------------loki-git-< #
