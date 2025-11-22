@@ -1,0 +1,119 @@
+#! /usr/bin/env loki
+
+##
+# Usage:
+#   fenrir-rund [-d|--debug] [-nl|--no-lint] [-nz|--no-zero] <SOLUTION DIRECTORY>
+#
+# Starts a container and executes 'fenrir-run' inside.
+# After the execution the container is removed unless the 'debug' flag is set.
+#
+# Options:
+#    -d, --debug        Does not stop the container (allows further debug)
+#   -nz, --no-zero      Skip task0 validation
+#   -nl, --no-lint      Skip linting stage (walk-inspections)
+##
+
+function finalise {
+    message=$1
+
+    loki-log fail "$message"
+
+    if [ -n "$debug" ]; then
+        loki-log warn "Do not forget to stop the container: 'docker stop $container'"
+    else
+        docker stop "$container" &> /dev/null
+    fi
+
+    exit 11
+}
+
+######################################################################
+##                         VERIFY ARGUMENTS                         ##
+######################################################################
+
+#include <shift-args>
+
+NO_LINT=""
+NO_ZERO=""
+debug=""
+
+hit=0
+path=""
+
+while [ "$#" -ne 0 ]; do
+    case $1 in
+        "--no-lint" | "-nl")
+            NO_LINT="-nl"
+        ;;
+
+        "--no-zero" | "-nz")
+            NO_ZERO="-nz"
+        ;;
+
+        "--debug" | "-d")
+            debug="YES"
+        ;;
+
+        *)
+            if [ $hit -ge 1 ]; then
+                loki-log err '(＃°Д°)' Wrong arguments count!
+                loki-log err "Expected <1> but got <$(( $# + hit ))>"
+                exit 15
+            fi
+
+            path=$1
+
+            (( hit++ ))
+        ;;
+    esac
+
+    shift
+done
+
+if [ "$hit" -ne 1 ]; then
+    loki-log err '(＃°Д°)' Wrong arguments count!
+    loki-log err "Expected <1> but got <$hit>"
+    exit 15
+fi
+
+######################################################################
+##                           MAIN PROGRAM                           ##
+######################################################################
+
+src=$(realpath "$path")
+task=$(fenrir-read-conf run task)
+
+if [ "$task" = "-" ]; then
+    loki-log err 'ᕙ( •̀ ᗜ •́ )ᕗ' "The task was not set!"
+    exit 89
+fi
+
+image=$(fenrir-read-conf "$task" image)
+image=${image:-"taekwandodo/fenrir-base"}
+
+container=$(docker run --rm -d "$image")
+
+
+lokiw docker exec -it "$container" fenrir info || {
+    finalise "Failed to find 'fenrir' in container"
+}
+
+lokiw docker cp "$src" "$container:/home/fikus/solution" || {
+    finalise "Unable to copy solution into container"
+}
+
+lokiw docker cp "$FENRIR_HOME" "$container:/home/fikus" || {
+    finalise "Unable to copy local repo into container"
+}
+
+lokiw docker cp "$RUN_CONF_FILE" "$container:/tmp/fenrir/tmp/run-conf.hel" || {
+    finalise "Unable to copy run-conf into container"
+}
+
+if docker exec -it "$container" bash -c "cd solution && fenrir run -i ${NO_LINT} ${NO_ZERO} ."; then
+    docker stop "$container" &> /dev/null
+elif [ -n "$debug" ]; then
+    loki-log warn "Do not forget to stop the container: 'docker stop $container'"
+else
+    docker stop "$container" &> /dev/null
+fi

@@ -64,6 +64,11 @@ case "$cmd" in
         fenrir-run "$@"
     ;;
 
+    "rund")
+        loki-log err "NOT UP TO DATE" # TODO
+        fenrir-run-docker "$@"
+    ;;
+
     "switch")
         loki-log err "NOT UP TO DATE" # TODO
         update-fenrir "$@"
