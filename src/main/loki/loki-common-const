@@ -15,6 +15,8 @@ LOKI_PROGRESS=0
 FENRIR_TMP_DIR=${FENRIR_TMP_DIR:-"/tmp/fenrir/tmp"}
 FENRIR_HOME=${FENRIR_HOME:-"$HOME/.fenrir"}
 TMP_IDX_FILE="$FENRIR_TMP_DIR/idx"
+SCORE_FILE=${SCORE_FILE:-"${FENRIR_TMP_DIR}/score"}
+RUN_CONF_FILE=${RUN_CONF_FILE:-"${FENRIR_TMP_DIR}/run-conf.hel"}
 
 if [ "$(id -u)" -ne 0 ]; then # Non sudo execution
     # Ensure FENRIR_TMP_DIR exists
@@ -29,6 +31,18 @@ if [ "$(id -u)" -ne 0 ]; then # Non sudo execution
 
     # Ensure TMP_IDX_FILE exists
     [ -f "${TMP_IDX_FILE}" ] || echo 0 > "$TMP_IDX_FILE"
+
+    # Ensure SCORE_FILE exists
+    [ -f "${SCORE_FILE}" ] || echo 0 > "$SCORE_FILE"
+
+    # Ensure RUN_CONF_FILE exists
+    if ! [ -d "${RUN_CONF_FILE}" ]; then
+        cat <<- CONF > "${RUN_CONF_FILE}"
+		root="/home/checker/solution"
+		blocking="0"
+		task="-"
+		CONF
+    fi
 fi
 
 ############################################

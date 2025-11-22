@@ -2,7 +2,7 @@
 
 ##
 # Usage:
-#   fenrir-read-conf [-a] (main|walk|forbidden|pipeline) <PARAMETER>
+#   fenrir-read-conf [-a] (main|run|walk|forbidden|pipeline) <PARAMETER>
 #
 # Get the value of the provided parameter in one of internal configs.
 #
@@ -27,6 +27,9 @@ EXP_ARGC=2
 #include <verify-argc>
 
 case "$1" in
+    run)
+        CONF_FILE="${RUN_CONF_FILE}"
+        ;;
     main)
         CONF_FILE="${CONF_FILE}/main.hel"
         ;;
@@ -37,7 +40,7 @@ case "$1" in
         CONF_FILE="${CONF_FILE}/forbidden-files.hel"
         ;;
     pipeline)
-        task=$(fenrir-read-conf main branch)
+        task=$(fenrir-read-conf run task)
         CONF_FILE="${FENRIR_HOME}/repo/${task}/pipeline.hel"
         ;;
     *)

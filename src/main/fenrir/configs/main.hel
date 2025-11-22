@@ -1,7 +1,2 @@
 
-score="/tmp/fenrir/score"
-root="/home/checker/solution"
 remote="https://gitlab.com/atpd/fenrir-tasks"
-branch="-"
-blocking="0"
-task="-"

@@ -25,7 +25,7 @@ function local_clone {
         exit 56
     fi
 
-    fenrir-set-conf main "root" "$to"
+    fenrir-set-conf run "root" "$to"
 }
 
 ######################################################################
@@ -44,15 +44,15 @@ path=""
 while [ "$#" -ne 0 ]; do
     case $1 in
         "--no-lint" | "-nl")
-            NO_LINT=YES
+            NO_LINT="nl"
         ;;
 
         "--no-zero" | "-nz")
-            NO_ZERO=YES
+            NO_ZERO="nz"
         ;;
 
         "-i")
-            INLINE=YES
+            INLINE="i"
         ;;
 
         *)
@@ -83,7 +83,7 @@ fi
 
 src=$(realpath "$path")
 
-if [ "$(fenrir-read-conf main branch)" = "-" ]; then
+if [ "$(fenrir-read-conf run task)" = "-" ]; then
     loki-log err 'ᕙ( •̀ ᗜ •́ )ᕗ' "The task was not set!"
     exit 89
 fi
@@ -94,21 +94,9 @@ if ! [ -d "$src/.git" ]; then
 fi
 
 if [ -n "$INLINE" ]; then
-    fenrir-set-conf main "root" "$src"
+    fenrir-set-conf run "root" "$src"
 else
     local_clone "$src"
 fi
 
-if [ -n "$NO_LINT" ]; then
-    if [ -n "$NO_ZERO" ]; then
-        fenrir-main nl nz
-    else
-        fenrir-main nl
-    fi
-else
-    if [ -n "$NO_ZERO" ]; then
-        fenrir-main nz
-    else
-        fenrir-main
-    fi
-fi
+fenrir-main $NO_ZERO $NO_LINT $INLINE

@@ -4,7 +4,7 @@ config="/etc/fenrir/walk.json"
 
 loki-log info "WI: Start"
 
-root_dir=$(fenrir-read-conf main root)
+root_dir=$(fenrir-read-conf run root)
 
 declare -A skip_list
 

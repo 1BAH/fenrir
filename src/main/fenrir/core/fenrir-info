@@ -24,7 +24,7 @@ EXP_ARGC=0
 ##                           MAIN PROGRAM                           ##
 ######################################################################
 
-curr_task=$(fenrir-read-conf main task)
+curr_task=$(fenrir-read-conf run task)
 
 pipeline=""
 if [ -f "${FENRIR_HOME}/${curr_task}/pipeline.hel" ]; then
@@ -38,8 +38,7 @@ cat <<____HEREDOC
 Current settings:
     * Remote: $(fenrir-read-conf main remote)
     * Current task: ${curr_task}
-    * Blocking: $(fenrir-read-conf main blocking)
-    * Last installed task: $(fenrir-read-conf main task)
+    * Blocking: $(fenrir-read-conf run blocking)
 ------------------------------------------------------------------
 Run settings:
 $([ -n "${pipeline}" ] && loki-wrap "${YELLOW}" "${pipeline}")

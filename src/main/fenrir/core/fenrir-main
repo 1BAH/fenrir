@@ -2,13 +2,14 @@
 
 ##
 # Usage:
-#   fenrir-main [nl] [nz]
+#   fenrir-main [nl] [nz] [i]
 #
 # Executes task validation pipeline.
 #
 # Options:
 #    nl     See fenrir-run '-nl' option
 #    nz     See fenrir-run '-nz' option
+#    i      See fenrir-run '-i' option
 ##
 
 #include <shift-args>
@@ -16,31 +17,46 @@
 # TODO ???
 #UNCOMMENT# cat ~/key > ~/.ssh/id_rsa
 
-if [ "$1" = "nl" ]; then
-    NL=1
-    shift
-fi
+while [ "$#" -ne 0 ]; do
+    case $1 in
+        "nl")
+            NL=1
+            shift
+        ;;
 
-if [ "$1" = "nz" ]; then
-    NZ=1
-    shift
-fi
+        "nz")
+            NZ=1
+            shift
+        ;;
+
+        "i")
+            INL=1
+            shift
+        ;;
+    esac
+done
+
 
 pre=$(fenrir-read-conf -a pipeline pre)
 main=$(fenrir-read-conf -a pipeline main)
-branch=$(fenrir-read-conf main branch)
-destination=$(fenrir-read-conf main root)
-blocking=$(fenrir-read-conf main blocking)
+branch=$(fenrir-read-conf run task)
+destination=$(fenrir-read-conf run root)
+blocking=$(fenrir-read-conf run blocking)
 
 ###########################################
 
 function finalise {
     # Print score
-    echo "Final score: $(cat "$score_file")"
+    echo "Final score: $(cat "${SCORE_FILE}")"
     exit 0
 }
 
 function switch_solution {
+    if [ -n "$INL" ]; then
+        loki-log warn "Inline option is on: skip switching the branch"
+        return
+    fi
+
     if [ "$branch" = "--" ]; then # Special alias for multi-branch tasks
         if lokiw cd "$destination"; then
             loki-log succ "Inside solution's directory"
@@ -65,8 +81,7 @@ function switch_solution {
 
 
 # initialise score file
-score_file=$(fenrir-read-conf main score)
-echo -n 0 > "$score_file"
+echo -n 0 > "${SCORE_FILE}"
 
 for script in $pre; do
     loki-log info "--------------------------($script)--------------------------"
@@ -101,6 +116,10 @@ for script in $main; do
         fi
 
         if ! "${FENRIR_HOME}/shared/walk-inspections"; then
+            finalise
+        fi
+    elif [ "$script" = "local" ]; then
+        if ! "${FENRIR_HOME}/shared/local"; then
             finalise
         fi
     else

@@ -19,7 +19,7 @@ LOCAL_CFGS="$FENRIR_HOME/cfgs"
 EXP_ARGC=1
 #include <verify-argc>
 
-curr_task=$(fenrir-read-conf main task)
+curr_task=$(fenrir-read-conf run task)
 
 case "${1}" in
     "repo")

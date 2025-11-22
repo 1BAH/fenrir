@@ -1,0 +1,27 @@
+#! /usr/bin/env loki
+
+
+test_file=$1
+
+######################################################################
+##                         VERIFY ARGUMENTS                         ##
+######################################################################
+
+#include <shift-args>
+
+EXP_ARGC=1
+#include <verify-argc>
+
+
+######################################################################
+##                           MAIN PROGRAM                           ##
+######################################################################
+
+if ! [ -f "${test_file}" ]; then
+    loki-log err "The provided file is not a regular one!"
+    exit 7
+fi
+
+cat "${test_file}" > "${FENRIR_HOME}/shared/local"
+
+loki-log succ '[]~(￣▽￣)~*' "Task 'local' has been updated!"

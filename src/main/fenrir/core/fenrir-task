@@ -50,13 +50,10 @@ if [ "$INSTALL" -ne 0 ]; then
     fi
 fi
 
-# TODO get rid of branch?? not in v1.0.0
 branch=$(fenrir-read-conf "${TASK}" branch)
-fenrir-set-conf main branch "$branch"
+fenrir-set-conf run task "$branch"
 
 block=$(fenrir-read-conf "${TASK}" blocking)
-fenrir-set-conf main blocking "$block"
-
-fenrir-set-conf main task "$TASK"
+fenrir-set-conf run blocking "$block"
 
 loki-log succ '[]~(￣▽￣)~*' "Fenrir is ready to check task '$TASK'"

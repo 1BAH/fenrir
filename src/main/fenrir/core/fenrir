@@ -54,6 +54,11 @@ case "$cmd" in
         fenrir-task "$@"
     ;;
 
+    "install")
+        loki-log warn "IN PROGRESS" # TODO
+        fenrir-install-task-local "$@"
+    ;;
+
     "run")
         loki-log err "NOT UP TO DATE" # TODO
         fenrir-run "$@"

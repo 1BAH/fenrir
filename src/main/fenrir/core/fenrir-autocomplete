@@ -1,5 +1,7 @@
 #! /usr/bin/env bash
 
+# TODO show installed tasks for 'task'
+
 _fenrir()
 {
     local IFS=$' \t\n'    # normalize IFS

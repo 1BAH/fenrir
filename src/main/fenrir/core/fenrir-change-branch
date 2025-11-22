@@ -11,7 +11,7 @@ EXP_ARGC=1
 #include <verify-argc>
 
 branch=$1
-destination=$(fenrir-read-conf main root)
+destination=$(fenrir-read-conf run root)
 
 ##############
 
