@@ -36,9 +36,9 @@ if [ "$(id -u)" -ne 0 ]; then # Non sudo execution
     [ -f "${SCORE_FILE}" ] || echo 0 > "$SCORE_FILE"
 
     # Ensure RUN_CONF_FILE exists
-    if ! [ -d "${RUN_CONF_FILE}" ]; then
+    if ! [ -f "${RUN_CONF_FILE}" ]; then
         cat <<- CONF > "${RUN_CONF_FILE}"
-		root="/home/checker/solution"
+		root="/home/fikus/solution"
 		blocking="0"
 		task="-"
 		CONF

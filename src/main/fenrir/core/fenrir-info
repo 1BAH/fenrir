@@ -27,8 +27,8 @@ EXP_ARGC=0
 curr_task=$(fenrir-read-conf run task)
 
 pipeline=""
-if [ -f "${FENRIR_HOME}/${curr_task}/pipeline.hel" ]; then
-    pipeline=$(< "${FENRIR_HOME}/${curr_task}/pipeline.hel")
+if [ -f "${FENRIR_HOME}/repo/${curr_task}/pipeline.hel" ]; then
+    pipeline=$(< "${FENRIR_HOME}/repo/${curr_task}/pipeline.hel")
 elif [ "$curr_task" != "-" ]; then
     loki-log err "Found invalid state of task '${curr_task}'. It's strongly recommended to rerun 'fenrir task ${curr_task}'."
 fi

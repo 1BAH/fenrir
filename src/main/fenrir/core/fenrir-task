@@ -31,7 +31,9 @@ EXP_ARGC=1
 
 TASK=$1
 
-if ! [ -d "$(fenrir-task-path repo)" ]; then
+echo "${FENRIR_HOME}/repo/${TASK}"
+
+if ! [ -d "${FENRIR_HOME}/repo/${TASK}" ]; then
     INSTALL=1
     loki-log warn "Task '$TASK' has not been installed yet"
 else

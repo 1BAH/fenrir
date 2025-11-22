@@ -374,7 +374,7 @@ for util in "$BASIC_UTILS_DIR"/* "$BASIC_UTILS_DIR"/**/*; do
     fi
 
     case "$(basename "$util")" in
-        "local" | "pipeline.hel")
+        "local" | "pipeline.hel" | "index.hel")
             if ! {
                 mv "$util" "$os_pref_home/$user/.fenrir/repo/local/$relative_path" &&
                 chown "$user" "$os_pref_home/$user/.fenrir/repo/local/$relative_path"

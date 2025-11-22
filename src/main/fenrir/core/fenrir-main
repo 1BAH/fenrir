@@ -118,10 +118,6 @@ for script in $main; do
         if ! "${FENRIR_HOME}/shared/walk-inspections"; then
             finalise
         fi
-    elif [ "$script" = "local" ]; then
-        if ! "${FENRIR_HOME}/shared/local"; then
-            finalise
-        fi
     else
         if ! "$(fenrir-task-path repo)/$script" && [ "$blocking" -ne 0 ]; then
             finalise
