@@ -1,27 +1,38 @@
 #! /usr/bin/env loki
 
-loki-log info "FDI: Inspecting '$1'"
+loki-set-log-prefix "FDI: "
+
+loki-log info "Inspecting '$1'"
 
 name=$(basename "$1")
 
-declare -A dirs
+declare -A forbidden_dirs
 for item in $(fenrir-read-conf -a forbidden directories); do
-    dirs+=( ["$item"]=1 )
+    forbidden_dirs+=( ["$item"]=1 )
 done
 
-if [[ ${skip_list[$name]+_} ]]; then
-    loki-log err "FDI: Found forbidden directory: '$1'"
+if [[ ${forbidden_dirs[$name]+_} ]]; then
+    loki-log err "Found forbidden directory: '$1'"
     exit 4
 fi
 
-pushd "$1" &> /dev/null
+lokiw pushd "$1" || {
+   loki-log fail "Failed to push directory"
+   exit 7
+}
 
 for pattern in $(fenrir-read-conf -a forbidden filePatterns); do
     if lokiw ls "$pattern"; then
-        loki-log fail "FDI: Found forbidden file pattern: '$pattern'"
-        popd &> /dev/null
+        loki-log fail "Found forbidden file pattern: '$pattern'"
+
+        lokiw popd || {
+            loki-log fail "Failed to push directory"
+        }
         exit 3
     fi
 done
 
-popd &> /dev/null
+lokiw popd || {
+    loki-log fail "Failed to pop directory"
+    exit 7
+}
