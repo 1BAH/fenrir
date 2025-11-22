@@ -22,6 +22,6 @@ if ! [ -f "${test_file}" ]; then
     exit 7
 fi
 
-cat "${test_file}" > "${FENRIR_HOME}/shared/local"
+cat "${test_file}" > "${FENRIR_HOME}/repo/local/local"
 
 loki-log succ '[]~(￣▽￣)~*' "Task 'local' has been updated!"

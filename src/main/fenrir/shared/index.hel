@@ -1,0 +1,7 @@
+
+scripts=()
+
+cfgs=()
+
+branch="local"
+blocking=1
