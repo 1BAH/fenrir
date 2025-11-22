@@ -14,6 +14,9 @@
 #                 Default value is '/etc/fenrir'
 ##
 
+
+#include <shift-args>
+
 CONF_FILE="/etc/fenrir"
 
 is_array=0

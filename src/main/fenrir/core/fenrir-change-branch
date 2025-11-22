@@ -7,6 +7,8 @@
 # Checks out to the provided branch in the current solution directory
 ##
 
+#include <shift-args>
+
 EXP_ARGC=1
 #include <verify-argc>
 

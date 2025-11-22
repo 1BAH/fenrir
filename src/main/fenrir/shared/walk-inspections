@@ -1,10 +1,7 @@
 #! /usr/bin/env loki
 
-config="/etc/fenrir/walk.json"
 
 loki-log info "WI: Start"
-
-root_dir=$(fenrir-read-conf run root)
 
 declare -A skip_list
 
@@ -22,7 +19,7 @@ function dir_check {
 
     if ! [[ ${skip_list[$(basename "$dir")]+_} ]]; then
         for inspection in $(fenrir-read-conf -a walk dirs); do
-            if ! "$HOME/.fenrir/custom/walk/$inspection" "$dir"; then
+            if ! "$HOME/.fenrir/shared/walk/$inspection" "$dir"; then
                 terminate
             fi
         done
@@ -36,8 +33,8 @@ function inspect_dir {
 
     for file in "$dir"/* "$dir"/.*; do
         if [ -f "$file" ]; then
-            for inspection in $(fenrir-read-conf walk -a files); do
-                if ! "$HOME/.fenrir/custom/walk/$inspection" "$file"; then
+            for inspection in $(fenrir-read-conf -a walk files); do
+                if ! "$HOME/.fenrir/shared/walk/$inspection" "$file"; then
                     terminate
                 fi
             done
@@ -48,5 +45,7 @@ function inspect_dir {
         fi
     done
 }
+
+dir_check "$PWD"
 
 loki-log succ "WI: All inspections have passed"
