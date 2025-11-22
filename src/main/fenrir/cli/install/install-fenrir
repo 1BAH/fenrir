@@ -215,7 +215,7 @@ if [ -d "/etc/fenrir" ]; then
         if [ "$op" == "y" ] || [ "$op" == "Y" ]; then
             loki-prog "Removing '/etc/fenrir'.."
             rm -fr /etc/fenrir
-            loki-gorp "DONE"
+            loki-gorp
         fi
     fi
 fi
@@ -225,7 +225,7 @@ if [ -d "/var/fenrir" ]; then
     rm -fr /var/fenrir
 fi
 
-out loki-gorp "DONE"
+out loki-gorp
 out loki-prog "Software requirements.."
 
 for req in "${REQUIREMENTS[@]}"; do
@@ -249,7 +249,7 @@ if (( "$(echo "$BASH_VERSION" | cut -d'.' -f1)" < 5 )); then
     fi
 fi
 
-out loki-gorp "DONE"
+out loki-gorp
 out loki-prog "Previous installations..."
 
 ( # Variable scope: found array
@@ -271,6 +271,10 @@ out loki-prog "Previous installations..."
         exit
     fi
 
+    if [ "${#found[@]}" -eq 0 ]; then
+        exit 0 # No conflicting files were detected
+    fi
+
     # Alerts for out-of-docker installation
     loki-log warn "These commands already exist:"
 
@@ -289,10 +293,10 @@ out loki-prog "Previous installations..."
 
 out loki-prog "Cleaning local repo.."
 rm -fr "$os_pref_home/$user/.fenrir"
-out loki-gorp "DONE"
+out loki-gorp
 
-out loki-gorp "DONE"
-loki-gorp "DONE"
+out loki-gorp
+loki-gorp
 
 #################################################################
 #                        Install files                          #
@@ -305,7 +309,7 @@ out loki-prog "Creating '/etc/fenrir'.."
 mkdir -p /etc/fenrir
 chown "$user" /etc/fenrir
 
-out loki-gorp "DONE"
+out loki-gorp
 
 #################################################################
 
@@ -324,7 +328,7 @@ for cmd in "$CORE_UTILS_DIR"/*; do
     fi
 done
 
-out loki-gorp "DONE"
+out loki-gorp
 
 #################################################################
 
@@ -344,13 +348,18 @@ done
 
 echo "version=\"$VERSION\"" >> "/etc/fenrir/main.hel"
 
-out loki-gorp "DONE"
+out loki-gorp
 
 #################################################################
 
 out loki-prog "Installing basic utils.."
 
 if ! mkdir -p "$os_pref_home/$user/.fenrir/shared/walk"; then
+    loki-log err "Unable to create local storage"
+    exit 189
+fi
+
+if ! mkdir -p "$os_pref_home/$user/.fenrir/repo/local"; then
     loki-log err "Unable to create local storage"
     exit 189
 fi
@@ -364,16 +373,29 @@ for util in "$BASIC_UTILS_DIR"/* "$BASIC_UTILS_DIR"/**/*; do
         continue
     fi
 
-    if ! {
-        mv "$util" "$os_pref_home/$user/.fenrir/shared/$relative_path" &&
-        chown "$user" "$os_pref_home/$user/.fenrir/shared/$relative_path"
-    }; then
-        loki-log err "Failed to install. Try again or submit an issue."
-        exit 8
-    fi
+    case "$(basename "$util")" in
+        "local" | "pipeline.hel")
+            if ! {
+                mv "$util" "$os_pref_home/$user/.fenrir/repo/local/$relative_path" &&
+                chown "$user" "$os_pref_home/$user/.fenrir/repo/local/$relative_path"
+            }; then
+                loki-log err "Failed to install. Try again or submit an issue."
+                exit 88
+            fi
+          ;;
+        *)
+            if ! {
+                mv "$util" "$os_pref_home/$user/.fenrir/shared/$relative_path" &&
+                chown "$user" "$os_pref_home/$user/.fenrir/shared/$relative_path"
+            }; then
+                loki-log err "Failed to install. Try again or submit an issue."
+                exit 8
+            fi
+          ;;
+    esac
 done
 
-out loki-gorp "DONE"
+out loki-gorp
 
 ###################################################################
 
@@ -383,7 +405,7 @@ mv "$(which fenrir-autocomplete)" "/etc/bash_completion.d/"
 
 out loki-log warn "Run 'source ~/.bashrc' or reload terminal to apply autocompletion"
 
-out loki-gorp "DONE"
+out loki-gorp
 
 ###################################################################
 
@@ -397,9 +419,9 @@ if ! {
     exit 19
 fi
 
-out loki-gorp "DONE"
+out loki-gorp
 
-loki-gorp "DONE"
+loki-gorp
 
 ###################################################################
 #                       Finish installation                       #
