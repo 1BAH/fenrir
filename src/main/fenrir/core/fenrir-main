@@ -46,11 +46,25 @@ blocking=$(fenrir-read-conf run blocking)
 ###########################################
 
 function finalise {
+    local ecode="$1"
+
     # Print score
     echo "Final score: $(cat "${SCORE_FILE}")"
-    exit 0
+    exit "$ecode"
 }
 
+function safe_run {
+    local cmd=$1
+
+    "$cmd"
+    local rcode=$?
+
+    if (( rcode != 0 )) ; then
+        finalise $rcode
+    fi
+}
+
+# shellcheck disable=SC2317
 function switch_solution {
     if [ -n "$INL" ]; then
         loki-log warn "Inline option is on: skip switching the branch"
@@ -91,21 +105,15 @@ for script in $pre; do
             continue
         fi
 
-        if ! "${FENRIR_HOME}/shared/task-zero"; then
-            finalise
-        fi
+        safe_run "${FENRIR_HOME}/shared/task-zero"
     else
-        if ! "$(fenrir-task-path repo)/$script"; then
-            finalise
-        fi
+        safe_run "$(fenrir-task-path repo)/$script"
     fi
 done
 
 loki-log info "--------------------------(switch-solution)--------------------------"
 
-if ! switch_solution; then
-    finalise
-fi
+safe_run switch_solution
 
 for script in $main; do
     loki-log info "--------------------------($script)--------------------------"
@@ -115,12 +123,13 @@ for script in $main; do
             continue
         fi
 
-        if ! "${FENRIR_HOME}/shared/walk-inspections"; then
-            finalise
-        fi
+        safe_run "${FENRIR_HOME}/shared/walk-inspections"
     else
-        if ! "$(fenrir-task-path repo)/$script" && [ "$blocking" -ne 0 ]; then
-            finalise
+        "$(fenrir-task-path repo)/$script"
+        rcode=$?
+
+        if (( rcode != 0 )) && [ "$blocking" -ne 0 ]; then
+            finalise $rcode
         fi
     fi
 done
