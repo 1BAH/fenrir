@@ -7,8 +7,8 @@
 # Show the current context of fenrir:
 #   - Tasks' remote repo
 #   - The task to be tested
-#   - Running mode of the task (is blocking)
-#   -
+#   - Running mode of the task (whether is blocking or not)
+#   - Testing pipeline
 ##
 
 ######################################################################
@@ -23,6 +23,8 @@ EXP_ARGC=0
 ######################################################################
 ##                           MAIN PROGRAM                           ##
 ######################################################################
+
+echo "$FENRIR_LOGO"
 
 curr_task=$(fenrir-read-conf run task)
 

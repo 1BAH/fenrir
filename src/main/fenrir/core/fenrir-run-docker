@@ -73,7 +73,7 @@ done
 if [ "$hit" -ne 1 ]; then
     loki-log err '(＃°Д°)' Wrong arguments count!
     loki-log err "Expected <1> but got <$hit>"
-    exit 15
+    exit 16
 fi
 
 ######################################################################

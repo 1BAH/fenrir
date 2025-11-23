@@ -28,9 +28,6 @@ shift
 
 loki-strace-clean
 
-# FIXME some cmds should mute it!!
-echo "$FENRIR_LOGO"
-
 case "$cmd" in
     "remote")
         EXP_ARGC=1
@@ -39,33 +36,28 @@ case "$cmd" in
         fenrir-set-conf main remote "${1}"
     ;;
 
-    "--help" | "-h" | "help")
+    "--help" | "h" | "help")
         loki-log warn "IN PROGRESS" # TODO
         fenrir-help "$@"
     ;;
 
     "i" | "info")
-        loki-log warn "IN PROGRESS" # TODO
         fenrir-info "$@"
     ;;
 
     "task")
-        loki-log warn "IN PROGRESS" # TODO
         fenrir-task "$@"
     ;;
 
-    "install")
-        loki-log warn "IN PROGRESS" # TODO
+    "install" | "il")
         fenrir-install-task-local "$@"
     ;;
 
     "run")
-        loki-log err "NOT UP TO DATE" # TODO
         fenrir-run "$@"
     ;;
 
     "rund")
-        loki-log err "NOT UP TO DATE" # TODO
         fenrir-run-docker "$@"
     ;;
 
@@ -83,12 +75,12 @@ case "$cmd" in
             exit 13
         fi
 
-        echo "Available version:"
+        echo "Available versions:"
 
         grep -o '"name":"[^"]*"' "$OUT_FILE" | sed 's|"name":"||' | sed 's|"||' | sed 's|^|* |'
     ;;
 
-    "-v" | "--version" | "version" | "-version")
+    "v" | "version")
         EXP_ARGC=0
         #include <verify-argc>
 
@@ -96,7 +88,6 @@ case "$cmd" in
     ;;
 
     "gc")
-        loki-log warn "IN PROGRESS" # TODO
         fenrir-gc "$@"
     ;;
 

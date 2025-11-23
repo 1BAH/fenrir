@@ -74,12 +74,14 @@ done
 if [ "$hit" -ne 1 ]; then
     loki-log err '(＃°Д°)' Wrong arguments count!
     loki-log err "Expected <1> but got <$hit>"
-    exit 15
+    exit 16
 fi
 
 ######################################################################
 ##                           MAIN PROGRAM                           ##
 ######################################################################
+
+echo "$FENRIR_LOGO"
 
 src=$(realpath "$path")
 
@@ -90,7 +92,7 @@ fi
 
 [ -n "$INLINE" ] || if ! [ -d "$src/.git" ]; then
     loki-log err '(╬▔皿▔)╯' "The provided file is not a project root"
-    exit 89
+    exit 90
 fi
 
 if [ -n "$INLINE" ]; then
