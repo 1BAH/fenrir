@@ -2,7 +2,7 @@
 
 ##
 # Usage:
-#   fenrir-gc [-f]
+#   fenrir-gc [-f|--force]
 #
 # Removes unused files. Has two modes: SOFT and HARD. The default is 'SOFT'
 # Soft:
@@ -13,7 +13,7 @@
 #   - local configs
 #
 # Options:
-#    -f     Run in 'HARD' mode.
+#    -f,--force     Run in 'HARD' mode.
 ##
 
 ######################################################################
@@ -24,7 +24,7 @@
 
 SOFT="YES"
 
-if [ "$1" = '-f' ]; then
+if [ "$1" = '-f' ] || [ "$1" = '--force' ]; then
     loki-log warn "Running in 'forced' mode"
     SOFT=""
     shift
