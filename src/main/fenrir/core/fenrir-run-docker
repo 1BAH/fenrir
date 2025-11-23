@@ -14,17 +14,19 @@
 ##
 
 function finalise {
-    message=$1
+    local message=$1
+    local ecode=${2:-0}
 
     loki-log fail "$message"
 
     if [ -n "$debug" ]; then
+        loki-log err "Container exited with non-zero code: <$ecode>"
         loki-log warn "Do not forget to stop the container: 'docker stop $container'"
     else
         docker stop "$container" &> /dev/null
     fi
 
-    exit 11
+    exit "$ecode"
 }
 
 ######################################################################
@@ -95,25 +97,33 @@ container=$(docker run --rm -d "$image")
 
 
 lokiw docker exec -it "$container" fenrir info || {
-    finalise "Failed to find 'fenrir' in container"
+    finalise "Failed to find 'fenrir' in container" "$?"
 }
 
 lokiw docker cp "$src" "$container:/home/fikus/solution" || {
-    finalise "Unable to copy solution into container"
+    finalise "Unable to copy solution into container" "$?"
 }
 
 lokiw docker cp "$FENRIR_HOME" "$container:/home/fikus" || {
-    finalise "Unable to copy local repo into container"
+    finalise "Unable to copy local repo into container" "$?"
 }
 
 lokiw docker cp "$RUN_CONF_FILE" "$container:/tmp/fenrir/tmp/run-conf.hel" || {
-    finalise "Unable to copy run-conf into container"
+    finalise "Unable to copy run-conf into container" "$?"
 }
 
-if docker exec -it "$container" bash -c "cd solution && fenrir run -i ${NO_LINT} ${NO_ZERO} ."; then
+# TODO non -i run!!!
+docker exec -it "$container" bash -c "cd solution && fenrir run -i ${NO_LINT} ${NO_ZERO} ."
+ecode=$?
+
+if (( ecode == 0 )); then
     docker stop "$container" &> /dev/null
 elif [ -n "$debug" ]; then
+    loki-log err "Container exited with non-zero code: <$ecode>"
     loki-log warn "Do not forget to stop the container: 'docker stop $container'"
 else
+    loki-log err "Container exited with non-zero code: <$ecode>"
     docker stop "$container" &> /dev/null
 fi
+
+exit "$ecode"

@@ -1,5 +1,5 @@
 pre=(
-    "task-zero"
+#    "task-zero"
 )
 
 main=(
