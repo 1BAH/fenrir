@@ -8,22 +8,57 @@ shopt -s extdebug
 #include <loki-common-const>
 #include <loki-common-funs>
 
+JOTUNHEIM_LAST_CMD=""
+JOTUNHEIM=()
+
 # When no args, we just want to load all global functions and global consts
 if (( $# != 0 )); then
     function save_cmd {
-        if [[ $BASH_COMMAND =~ ^source.*$ ]]; then
+        if [[ "${BASH_SOURCE[1]}" == "/usr/local/bin/loki" ]]; then
             return 0
         fi
 
-        if [[ $BASH_COMMAND =~ ^loki.+$ ]]; then
-            (( JOTUNHEIM_DEPTH++ ))
+        # They are self-responsible for logging
+        if [[ $BASH_COMMAND =~ ^loki.*$ || $BASH_COMMAND =~ ^fenrir.*$ ]] ; then
+            return 0
         fi
 
-        if ! [[ $BASH_COMMAND =~ ^loki.*$ || $BASH_COMMAND =~ ^fenrir.*$ ]] ; then
-            if (( JOTUNHEIM_DEPTH == 0 )); then
-                echo "$BASH_COMMAND" >> "$CMD_FILE"
+        # Handle shadowing by other commands in subshells
+        CMD=${BASH_COMMAND}
+
+        # compute symmetric difference of two arrays
+        sym_diff=$(echo "${JOTUNHEIM[@]}" "${FUNCNAME[@]}" | tr ' ' '\n' | sort | uniq -u)
+
+        if [[ "${JOTUNHEIM_LAST_CMD}" == "${CMD}" ]]; then # INCORRECT FOR literal cmd duplications
+            if [[ -z "${sym_diff}" ]] ||
+               [[ "${CMD}" == "${FUNCNAME[1]}" ]]; then # INCORRECT FOR direct recursive call
+                return 0
             fi
         fi
+
+        len=$(( ${#BASH_SOURCE[@]} - 1 ))
+        {
+            func_name=${FUNCNAME[1]}
+            if [[ "$func_name" == "source" ]]; then
+                echo "[Script '${BASH_SOURCE[1]}']:"
+            else
+                echo "[Function '$(loki-wrap "${BOLD}" "${func_name}")'] at ${BASH_SOURCE[1]}:"
+            fi
+
+            for (( i = 2; i < len; ++i )); do
+                func_name=${FUNCNAME[i]}
+                if [[ "$func_name" == "source" ]]; then
+                    echo "  in [Script '${BASH_SOURCE[i]}']:"
+                else
+                    echo "  in [Function '$(loki-wrap "${BOLD}" "${func_name}")'] at ${BASH_SOURCE[i]}:"
+                fi
+            done
+
+            sed "s|^|    ${MAGENTA}|; s|$|${ENDC}|" <<< "${CMD}"
+        } >> "$CMD_FILE"
+
+        JOTUNHEIM_LAST_CMD="$CMD"
+        JOTUNHEIM=("${FUNCNAME[@]}")
     }
 
     file=$(realpath "$1")

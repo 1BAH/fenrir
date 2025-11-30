@@ -4,7 +4,6 @@
 #>            Internal flags              <#
 ############################################
 
-JOTUNHEIM_DEPTH="-1" # Inside Loki
 LOKI_VERBOSE=${LOKI_VERBOSE-"-v"} # preserve emptiness
 LOKI_PROGRESS=0
 

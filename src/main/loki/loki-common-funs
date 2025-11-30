@@ -5,8 +5,6 @@
 ############################################
 
 function loki-dup {
-trap '(( JOTUNHEIM_DEPTH -= 2 ))' RETURN
-
     local str="$1"
     local cnt="$2"
     printf -v template '%*s' "$cnt"
@@ -14,8 +12,6 @@ trap '(( JOTUNHEIM_DEPTH -= 2 ))' RETURN
 }
 
 function loki-wrap {
-trap '(( JOTUNHEIM_DEPTH -= 2 ))' RETURN
-
     local flags=""
     if [[ $1 == "-n" ]]; then
         flags="$flags -n"
@@ -35,8 +31,6 @@ trap '(( JOTUNHEIM_DEPTH -= 2 ))' RETURN
 }
 
 function loki-prog {
-trap '(( JOTUNHEIM_DEPTH -= 2 ))' RETURN
-
     (( LOKI_PROGRESS++ ))
 
     loki-wrap -n "${EMERALD}" "PROGRESS $(loki-dup ">>" "$LOKI_PROGRESS")"
@@ -58,8 +52,6 @@ trap '(( JOTUNHEIM_DEPTH -= 2 ))' RETURN
 
 
 function loki-log {
-trap '(( JOTUNHEIM_DEPTH -= 2 ))' RETURN
-
     local cmd=$1
     shift
 
@@ -111,12 +103,10 @@ trap '(( JOTUNHEIM_DEPTH -= 2 ))' RETURN
 
 
 function loki-strace-clean {
-trap '(( JOTUNHEIM_DEPTH -= 2 ))' RETURN
     echo -n > "$CMD_FILE"
 }
 
 function loki-set-log-prefix {
-trap '(( JOTUNHEIM_DEPTH -= 2 ))' RETURN
     LOKI_LOG_PREFIX="$1"
 }
 
