@@ -4,7 +4,7 @@
 #>            Internal flags              <#
 ############################################
 
-JOTUNHEIM_DEPTH=0
+JOTUNHEIM_DEPTH="-1" # Inside Loki
 LOKI_VERBOSE=${LOKI_VERBOSE-"-v"} # preserve emptiness
 LOKI_PROGRESS=0
 
@@ -58,22 +58,23 @@ LOKI_LOG_PREFIX=${LOKI_LOG_PREFIX:-""}
 ############################################
 #>                Colours                 <#
 ############################################
+ESC=$'\e'
 
-BOLD="\033[1m"
+BOLD="${ESC}[1m"
 
-DARK_GREEN="${BOLD}\033[38;5;28m"
-MAGENTA="${BOLD}\033[38;5;197m"
-PEACH="${BOLD}\033[38;5;209m"
-PURPLE="${BOLD}\033[38;5;129m"
-EMERALD="${BOLD}\033[38;5;30m"
-GRAY="${BOLD}\033[38;5;249m"
-SKY="${BOLD}\033[38;5;33m"
-GREEN="${BOLD}\033[38;5;112m"
-BLUE="${BOLD}\033[38;5;4m"
-YELLOW="${BOLD}\033[38;5;214m"
-RED="${BOLD}\033[38;5;196m"
+DARK_GREEN="${BOLD}${ESC}[38;5;28m"
+MAGENTA="${BOLD}${ESC}[38;5;197m"
+PEACH="${BOLD}${ESC}[38;5;209m"
+PURPLE="${BOLD}${ESC}[38;5;129m"
+EMERALD="${BOLD}${ESC}[38;5;30m"
+GRAY="${BOLD}${ESC}[38;5;249m"
+SKY="${BOLD}${ESC}[38;5;33m"
+GREEN="${BOLD}${ESC}[38;5;112m"
+BLUE="${BOLD}${ESC}[38;5;4m"
+YELLOW="${BOLD}${ESC}[38;5;214m"
+RED="${BOLD}${ESC}[38;5;196m"
 
-ENDC="\033[0m"
+ENDC="${ESC}[0m"
 
 
 IFS= read -r -d '' FENRIR_LOGO << 'LOGO'
