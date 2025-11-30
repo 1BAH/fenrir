@@ -1,0 +1,36 @@
+# >-loki-asserts----------------------------------------------------------------------> #
+##
+# Usage:
+#   loki-assert-eq <expected> <real>
+#
+# Test the argument for equality (as strings).
+# Exits with code 99 on failure
+##
+function loki-assert-eq {
+    local exp=${1:?"loki-assert-eq: Missing the first argument"}
+    local real=${2:?"loki-assert-eq: Missing the second argument"}
+
+    if [[ "$exp" != "$real" ]]; then
+        loki-log fail "Expected <$exp> to be <$real>"
+        exit 99
+    fi
+}
+
+
+##
+# Usage:
+#   loki-assert-neq <expected> <real>
+#
+# Test the argument for non-equality (as strings).
+# Exits with code 99 on failure
+##
+function loki-assert-neq {
+    local exp=${1:?"loki-assert-eq: Missing the first argument"}
+    local real=${2:?"loki-assert-eq: Missing the second argument"}
+
+    if [[ "$exp" == "$real" ]]; then
+        loki-log fail "Expected <$exp> to be <$real>"
+        exit 99
+    fi
+}
+# <----------------------------------------------------------------------loki-asserts-< #
