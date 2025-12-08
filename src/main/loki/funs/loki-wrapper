@@ -23,14 +23,33 @@ function loki-get-err {
 
 ##
 # Usage:
-#   lokiw [CMD]
+#   lokiw [-e] [-u] [CMD]
 #
 # Stores the command, its stdout and stderr. Preserves the return code.
+#
+# Options:
+#    -e     Exits current shell when the return code is not zero
+#    -u     Unsafe mode: uses 'eval $*' instead of '$@'
+#           Might have unexpected side-effects from the variable expansion
 ##
 function lokiw {
-    CMD=$*
+    local exitable=""
+    local unsafe=""
+
+    if [[ "$1" == "-e" ]]; then
+        exitable="YES"
+        shift
+    fi
+
+    if [[ "$1" == "-u" ]]; then
+        unsafe="YES"
+        shift
+    fi
+
+    local CMD=$*
 
     # compute symmetric difference of two arrays
+    local sym_diff
     sym_diff=$(echo "${JOTUNHEIM[@]}" "${FUNCNAME[@]}" | tr ' ' '\n' | sort | uniq -u)
 
     if [[ "${JOTUNHEIM_LAST_CMD}" == "${CMD}" ]]; then # INCORRECT FOR literal cmd duplications
@@ -40,9 +59,9 @@ function lokiw {
         fi
     fi
 
-    len=$(( ${#BASH_SOURCE[@]} - 1 ))
+    local len=$(( ${#BASH_SOURCE[@]} - 1 ))
     {
-        func_name=${FUNCNAME[1]}
+        local func_name=${FUNCNAME[1]}
         if [[ "$func_name" == "source" ]]; then
             echo "[Script '${BASH_SOURCE[1]}']:"
         else
@@ -50,7 +69,7 @@ function lokiw {
         fi
 
         for (( i = 2; i < len; ++i )); do
-            func_name=${FUNCNAME[i]}
+            local func_name=${FUNCNAME[i]}
             if [[ "$func_name" == "source" ]]; then
                 echo "  in [Script '${BASH_SOURCE[i]}']:"
             else
@@ -64,106 +83,20 @@ function lokiw {
     JOTUNHEIM_LAST_CMD="$CMD"
     JOTUNHEIM=("${FUNCNAME[@]}")
 
-    "$@" > "$OUT_FILE" 2> "$ERR_FILE"
-    return $?
-}
-
-##
-# Usage:
-#   lokiw-pipe [CMD]
-#
-# Stores the command, its stdout and stderr. Preserves the return code.
-##
-function lokiw-pipe {
-    CMD=$*
-
-    # compute symmetric difference of two arrays
-    sym_diff=$(echo "${JOTUNHEIM[@]}" "${FUNCNAME[@]}" | tr ' ' '\n' | sort | uniq -u)
-
-    if [[ "${JOTUNHEIM_LAST_CMD}" == "${CMD}" ]]; then # INCORRECT FOR literal cmd duplications
-        if [[ -z "${sym_diff}" ]] ||
-           [[ "${CMD}" == "${FUNCNAME[1]}" ]]; then # INCORRECT FOR direct recursive call
-            return 0
-        fi
+    local ecode
+    if [[ -n "$unsafe" ]]; then
+        eval "$*" > "$OUT_FILE" 2> "$ERR_FILE"
+        ecode=$?
+    else
+        "$@" > "$OUT_FILE" 2> "$ERR_FILE"
+        ecode=$?
     fi
 
-    len=$(( ${#BASH_SOURCE[@]} - 1 ))
-    {
-        func_name=${FUNCNAME[1]}
-        if [[ "$func_name" == "source" ]]; then
-            echo "[Script '${BASH_SOURCE[1]}']:"
-        else
-            echo "[Function '$(loki-wrap "${BOLD}" "${func_name}")'] at ${BASH_SOURCE[1]}:"
-        fi
-
-        for (( i = 2; i < len; ++i )); do
-            func_name=${FUNCNAME[i]}
-            if [[ "$func_name" == "source" ]]; then
-                echo "  in [Script '${BASH_SOURCE[i]}']:"
-            else
-                echo "  in [Function '$(loki-wrap "${BOLD}" "${func_name}")'] at ${BASH_SOURCE[i]}:"
-            fi
-        done
-
-        sed "s|^|    ${MAGENTA}|; s|$|${ENDC}|" <<< "${CMD}"
-    } >> "$CMD_FILE"
-
-    JOTUNHEIM_LAST_CMD="$CMD"
-    JOTUNHEIM=("${FUNCNAME[@]}")
-
-    eval "$*" > "$OUT_FILE" 2> "$ERR_FILE"
-    return $?
-}
-
-##
-# Usage:
-#   lokiw-exitable [CMD]
-#
-# Stores the command, its stdout and stderr. Preserves the return code.
-##
-function lokiw-exitable {
-    CMD=$*
-
-    # compute symmetric difference of two arrays
-    sym_diff=$(echo "${JOTUNHEIM[@]}" "${FUNCNAME[@]}" | tr ' ' '\n' | sort | uniq -u)
-
-    if [[ "${JOTUNHEIM_LAST_CMD}" == "${CMD}" ]]; then # INCORRECT FOR literal cmd duplications
-        if [[ -z "${sym_diff}" ]] ||
-           [[ "${CMD}" == "${FUNCNAME[1]}" ]]; then # INCORRECT FOR direct recursive call
-            return 0
-        fi
-    fi
-
-    len=$(( ${#BASH_SOURCE[@]} - 1 ))
-    {
-        func_name=${FUNCNAME[1]}
-        if [[ "$func_name" == "source" ]]; then
-            echo "[Script '${BASH_SOURCE[1]}']:"
-        else
-            echo "[Function '$(loki-wrap "${BOLD}" "${func_name}")'] at ${BASH_SOURCE[1]}:"
-        fi
-
-        for (( i = 2; i < len; ++i )); do
-            func_name=${FUNCNAME[i]}
-            if [[ "$func_name" == "source" ]]; then
-                echo "  in [Script '${BASH_SOURCE[i]}']:"
-            else
-                echo "  in [Function '$(loki-wrap "${BOLD}" "${func_name}")'] at ${BASH_SOURCE[i]}:"
-            fi
-        done
-
-        sed "s|^|    ${MAGENTA}|; s|$|${ENDC}|" <<< "${CMD}"
-    } >> "$CMD_FILE"
-
-    JOTUNHEIM_LAST_CMD="$CMD"
-    JOTUNHEIM=("${FUNCNAME[@]}")
-
-    eval "$*" > "$OUT_FILE" 2> "$ERR_FILE"
-    res=$?
-    if [ $res -ne 0 ]; then
+    if [[ -n "$exitable" ]] && [ $ecode -ne 0 ]; then
         loki-log fail "Failed to execute the command: '$*'"
-        exit $res
+        exit $ecode
     fi
-}
 
+    return $ecode
+}
 # <----------------------------------------------------------------------loki-wrapper-< #

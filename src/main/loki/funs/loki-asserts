@@ -11,7 +11,7 @@ function loki-assert-eq {
     local real=${2:?"loki-assert-eq: Missing the second argument"}
 
     if [[ "$exp" != "$real" ]]; then
-        loki-log fail "Expected <$exp> to be <$real>"
+        loki-log fail "Expected <$real> to be <$exp>"
         exit 99
     fi
 }
@@ -29,7 +29,7 @@ function loki-assert-neq {
     local real=${2:?"loki-assert-eq: Missing the second argument"}
 
     if [[ "$exp" == "$real" ]]; then
-        loki-log fail "Expected <$exp> to be <$real>"
+        loki-log fail "Expected <$real> to differ from <$exp>"
         exit 99
     fi
 }
