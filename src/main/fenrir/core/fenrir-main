@@ -56,7 +56,14 @@ function finalise {
 function switch_solution {
     if [ -n "$INL" ]; then
         loki-log warn "Inline option is on: skip switching the branch"
-        return
+
+        if lokiw cd "$destination"; then
+            loki-log succ "Inside solution's directory"
+            return
+        else
+            loki-log fail "Failed to change directory"
+            return 3
+        fi
     fi
 
     if [ "$branch" = "--" ]; then # Special alias for multi-branch tasks
