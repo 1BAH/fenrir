@@ -77,6 +77,17 @@ if [ "$hit" -ne 1 ]; then
     exit 16
 fi
 
+# Docker execution uses inline option by default
+if [ -n "${FENRIR_IN_DOCKER}" ]; then
+    INLINE="i"
+fi
+
+if ! [ -d "$(fenrir-task-path repo)" ]; then
+    loki-log err "Task <$(fenrir-read-conf run task)> is not installed!"
+    loki-log err "Install it via 'fenrir task $(fenrir-read-conf run task)' to be able to run tests"
+    exit 77
+fi
+
 ######################################################################
 ##                           MAIN PROGRAM                           ##
 ######################################################################
