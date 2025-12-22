@@ -19,7 +19,7 @@ function dir_check {
 
     if ! [[ ${skip_list[$(basename "$dir")]+_} ]]; then
         for inspection in $(fenrir-read-conf -a walk dirs); do
-            if ! "$HOME/.fenrir/shared/walk/$inspection" "$dir"; then
+            if ! "${FENRIR_HOME}/shared/walk/$inspection" "$dir"; then
                 terminate
             fi
         done
@@ -34,7 +34,7 @@ function inspect_dir {
     for file in "$dir"/* "$dir"/.*; do
         if [ -f "$file" ]; then
             for inspection in $(fenrir-read-conf -a walk files); do
-                if ! "$HOME/.fenrir/shared/walk/$inspection" "$file"; then
+                if ! "${FENRIR_HOME}/shared/walk/$inspection" "$file"; then
                     terminate
                 fi
             done
