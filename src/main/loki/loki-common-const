@@ -37,7 +37,7 @@ if [ "$(id -u)" -ne 0 ]; then # Non sudo execution
     # Ensure RUN_CONF_FILE exists
     if ! [ -f "${RUN_CONF_FILE}" ]; then
         cat <<- CONF > "${RUN_CONF_FILE}"
-		root="/home/fikus/solution"
+		root="$HOME/solution"
 		blocking="0"
 		task="-"
 		CONF
