@@ -1,34 +1,44 @@
 #! /usr/bin/env loki
 
 repo=$1
-destination="$HOME/solution"
+destination=$(fenrir-read-conf run root)
 
-##############
+######################################################################
+##                         VERIFY ARGUMENTS                         ##
+######################################################################
+
+#include <shift-args>
+
+EXP_ARGC=1
+#include <verify-argc>
+
+######################################################################
+##                           MAIN PROGRAM                           ##
+######################################################################
 
 loki-log info "Cloning repo $repo"
 
 if [ -d "$destination" ]; then
-    loki-log warn "Remove previously cloned repo"
+    loki-log warn "Removing previously cloned repo.."
     rm -fr "$destination"
 fi
 
-if lokiw git clone "$repo" "$destination"
-then
+if lokiw git clone "$repo" "$destination"; then
     loki-log succ "Cloned repo to directory 'solution'"
 else
     loki-log fail "Cannot clone the repository"
     exit 1
 fi
 
-pushd "$destination" &> /dev/null
-git switch task0 &> /dev/null
-git switch "$(fenrir-read-conf main branch)" &> /dev/null
-
-# FIXME get rid of jq
-if [ "$(jq -r '.task' "/etc/fenrir/main.json")" = "git/ess" ]; then
-    for i in $(seq 1 17); do
-        git switch $i &> /dev/null
-    done
-fi
-pod &> /dev/null
-
+#lokiw -e pushd "$destination"
+#
+#git switch task0 &> /dev/null
+#git switch "$(fenrir-read-conf run task)" &> /dev/null
+#
+#if [ "$(fenrir-read-conf run task)" = "git/ess" ]; then
+#    for i in $(seq 1 17); do
+#        git switch $i &> /dev/null
+#    done
+#fi
+#
+#lokiw -e popd
