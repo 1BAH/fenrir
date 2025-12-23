@@ -2,14 +2,13 @@
 
 ##
 # Usage:
-#   fenrir-main [nl] [nz] [i]
+#   fenrir-main [nl] [nz]
 #
 # Executes task validation pipeline.
 #
 # Options:
 #    nl     See fenrir-run '-nl' option
 #    nz     See fenrir-run '-nz' option
-#    i      See fenrir-run '-i' option
 ##
 
 #include <shift-args>
@@ -26,11 +25,6 @@ while [ "$#" -ne 0 ]; do
 
         "nz")
             NZ=1
-            shift
-        ;;
-
-        "i")
-            INL=1
             shift
         ;;
     esac
@@ -74,11 +68,6 @@ function switch_solution {
     curr_branch=$(git rev-parse --abbrev-ref HEAD)
 
     if [ "$task" = "$curr_branch" ]; then
-        return
-    fi
-
-    if [ -n "$INL" ]; then
-        loki-log warn "Inline option is on: skip switching the branch"
         return
     fi
 

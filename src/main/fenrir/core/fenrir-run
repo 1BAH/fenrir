@@ -112,4 +112,4 @@ else
     local_clone "$src"
 fi
 
-fenrir-main $NO_ZERO $NO_LINT $INLINE
+fenrir-main $NO_ZERO $NO_LINT
