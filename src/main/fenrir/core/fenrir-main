@@ -39,9 +39,14 @@ done
 
 pre=$(fenrir-read-conf -a pipeline pre)
 main=$(fenrir-read-conf -a pipeline main)
-branch=$(fenrir-read-conf run task)
+task=$(fenrir-read-conf run task)
 destination=$(fenrir-read-conf run root)
 blocking=$(fenrir-read-conf run blocking)
+
+# No Initial Branch tasks
+if [[ "$task" =~ ^*nib$ ]]; then
+    nib_task=1
+fi
 
 ###########################################
 
@@ -54,31 +59,32 @@ function finalise {
 }
 
 function switch_solution {
+    if lokiw cd "$destination"; then
+        loki-log succ "Inside solution's directory"
+    else
+        loki-log fail "Failed to change directory"
+        return 3
+    fi
+
+    if [ -n "$nib_task" ]; then
+        return
+    fi
+
+    local curr_branch
+    curr_branch=$(git rev-parse --abbrev-ref HEAD)
+
+    if [ "$task" = "$curr_branch" ]; then
+        return
+    fi
+
     if [ -n "$INL" ]; then
         loki-log warn "Inline option is on: skip switching the branch"
-
-        if lokiw cd "$destination"; then
-            loki-log succ "Inside solution's directory"
-            return
-        else
-            loki-log fail "Failed to change directory"
-            return 3
-        fi
+        return
     fi
 
-    if [ "$branch" = "--" ]; then # Special alias for multi-branch tasks
-        if lokiw cd "$destination"; then
-            loki-log succ "Inside solution's directory"
-            return
-        else
-            loki-log fail "Failed to change directory"
-            return 3
-        fi
-    fi
-
-    if fenrir-change-branch "$branch"; then
-        if lokiw cd "$destination/$branch"; then
-            loki-log succ "Inside solution's directory"
+    if fenrir-change-branch "$task"; then
+        if lokiw cd "$task"; then
+            loki-log succ "Inside task's directory"
         else
             loki-log fail "Cannot change directory"
             return 3
@@ -89,7 +95,7 @@ function switch_solution {
 }
 
 
-# initialise score file
+# Initialise score file
 echo -n 0 > "${SCORE_FILE}"
 
 for script in $pre; do
