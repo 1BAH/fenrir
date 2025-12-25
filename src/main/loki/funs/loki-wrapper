@@ -77,7 +77,12 @@ function lokiw {
             fi
         done
 
-        sed "s|^|    ${MAGENTA}|; s|$|${ENDC}|" <<< "${CMD}"
+        if [ "$LOKI_VERBOSE" = "-v" ]; then
+            sed "s|^|    ${MAGENTA}|; s|$|${ENDC}|" <<< "${CMD}"
+        else
+            echo -n "    "
+            echo "${CMD}"
+        fi
     } >> "$CMD_FILE"
 
     JOTUNHEIM_LAST_CMD="$CMD"

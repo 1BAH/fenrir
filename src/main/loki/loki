@@ -3,7 +3,7 @@
 set -T
 shopt -s extdebug
 
-# Alternative
+# Alternative TODO:complete docs!
 
 #include <loki-common-const>
 #include <loki-common-funs>
@@ -28,7 +28,8 @@ if (( $# != 0 )); then
         local JOTUNHEIM_CMD=${BASH_COMMAND}
 
         # Compute symmetric difference of two arrays
-        local JOTUNHEIM_sym_diff=$(echo "${JOTUNHEIM[@]}" "${FUNCNAME[@]}" | tr ' ' '\n' | sort | uniq -u)
+        local JOTUNHEIM_sym_diff
+        JOTUNHEIM_sym_diff=$(echo "${JOTUNHEIM[@]}" "${FUNCNAME[@]}" | tr ' ' '\n' | sort | uniq -u)
 
         if [[ "${JOTUNHEIM_LAST_CMD}" == "${JOTUNHEIM_CMD}" ]]; then # INCORRECT FOR literal cmd duplications
             if [[ -z "${JOTUNHEIM_sym_diff}" ]] ||
@@ -57,7 +58,12 @@ if (( $# != 0 )); then
                 fi
             done
 
-            sed "s|^|    ${MAGENTA}|; s|$|${ENDC}|" <<< "${JOTUNHEIM_CMD}"
+            if [ "$LOKI_VERBOSE" = "-v" ]; then
+                sed "s|^|    ${MAGENTA}|; s|$|${ENDC}|" <<< "${JOTUNHEIM_CMD}"
+            else
+                echo -n "    "
+                echo "${JOTUNHEIM_CMD}"
+            fi
         } >> "$CMD_FILE"
 
         JOTUNHEIM_LAST_CMD="$JOTUNHEIM_CMD"
@@ -73,5 +79,6 @@ if (( $# != 0 )); then
         trap 'save_cmd' DEBUG
     fi
 
+    # shellcheck disable=SC1090
     source "$file" "${other[@]}"
 fi
