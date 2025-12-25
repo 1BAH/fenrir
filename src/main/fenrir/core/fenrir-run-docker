@@ -93,7 +93,7 @@ fi
 image=$(fenrir-read-conf "$task" image)
 image=${image:-"taekwandodo/fenrir-base"}
 
-container=$(docker run --rm -d "$image")
+container=$(docker run -e LOKI_VERBOSE --rm -d "$image")
 
 
 lokiw docker exec -it "$container" fenrir info || {
@@ -112,7 +112,7 @@ lokiw docker cp "$RUN_CONF_FILE" "$container:/tmp/fenrir/tmp/run-conf.hel" || {
     finalise "Unable to copy run-conf into container" "$?"
 }
 
-docker exec -it "$container" bash -c "cd solution && fenrir run ${NO_LINT} ${NO_ZERO} ."
+docker exec -it "$container" bash -c "cd solution && fenrir run -i ${NO_LINT} ${NO_ZERO} ."
 ecode=$?
 
 if (( ecode == 0 )); then
