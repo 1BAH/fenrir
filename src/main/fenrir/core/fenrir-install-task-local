@@ -1,5 +1,13 @@
 #! /usr/bin/env loki
 
+##
+# Usage:
+#   fenrir-install-task-local <TEST SCRIPT>
+#
+# Local installation for task development.
+# Install the provided script into the local task repo.
+# To run the test use 'local' task.
+##
 
 test_file=$1
 
@@ -11,7 +19,6 @@ test_file=$1
 
 EXP_ARGC=1
 #include <verify-argc>
-
 
 ######################################################################
 ##                           MAIN PROGRAM                           ##

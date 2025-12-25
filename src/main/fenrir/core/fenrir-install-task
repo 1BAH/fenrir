@@ -1,5 +1,11 @@
 #! /usr/bin/env loki
 
+##
+# Usage:
+#   fenrir-install-task <TASK ID>
+#
+# Install task by its ID from remote repo
+##
 
 LOCAL_REPO="$FENRIR_HOME/repo"
 LOCAL_CFGS="$FENRIR_HOME/cfgs"
