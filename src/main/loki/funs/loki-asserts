@@ -33,4 +33,22 @@ function loki-assert-neq {
         exit 99
     fi
 }
+
+
+##
+# Usage:
+#   loki-assert-regeq <regexp> <real>
+#
+# Test the argument for matching a regexp.
+# Exits with code 99 on failure
+##
+function loki-assert-regeq {
+    local regexp=${1:?"loki-assert-eq: Missing the first argument"}
+    local real=${2:?"loki-assert-eq: Missing the second argument"}
+
+    if ! [[ $real =~ $regexp ]]; then
+        loki-log fail "Expected <$real> to match regexp <$regexp>"
+        exit 99
+    fi
+}
 # <----------------------------------------------------------------------loki-asserts-< #
