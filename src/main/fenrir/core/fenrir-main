@@ -38,7 +38,7 @@ destination=$(fenrir-read-conf run root)
 blocking=$(fenrir-read-conf run blocking)
 
 # No Initial Branch tasks
-if [[ "$task" =~ ^*nib$ ]]; then
+if [[ "$task" =~ ^.*nib$ ]]; then
     nib_task=1
 fi
 
