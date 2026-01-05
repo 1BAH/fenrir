@@ -60,7 +60,7 @@ function switch_solution {
         return 3
     fi
 
-    if [ -n "$nib_task" ]; then
+    if [ -n "$nib_task" ] || [ "$task" = "local" ]; then
         return
     fi
 
