@@ -2,13 +2,14 @@
 
 ##
 # Usage:
-#   fenrir-tmp [-d]
+#   fenrir-tmp [-d | -p]
 #
 # Creates a new temporary file in 'FENRIR_TMP_DIR'.
 #
 # Options:
 #    none   Creates a regular file
 #    -d     Creates a directory
+#    -p     Creates a named pipe
 #
 # Special configs:
 #    FNR_TMP_MAX_CAP    The maximum size of fenrir's tmp directory. It works according to the LRU algorithm.
@@ -56,6 +57,12 @@ function tmp_dir {
     echo "$name"
 }
 
+function tmp_pipe {
+    name="$FENRIR_TMP_DIR/$(new_name)"
+    mkfifo "$name"
+    echo "$name"
+}
+
 ######################################################################
 ##                           MAIN PROGRAM                           ##
 ######################################################################
@@ -76,6 +83,9 @@ fi
 case "$1" in
     "-d")
         tmp_dir
+    ;;
+    "-p")
+        tmp_pipe
     ;;
     *)
         loki-log err "fenrir-tmp: Unknown option '$1'"
