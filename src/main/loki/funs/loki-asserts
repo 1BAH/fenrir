@@ -1,4 +1,10 @@
 # >-loki-asserts----------------------------------------------------------------------> #
+LOKI_ASSERT_CB="echo -n ''"
+
+function loki-assert-cb {
+    LOKI_ASSERT_CB="eval $1"
+}
+
 ##
 # Usage:
 #   loki-assert-eq <expected> <real>
@@ -9,9 +15,12 @@
 function loki-assert-eq {
     local exp=${1:?"loki-assert-eq: Missing the first argument"}
     local real=${2:?"loki-assert-eq: Missing the second argument"}
+    local msg=$3
 
     if [[ "$exp" != "$real" ]]; then
+        [ -n "$msg" ] && loki-log err "$msg"
         loki-log fail "Expected <$real> to be <$exp>"
+        ${LOKI_ASSERT_CB}
         exit 99
     fi
 }
@@ -27,9 +36,12 @@ function loki-assert-eq {
 function loki-assert-neq {
     local exp=${1:?"loki-assert-eq: Missing the first argument"}
     local real=${2:?"loki-assert-eq: Missing the second argument"}
+    local msg=$3
 
     if [[ "$exp" == "$real" ]]; then
+        [ -n "$msg" ] && loki-log err "$msg"
         loki-log fail "Expected <$real> to differ from <$exp>"
+        ${LOKI_ASSERT_CB}
         exit 99
     fi
 }
@@ -45,9 +57,12 @@ function loki-assert-neq {
 function loki-assert-regeq {
     local regexp=${1:?"loki-assert-eq: Missing the first argument"}
     local real=${2:?"loki-assert-eq: Missing the second argument"}
+    local msg=$3
 
     if ! [[ $real =~ $regexp ]]; then
+        [ -n "$msg" ] && loki-log err "$msg"
         loki-log fail "Expected <$real> to match regexp <$regexp>"
+        ${LOKI_ASSERT_CB}
         exit 99
     fi
 }
