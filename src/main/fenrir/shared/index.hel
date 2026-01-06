@@ -5,3 +5,8 @@ cfgs=()
 
 branch="local"
 blocking=1
+
+# Execution restrictions
+inline=1
+inhost=1
+indocker=1

@@ -31,6 +31,10 @@ case "$1" in
         CONF_FILE="${CONF_FILE}/forbidden-files.hel"
     ;;
 
+    local)
+        CONF_FILE="${FENRIR_HOME}/repo/local/index.hel"
+    ;;
+
     *)
         loki-log err "Unknown conf file: '$1'"
         exit 1

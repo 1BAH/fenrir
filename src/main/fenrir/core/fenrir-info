@@ -35,12 +35,17 @@ elif [ "$curr_task" != "-" ]; then
     loki-log err "Found invalid state of task '${curr_task}'. It's strongly recommended to rerun 'fenrir task ${curr_task}'."
 fi
 
+inline=$(fenrir-read-conf "${curr_task}" inline)
+inhost=$(fenrir-read-conf "${curr_task}" inhost)
+indocker=$(fenrir-read-conf "${curr_task}" indocker)
+
 cat <<____HEREDOC
 ------------------------------------------------------------------
 Current settings:
     * Remote: $(fenrir-read-conf main remote)
     * Current task: ${curr_task}
     * Blocking: $(fenrir-read-conf run blocking)
+    * Execution mode: ${inline:-1}${inhost:-1}${indocker:-1} (Inline-Host-Docker)
 ------------------------------------------------------------------
 Run settings:
 $([ -n "${pipeline}" ] && loki-wrap "${YELLOW}" "${pipeline}")

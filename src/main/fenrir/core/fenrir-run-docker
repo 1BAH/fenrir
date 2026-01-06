@@ -82,6 +82,16 @@ fi
 ##                           MAIN PROGRAM                           ##
 ######################################################################
 
+allowed=$(fenrir-read-conf "$task" indocker)
+allowed=${allowed:-1}
+
+# Check env restrictions
+if (( allowed != 1 )); then
+    loki-log err "This task does not support execution in docker"
+    loki-log err "Use 'fenrir run $task' instead"
+    exit 103
+fi
+
 src=$(realpath "$path")
 task=$(fenrir-read-conf run task)
 
@@ -91,6 +101,7 @@ if [ "$task" = "-" ]; then
 fi
 
 image=$(fenrir-read-conf "$task" image)
+# FIXME switch to gitlab registry! (download quotas)
 image=${image:-"taekwandodo/fenrir-base"}
 
 container=$(docker run -e LOKI_VERBOSE --rm -d "$image")

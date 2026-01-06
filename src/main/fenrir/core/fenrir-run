@@ -82,9 +82,11 @@ if [ -n "${FENRIR_IN_DOCKER}" ]; then
     INLINE="i"
 fi
 
+task=$(fenrir-read-conf run task)
+
 if ! [ -d "$(fenrir-task-path repo)" ]; then
-    loki-log err "Task <$(fenrir-read-conf run task)> is not installed!"
-    loki-log err "Install it via 'fenrir task $(fenrir-read-conf run task)' to be able to run tests"
+    loki-log err "Task <$task> is not installed!"
+    loki-log err "Install it via 'fenrir task $task' to be able to run tests"
     exit 77
 fi
 
@@ -94,9 +96,30 @@ fi
 
 echo "$FENRIR_LOGO"
 
+allowed_inline=$(fenrir-read-conf "$task" inline)
+allowed_inline=${allowed_inline:-1}
+
+allowed=$(fenrir-read-conf "$task" inhost)
+allowed=${allowed:-1}
+
+# Check env restrictions
+if [ -z "${FENRIR_IN_DOCKER}" ]; then
+    if (( allowed != 1 )); then
+        loki-log err "This task does not support execution in host system"
+        loki-log err "Use 'fenrir rund $task' instead"
+        exit 101
+    fi
+
+    if (( allowed_inline != 1 )) && [ -n "$INLINE" ]; then
+        loki-log err "This task does not support inline execution"
+        loki-log err "Remove '-i' flag"
+        exit 102
+    fi
+fi
+
 src=$(realpath "$path")
 
-if [ "$(fenrir-read-conf run task)" = "-" ]; then
+if [ "$task" = "-" ]; then
     loki-log err 'ᕙ( •̀ ᗜ •́ )ᕗ' "The task was not set!"
     exit 89
 fi
