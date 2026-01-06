@@ -96,6 +96,11 @@ fi
 
 echo "$FENRIR_LOGO"
 
+if ! [ -f "${FENRIR_HOME}/repo/${task}/pipeline.hel" ]; then
+    loki-log err "Task '${task}' is not installed. Try to run 'fenrir task ${task}'"
+    exit 144
+fi
+
 allowed_inline=$(fenrir-read-conf "$task" inline)
 allowed_inline=${allowed_inline:-1}
 

@@ -82,6 +82,11 @@ fi
 ##                           MAIN PROGRAM                           ##
 ######################################################################
 
+if ! [ -f "${FENRIR_HOME}/repo/${task}/pipeline.hel" ]; then
+    loki-log err "Task '${task}' is not installed. Try to run 'fenrir task ${task}'"
+    exit 144
+fi
+
 allowed=$(fenrir-read-conf "$task" indocker)
 allowed=${allowed:-1}
 
