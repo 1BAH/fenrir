@@ -31,13 +31,16 @@ curr_task=$(fenrir-read-conf run task)
 pipeline=""
 if [ -f "${FENRIR_HOME}/repo/${curr_task}/pipeline.hel" ]; then
     pipeline=$(< "${FENRIR_HOME}/repo/${curr_task}/pipeline.hel")
+    inline=$(fenrir-read-conf "${curr_task}" inline)
+    inhost=$(fenrir-read-conf "${curr_task}" inhost)
+    indocker=$(fenrir-read-conf "${curr_task}" indocker)
 elif [ "$curr_task" != "-" ]; then
     loki-log err "Found invalid state of task '${curr_task}'. It's strongly recommended to rerun 'fenrir task ${curr_task}'."
+    inline="?"
+    inhost="?"
+    indocker="?"
 fi
 
-inline=$(fenrir-read-conf "${curr_task}" inline)
-inhost=$(fenrir-read-conf "${curr_task}" inhost)
-indocker=$(fenrir-read-conf "${curr_task}" indocker)
 
 cat <<____HEREDOC
 ------------------------------------------------------------------
