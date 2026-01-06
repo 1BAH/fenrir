@@ -1,0 +1,27 @@
+# >-loki-points-----------------------------------------------------------------------> #
+##
+# Usage:
+#   loki-points [+ | -]<number>
+#
+# Add the provided number of points to the global counter.
+# The location of the global counter is defined by '$SCORE_FILE' (see loki-common-const).
+##
+function loki-points {
+    local op=${1:0:1}
+    local points=${1:1}
+
+    case "$op" in
+        "+")
+            echo -n $(( points + $(cat "$SCORE_FILE") )) > "$SCORE_FILE"
+            loki-log succ '(੭>ᴗ<)੭ ' "PASSED"
+            ;;
+        "-")
+            echo -n $(( $(cat "$SCORE_FILE") - points )) > "$SCORE_FILE"
+            loki-log fault '𐐘💥╾━╤デ╦︻ඞා ' "FAILED"
+            ;;
+        *)
+            loki-log err "loki-points: Unsupported operation <$op>"
+            exit 56
+    esac
+}
+# <-----------------------------------------------------------------------loki-points-< #

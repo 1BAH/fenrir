@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /usr/bin/env loki
 
 url="https://gitlab.com/atpd/progtech/fenrir.git"
 out="/var/fenrir/out"
@@ -7,6 +7,8 @@ err="/var/fenrir/err"
 ######################################################################
 ##                         VERIFY ARGUMENTS                         ##
 ######################################################################
+
+#include <shift-args>
 
 DOCKER_UPDATE="-v"
 
@@ -19,8 +21,8 @@ exp=1
 real=$#
 
 if [ "$exp" -ne "$real" ]; then
-    fenrir-log err "$DOCKER_UPDATE" '(＃°Д°)' Wrong arguments count!
-    fenrir-log err "$DOCKER_UPDATE" "Expected <$exp> but got <$real>"
+    loki-log err "$DOCKER_UPDATE" '(＃°Д°)' Wrong arguments count!
+    loki-log err "$DOCKER_UPDATE" "Expected <$exp> but got <$real>"
     exit 15
 fi
 
@@ -35,10 +37,12 @@ function safe_tag_clone {
         rm -rf "$HOME/.fenrir/tag"
     fi
 
+    # FIXME $HOME/.fenrir/tag is deprecated move to tmp!
+
     if ! git clone --depth 1 --branch "$tag" "$url" "$HOME/.fenrir/tag" > "$out" 2> "$err"; then
-        fenrir-log err  "$DOCKER_UPDATE" 'ヽ（≧□≦）ノ' "Failed to clone repo"
-        fenrir-log warn "$DOCKER_UPDATE" "<stdout>" "$(cat "$out")"
-        fenrir-log err  "$DOCKER_UPDATE" "<stderr>" "$(cat "$err")"
+        loki-log err  "$DOCKER_UPDATE" 'ヽ（≧□≦）ノ' "Failed to clone repo"
+        loki-log warn "$DOCKER_UPDATE" "<stdout>" "$(cat "$out")"
+        loki-log err  "$DOCKER_UPDATE" "<stderr>" "$(cat "$err")"
         exit 66
     fi
 }
@@ -49,9 +53,9 @@ function safe_clone {
     fi
 
     if ! git clone --depth 1 "$url" "$HOME/.fenrir/tag" > "$out" 2> "$err"; then
-        fenrir-log err  "$DOCKER_UPDATE" 'ヽ（≧□≦）ノ' "Failed to clone repo"
-        fenrir-log warn "$DOCKER_UPDATE" "<stdout>" "$(cat "$out")"
-        fenrir-log err  "$DOCKER_UPDATE" "<stderr>" "$(cat "$err")"
+        loki-log err  "$DOCKER_UPDATE" 'ヽ（≧□≦）ノ' "Failed to clone repo"
+        loki-log warn "$DOCKER_UPDATE" "<stdout>" "$(cat "$out")"
+        loki-log err  "$DOCKER_UPDATE" "<stderr>" "$(cat "$err")"
         exit 66
     fi
 }
@@ -65,7 +69,7 @@ tag=$1
 if [ "$tag" = "latest" ]; then
     safe_clone
 elif [ -z "$tag" ]; then
-    fenrir-log err "$DOCKER_UPDATE" '(ㆆ_ㆆ)' "Empty version"
+    loki-log err "$DOCKER_UPDATE" '(ㆆ_ㆆ)' "Empty version"
     exit 67
 else
     safe_tag_clone "$tag"
@@ -79,4 +83,4 @@ else
     sudo "$HOME/.fenrir/tag/src/main/fenrir/cli/install-fenrir" update
 fi
 
-fenrir-log succ "$DOCKER_UPDATE" '♪(^∇^*)' "Successfully switched to $(jq '.version' '/etc/fenrir/main.json') version"
+loki-log succ "$DOCKER_UPDATE" '♪(^∇^*)' "Successfully switched to $(jq '.version' '/etc/fenrir/main.json') version"

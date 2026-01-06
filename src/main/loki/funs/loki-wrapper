@@ -1,0 +1,107 @@
+# >-loki-wrapper----------------------------------------------------------------------> #
+##
+# Usage:
+#   loki-get-out
+#
+# Prints the content of '$OUT_FILE'.
+##
+function loki-get-out {
+    cat "$OUT_FILE"
+}
+
+
+##
+# Usage:
+#   loki-get-err
+#
+# Prints the content of '$ERR_FILE'.
+##
+function loki-get-err {
+    cat "$ERR_FILE"
+}
+
+
+##
+# Usage:
+#   lokiw [-e] [-u] [CMD]
+#
+# Stores the command, its stdout and stderr. Preserves the return code.
+#
+# Options:
+#    -e     Exits current shell when the return code is not zero
+#    -u     Unsafe mode: uses 'eval $*' instead of '$@'
+#           Might have unexpected side-effects from the variable expansion
+##
+function lokiw {
+    local exitable=""
+    local unsafe=""
+
+    if [[ "$1" == "-e" ]]; then
+        exitable="YES"
+        shift
+    fi
+
+    if [[ "$1" == "-u" ]]; then
+        unsafe="YES"
+        shift
+    fi
+
+    local CMD=$*
+
+    # compute symmetric difference of two arrays
+    local sym_diff
+    sym_diff=$(echo "${JOTUNHEIM[@]}" "${FUNCNAME[@]}" | tr ' ' '\n' | sort | uniq -u)
+
+    if [[ "${JOTUNHEIM_LAST_CMD}" == "${CMD}" ]]; then # INCORRECT FOR literal cmd duplications
+        if [[ -z "${sym_diff}" ]] ||
+           [[ "${CMD}" == "${FUNCNAME[1]}" ]]; then # INCORRECT FOR direct recursive call
+            return 0
+        fi
+    fi
+
+    local len=$(( ${#BASH_SOURCE[@]} - 1 ))
+    {
+        local func_name=${FUNCNAME[1]}
+        if [[ "$func_name" == "source" ]]; then
+            echo "[Script '${BASH_SOURCE[1]}']:"
+        else
+            echo "[Function '$(loki-wrap "${BOLD}" "${func_name}")'] at ${BASH_SOURCE[1]}:"
+        fi
+
+        for (( i = 2; i < len; ++i )); do
+            local func_name=${FUNCNAME[i]}
+            if [[ "$func_name" == "source" ]]; then
+                echo "  in [Script '${BASH_SOURCE[i]}']:"
+            else
+                echo "  in [Function '$(loki-wrap "${BOLD}" "${func_name}")'] at ${BASH_SOURCE[i]}:"
+            fi
+        done
+
+        if [ "$LOKI_VERBOSE" = "-v" ]; then
+            sed "s|^|    ${MAGENTA}|; s|$|${ENDC}|" <<< "${CMD}"
+        else
+            echo -n "    "
+            echo "${CMD}"
+        fi
+    } >> "$CMD_FILE"
+
+    JOTUNHEIM_LAST_CMD="$CMD"
+    JOTUNHEIM=("${FUNCNAME[@]}")
+
+    local ecode
+    if [[ -n "$unsafe" ]]; then
+        eval "$*" > "$OUT_FILE" 2> "$ERR_FILE"
+        ecode=$?
+    else
+        "$@" > "$OUT_FILE" 2> "$ERR_FILE"
+        ecode=$?
+    fi
+
+    if [[ -n "$exitable" ]] && [ $ecode -ne 0 ]; then
+        loki-log fail "Failed to execute the command: '$*'"
+        exit $ecode
+    fi
+
+    return $ecode
+}
+# <----------------------------------------------------------------------loki-wrapper-< #

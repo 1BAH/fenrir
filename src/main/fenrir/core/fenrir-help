@@ -1,0 +1,30 @@
+#! /usr/bin/env loki
+
+######################################################################
+##                         VERIFY ARGUMENTS                         ##
+######################################################################
+
+#include <shift-args>
+
+# TODO Create help pages for all cmds
+
+EXP_ARGC=0
+#include <verify-argc>
+
+######################################################################
+##                           MAIN PROGRAM                           ##
+######################################################################
+
+cat <<____HEREDOC
+Fenrir is lightweight testing framework based on bash.
+
+Help pages to be done..
+
+------------------------------------------------------------------
+OPTIONS:
+    v, version           Print current version
+    --help, h, help      See help pages
+------------------------------------------------------------------
+fenrir $(fenrir-read-conf main version), 2026
+@_1BAH_
+____HEREDOC

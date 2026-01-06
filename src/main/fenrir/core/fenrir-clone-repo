@@ -1,38 +1,44 @@
-#! /bin/bash
+#! /usr/bin/env loki
 
 repo=$1
-verbosity=$2
-destination="$HOME/solution"
-out="/var/fenrir/out"
-err="/var/fenrir/err"
+destination=$(fenrir-read-conf run root)
 
-##############
+######################################################################
+##                         VERIFY ARGUMENTS                         ##
+######################################################################
 
-fenrir-log info "$verbosity" "Cloning repo $repo"
+#include <shift-args>
+
+EXP_ARGC=1
+#include <verify-argc>
+
+######################################################################
+##                           MAIN PROGRAM                           ##
+######################################################################
+
+loki-log info "Cloning repo $repo"
 
 if [ -d "$destination" ]; then
-    fenrir-log warn "$verbosity" "Remove previously cloned repo"
+    loki-log warn "Removing previously cloned repo.."
     rm -fr "$destination"
 fi
 
-if git clone "$repo" "$destination" > "$out" 2> "$err"
-then
-    fenrir-log succ "$verbosity" "Cloned repo to directory 'solution'"
+if lokiw git clone "$repo" "$destination"; then
+    loki-log succ "Cloned repo to directory 'solution'"
 else
-    fenrir-log err "$verbosity" "Failed"
-    fenrir-log warn "$verbosity" "<stdout>" "$(cat "$out")"
-    fenrir-log err "$verbosity" "<stderr>" "$(cat "$err")"
+    loki-log fail "Cannot clone the repository"
     exit 1
 fi
 
-pushd "$destination" &> /dev/null
-git switch task0 &> /dev/null
-git switch "$(jq -r '.branch' "/etc/fenrir/main.json")" &> /dev/null
-
-if [ "$(jq -r '.task' "/etc/fenrir/main.json")" = "git/ess" ]; then
-    for i in $(seq 1 17); do
-        git switch $i &> /dev/null
-    done
-fi
-pod &> /dev/null
-
+#lokiw -e pushd "$destination"
+#
+#git switch task0 &> /dev/null
+#git switch "$(fenrir-read-conf run task)" &> /dev/null
+#
+#if [ "$(fenrir-read-conf run task)" = "git/ess" ]; then
+#    for i in $(seq 1 17); do
+#        git switch $i &> /dev/null
+#    done
+#fi
+#
+#lokiw -e popd

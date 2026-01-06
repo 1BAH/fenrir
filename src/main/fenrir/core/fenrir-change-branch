@@ -1,26 +1,42 @@
-#! /bin/bash
+#! /usr/bin/env loki
 
-verbosity=$1
-branch=$2
-destination=$(fenrir-getroot)
-out="/var/fenrir/out"
-err="/var/fenrir/err"
+##
+# Usage:
+#   fenrir-change-branch <branch name>
+#
+# Checks out to the provided branch in the current solution directory
+##
+
+#include <shift-args>
+
+EXP_ARGC=1
+#include <verify-argc>
+
+branch=$1
+destination=$(fenrir-read-conf run root)
 
 ##############
 
-pushd "$destination" &> /dev/null
+lokiw pushd "$destination" || {
+    loki-log fail "Cannot switch to '$destination'"
+    exit 7
+}
 
-fenrir-log info "$verbosity" "Switching branch to '$branch'"
+loki-log info "Switching branch to '$branch'"
 
-if git switch "$branch" > "$out" 2> "$err"
-then
-    fenrir-log succ "$verbosity" "Switched to '$branch'"
+if lokiw git switch "$branch"; then
+    loki-log succ "Switched to '$branch'"
 else
-    fenrir-log err "$verbosity" "Failed"
-    fenrir-log warn "$verbosity" "<stdout>" "$(cat "$out")"
-    fenrir-log err "$verbosity" "<stderr>" "$(cat "$err")"
-    popd &> /dev/null
+    loki-log fail "Cannot check out to '$branch'"
+    lokiw popd || {
+        loki-log fail "Failed to pop directory"
+        exit 7
+    }
+
     exit 1
 fi
 
-popd &> /dev/null
+lokiw popd || {
+    loki-log fail "Failed to pop directory"
+    exit 7
+}

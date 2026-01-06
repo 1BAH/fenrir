@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /usr/bin/env bash
 
 ################################################
 #      We assume that PATH is already set!!!

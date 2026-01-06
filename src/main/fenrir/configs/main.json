@@ -1,8 +1,0 @@
-{
-    "score": "/var/fenrir/score",
-    "root": "/home/checker/solution",
-    "remote": "https://gitlab.com/atpd/progtech/tasks",
-    "branch": "-",
-    "blocking": "0",
-    "task": "-"
-}

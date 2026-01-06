@@ -1,33 +1,42 @@
-#! /bin/bash
+#! /usr/bin/env loki
 
-out="/var/fenrir/out"
-err="/var/fenrir/err"
-
+##
+# Usage:
+#   fenrir-run [-i] [-nl|--no-lint] [-nz|--no-zero] <SOLUTION DIRECTORY>
+#
+# Test the provided solution. The test must be set beforehand with 'fenrir-task' command.
+# This command is an interface. For the detailed execution pipeline see 'fenrir-main'.
+#
+# Options:
+#    -i                 Run test inside the provided directory without cloning it
+#                       WARNING! In case of test's impurity it might produce some side-effects
+#   -nz, --no-zero      Skip task0 validation
+#   -nl, --no-lint      Skip linting stage (walk-inspections)
+##
 
 function local_clone {
     from=$1
     to=$(fenrir-tmp -d)
 
-    fenrir-log info "$SILENT" "Cloning repo to '$to'.."
+    loki-log info "Cloning repo to '$to'.."
 
-    if ! git clone "$from" "$to" > "$out" 2> "$err"; then
-        fenrir-log err  "$SILENT" "Failed to clone locally"
-        fenrir-log warn "$SILENT" "<stdout>" "$(cat "$out")"
-        fenrir-log err  "$SILENT" "<stderr>" "$(cat "$err")"
+    if ! lokiw git clone "$from" "$to"; then
+        loki-log fail '(シ. .)シ' "Failed to clone locally"
         exit 56
     fi
 
-    jq ".root = \"$to\"" "/etc/fenrir/main.json" > /tmp/TMP_FENRIR
-    cat /tmp/TMP_FENRIR > "/etc/fenrir/main.json"
+    fenrir-set-conf run "root" "$to"
 }
 
 ######################################################################
 ##                         VERIFY ARGUMENTS                         ##
 ######################################################################
 
-SILENT="-v"
+#include <shift-args>
+
 NO_LINT=""
 NO_ZERO=""
+INLINE=""
 
 hit=0
 path=""
@@ -35,21 +44,21 @@ path=""
 while [ "$#" -ne 0 ]; do
     case $1 in
         "--no-lint" | "-nl")
-            NO_LINT=YES
+            NO_LINT="nl"
         ;;
 
         "--no-zero" | "-nz")
-            NO_ZERO=YES
+            NO_ZERO="nz"
         ;;
 
-        "-s")
-            SILENT=""
+        "-i")
+            INLINE="i"
         ;;
 
         *)
             if [ $hit -ge 1 ]; then
-                fenrir-log err "$SILENT" '(＃°Д°)' Wrong arguments count!
-                fenrir-log err "$SILENT" "Expected <1> but got <$(( $# + hit ))>"
+                loki-log err '(＃°Д°)' Wrong arguments count!
+                loki-log err "Expected <1> but got <$(( $# + hit ))>"
                 exit 15
             fi
 
@@ -63,34 +72,72 @@ while [ "$#" -ne 0 ]; do
 done
 
 if [ "$hit" -ne 1 ]; then
-    fenrir-log err "$SILENT" '(＃°Д°)' Wrong arguments count!
-    fenrir-log err "$SILENT" "Expected <1> but got <$hit>"
-    exit 15
+    loki-log err '(＃°Д°)' Wrong arguments count!
+    loki-log err "Expected <1> but got <$hit>"
+    exit 16
+fi
+
+# Docker execution uses inline option by default
+if [ -n "${FENRIR_IN_DOCKER}" ]; then
+    INLINE="i"
+fi
+
+task=$(fenrir-read-conf run task)
+
+if ! [ -d "$(fenrir-task-path repo)" ]; then
+    loki-log err "Task <$task> is not installed!"
+    loki-log err "Install it via 'fenrir task $task' to be able to run tests"
+    exit 77
 fi
 
 ######################################################################
 ##                           MAIN PROGRAM                           ##
 ######################################################################
 
+echo "$FENRIR_LOGO"
+
+if ! [ -f "${FENRIR_HOME}/repo/${task}/pipeline.hel" ]; then
+    loki-log err "Task '${task}' is not installed. Try to run 'fenrir task ${task}'"
+    exit 144
+fi
+
+allowed_inline=$(fenrir-read-conf "$task" inline)
+allowed_inline=${allowed_inline:-1}
+
+allowed=$(fenrir-read-conf "$task" inhost)
+allowed=${allowed:-1}
+
+# Check env restrictions
+if [ -z "${FENRIR_IN_DOCKER}" ]; then
+    if (( allowed != 1 )); then
+        loki-log err "This task does not support execution in host system"
+        loki-log err "Use 'fenrir rund $task' instead"
+        exit 101
+    fi
+
+    if (( allowed_inline != 1 )) && [ -n "$INLINE" ]; then
+        loki-log err "This task does not support inline execution"
+        loki-log err "Remove '-i' flag"
+        exit 102
+    fi
+fi
+
 src=$(realpath "$path")
 
-if ! [ -d "$src/.git" ]; then
-    fenrir-log err "$SILENT" '(╬▔皿▔)╯' "The provided file is not a project root"
+if [ "$task" = "-" ]; then
+    loki-log err 'ᕙ( •̀ ᗜ •́ )ᕗ' "The task was not set!"
     exit 89
 fi
 
-local_clone "$src"
-
-if [ -n "$NO_LINT" ]; then
-    if [ -n "$NO_ZERO" ]; then
-        fenrir-main nl nz "$SILENT"
-    else
-        fenrir-main nl "$SILENT"
-    fi
-else
-    if [ -n "$NO_ZERO" ]; then
-        fenrir-main nz "$SILENT"
-    else
-        fenrir-main "$SILENT"
-    fi
+[ -n "$INLINE" ] || if ! [ -d "$src/.git" ]; then
+    loki-log err '(╬▔皿▔)╯' "The provided file is not a project root"
+    exit 90
 fi
+
+if [ -n "$INLINE" ]; then
+    fenrir-set-conf run "root" "$src"
+else
+    local_clone "$src"
+fi
+
+fenrir-main $NO_ZERO $NO_LINT

@@ -1,293 +1,74 @@
-#! /bin/bash
+#! /usr/bin/env bash
 
-CLI_DIR=$(dirname "$(realpath "$0")")
-CORE_UTILS_DIR=$(realpath "${CLI_DIR}/../core")
-CFGS_DIR=$(realpath "${CLI_DIR}/../configs")
-BASIC_UTILS_DIR=$(realpath "${CLI_DIR}/../custom")
+out=(">" "/dev/null")
+in_docker=""
+verbose=""
 
-while IFS='=' read -r key value; do
-    if [ "$key" = "version" ]; then
-        VERSION=$value
-    fi
-done < "$CLI_DIR/fenrir.properties"
+while (( $# > 0 )); do
+    case "$1" in
+    -v)
+        out=()
+        verbose="-v"
+        ;;
+    -d)
+        in_docker="1"
+        ;;
+    esac
 
-update=""
-docker_update=""
-
-###################################################################
-
-GREEN="\033[38;5;112m"
-BLUE="\033[38;5;4m"
-YELLOW="\033[38;5;214m"
-RED="\033[38;5;196m"
-ENDC="\033[0m"
-
-
-function info {
-    [ -z "$update" ] && echo -e "${BLUE}[ INFO  ]${ENDC} $*" # > /dev/tty
-}
-
-function warn {
-    echo -e "${YELLOW}[WARNING]${ENDC} $*" # > /dev/tty
-}
-
-function err {
-    echo -e "${RED}[ ERROR ]${ENDC} $*" # > /dev/tty
-}
-
-function succ {
-    [ -z "$update" ] && echo -e "${GREEN}[SUCCESS]${ENDC} $*" # > /dev/tty
-}
+    shift
+done
 
 #################################################################
-
-if [ "$1" = "update" ]; then
-    info "Updating fenrir up to version @$VERSION"
-    update=true
-fi
-
-if [ "$1" = "docker" ]; then
-    echo "[ INFO  ] Updating fenrir up to the latest version: \"$VERSION\""
-    update=true
-    docker_update=true
-fi
-
+#                         VERIFY SUDO                           #
 #################################################################
 
-if [ "$(id -u)" -ne 0 ]; then
-    if [ -n "$update" ]; then
-        err "THIS SHOULD NOT HAVE HAPPENED! CONTACT US!"
-    fi
-
-    err "The script must be run under sudo!"
+if ! [ "$(id -u)" -eq 0 ]; then
+    echo -e "\033[1m\033[38;5;196m[ ERROR ]\033[0m \033[38;5;197mᕙ( •̀ ᗜ •́ )ᕗ  \033[0mThe script must be run in a \033[1mprivileged mode\033[0m (sudo)!"
     exit 111
 fi
 
-###################################################################
-
-[ -n "$SUDO_USER" ] && user=$SUDO_USER || user=$USER
-info "Installing fenrir @$VERSION for '$user' user"
+echo "PROGRESS >> Assembling the build script.."
 
 #################################################################
-
-info "> Identifying OS.."
-
-case "$(uname -s)" in
-    Linux*)
-        os_pref_home="/home"
-        info ">> OS is LINUX"
-    ;;
-    Darwin*)
-        os_pref_home="/Users"
-        info ">> OS is MACOS"
-    ;;
-#    CYGWIN*)
-#        os=Cygwin
-#    ;;
-#    MINGW*)
-#        os=MinGw
-#    ;;
-#    MSYS_NT*)
-#        os=MSys
-#    ;;
-    *)
-        warn ">> Unsupported OS: '$(uname -s)'"
-        warn ">> Do you agree to continue? (Potentially dangerous) [yes|no]"
-        read -r op
-
-        if [ "$op" != "yes" ]; then
-            err "Terminating.."
-            exit 3
-        fi
-    ;;
-esac
-
+#                       ASSEMBLE INSTALLER                      #
 #################################################################
 
-info "> Validating environment.."
+CLI_DIR=$(dirname "$(realpath "$0")") # 'cli' directory
+BUILD_SCRIPT="/tmp/FENRIR_BUILD_SCRIPT"
 
-if [ -d "/etc/fenrir" ]; then
-    warn ">> Directory '/etc/fenrir' already exists"
-    warn ">> Remove existing '/etc/fenrir' [yes|no]"
-    read -r op
-
-    if [ "$op" = "yes" ]; then
-        info ">>> Removing '/etc/fenrir'.."
-        rm -fr /etc/fenrir
-    else
-        err "Terminating.."
-        exit 3
-    fi
+if [ -f "$BUILD_SCRIPT" ]; then
+    eval "echo \"[ INFO  ] Found an old build script: <$BUILD_SCRIPT>\" ${out[*]}"
+    rm -fr "$BUILD_SCRIPT" &> /dev/null
 fi
 
-if [ -d "/var/fenrir" ]; then
-    warn ">> Directory '/var/fenrir' already exists. Run uninstaller to remove it"
-    warn ">> Remove existing '/var/fenrir'? [yes|no]"
-    read -r op
 
-    if [ "$op" = "yes" ]; then
-        info ">>> Removing '/var/fenrir'.."
-        rm -fr /var/fenrir
-    else
-        err "Terminating.."
-        exit 3
-    fi
-fi
-
-if ! type jq &> /dev/null; then
-    err ">> 'jq' is not installed"
-    exit 4
-fi
-
-if ! type wget &> /dev/null; then
-    err ">> 'wget' is not installed"
-    exit 4
-fi
-
-for cmd in "$CORE_UTILS_DIR"/*; do
-    name=$(basename "$cmd")
-
-    if type "$name" &> /dev/null; then
-        location=($(type "$name")) # FIXME: SC2207
-        if [ -n "$docker_update" ]; then
+( # Do not pollute the global variable scope
+    first=1
+    for script in install/*; do
+        if [[ $script == "install-fenrir" ]]; then
             continue
         fi
 
-        warn ">> Command <$name> already exists: '${location[2]}'"
-        warn ">> After installation it will be overridden. Continue? [yes|no]"
-        read -r op
+        eval "echo \"[ INFO  ] Inlining module <$script>..\" ${out[*]}"
 
-        if [ "$op" != "yes" ]; then
-            err "Terminating.."
-            exit 3
+        file=$(basename "$script")
+        pattern="#include <$file>"
+
+        if (( first == 1 )); then
+            sed -e "/$pattern/r $script" -e "/$pattern/d" install/install-fenrir > $BUILD_SCRIPT
+            first=0
+        else
+            sed -i -e "/$pattern/r $script" -e "/$pattern/d" $BUILD_SCRIPT
         fi
-    fi
-done
+    done
+)
 
-succ "> Ready to be installed!"
+chmod +x $BUILD_SCRIPT
 
-#################################################################
+eval "echo \"[ INFO  ] The final build script is <$BUILD_SCRIPT>\" ${out[*]}"
+echo "PROGRESS << DONE"
 
-info "> Creating '/etc/fenrir'.."
+CLI_DIR="$CLI_DIR" FENRIR_INSTALL_VERBOSE="$verbose" LOKI_VERBOSE="$verbose" IN_DOCKER="$in_docker" $BUILD_SCRIPT
+# TODO save to local repo
 
-mkdir -p /etc/fenrir
-chown "$user" /etc/fenrir
-
-succ "> Done"
-
-#################################################################
-
-info "> Creating '/var/fenrir'.."
-
-mkdir -p /var/fenrir
-chown "$user" /var/fenrir
-
-succ "> Done"
-
-#################################################################
-
-info "> Installing core.."
-
-for cmd in "$CORE_UTILS_DIR"/*; do
-    name=$(basename "$cmd")
-
-    if ! cp "$cmd" "/usr/local/bin/$name"; then
-        err "Terminating.."
-        exit 10
-    fi
-done
-
-succ "> Done"
-
-#################################################################
-
-info "> Setting all configs.."
-
-for cfg in "$CFGS_DIR"/*; do
-    name=$(basename "$cfg")
-
-    if ! {
-        cp "$cfg" "/etc/fenrir/$name" &&
-        chown "$user" "/etc/fenrir/$name"
-    }; then
-        err "Terminating.."
-        exit 10
-    fi
-done
-
-sudo chmod -t /tmp
-jq ".version = \"$VERSION\"" "/etc/fenrir/main.json" > /tmp/INSTALL_FENRIR
-cat /tmp/INSTALL_FENRIR > "/etc/fenrir/main.json"
-sudo chmod +t /tmp
-
-succ "> Done"
-
-#################################################################
-
-info "> Installing basic utils.."
-
-if ! mkdir -p "$os_pref_home/$user/.fenrir/custom/walk"; then
-    err "> Unable to create local storage"
-    exit 189
-fi
-
-chown "$user" "$os_pref_home/$user/.fenrir"
-chown "$user" "$os_pref_home/$user/.fenrir/custom"
-chown "$user" "$os_pref_home/$user/.fenrir/custom/walk"
-
-for util in "$BASIC_UTILS_DIR"/* "$BASIC_UTILS_DIR"/**/*; do
-    relative_path=${util#$BASIC_UTILS_DIR/}
-
-    if [ -d "$util" ]; then
-        continue
-    fi
-
-    if ! {
-        cp "$util" "$os_pref_home/$user/.fenrir/custom/$relative_path" &&
-        chown "$user" "$os_pref_home/$user/.fenrir/custom/$relative_path"
-    }; then
-        err "Terminating.."
-        exit 10
-    fi
-done
-
-succ "> Done"
-
-###################################################################
-
-info "> Installing cli tool.."
-
-cat "$CLI_DIR/fenrir" > "/usr/local/bin/fenrir"
-chmod +x "/usr/local/bin/fenrir"
-
-succ "> Done"
-
-###################################################################
-
-info "> Installing autocompletion.."
-
-cp "`which fenrir-autocomplete`" "/etc/bash_completion.d/"
-
-warn "> Run 'source ~/.bashrc' or reload terminal to apply autocompletion"
-
-succ "> Done"
-
-###################################################################
-
-info "> Installing uninstaller.."
-
-if ! {
-    cp "$CLI_DIR/uninstall-fenrir" "/usr/local/bin/uninstall-fenrir" &&
-    chmod +x "/usr/local/bin/uninstall-fenrir"
-}; then
-    err "Terminating.."
-    exit 19
-fi
-
-succ "> Done"
-
-###################################################################
-
-update="" # Unmute
-
-[ -z "$docker_update" ] && succ "Installation has finished!"
+# TODO BUILD SCRIPT CHOWN!

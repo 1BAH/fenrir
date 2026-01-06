@@ -1,0 +1,30 @@
+# >>= START =<<
+
+##
+# Usage:
+#   #include <verify-argc>
+#
+# Validates argc. Has two modes:
+#   - 'EXP_ARGC' is set:
+#     Checks that argc is equal to 'EXP_ARGC'
+#   - 'MAX_ARGC' is set:
+#     Checks that argc is no more than 'MAX_ARGC'
+##
+
+if [[ -v EXP_ARGC ]]; then
+    if (( $# != "${EXP_ARGC}" )); then
+        loki-log err '(＃°Д°)' Wrong arguments count!
+        loki-log err "Expected <$EXP_ARGC> but got <$#>"
+        exit 111
+    fi
+elif [[ -v MAX_ARGC ]]; then
+    if (( $# > "${MAX_ARGC}" )); then
+        loki-log err '(＃°Д°)' Wrong arguments count!
+        loki-log err "Expected no more than <${MAX_ARGC}> but got <$#>"
+        exit 111
+    fi
+else
+    loki-log warn "'verify-args' is invoked but no options are set"
+fi
+
+# >>= END =<<

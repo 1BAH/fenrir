@@ -1,96 +1,59 @@
-#! /bin/bash
+#! /usr/bin/env loki
 
-TMP=$(fenrir-tmp -v)
-LOCAL_REPO="$HOME/.fenrir/repo"
-LOCAL_CFGS="$HOME/.fenrir/cfgs"
+##
+# Usage:
+#   fenrir-task [-f|--force] <TASK ID>
+#
+# Set the task to be checked and optionally download its tests.
+# The tests are downloaded from 'remote' which is defined in '/etc/fenrir/main.hel'.
+# When the task tests have already been downloaded, the corresponding stages is omitted.
+#
+# Options:
+#    none            Download tests only when they are not presented
+#    -f, --force     Download tests anyway
+##
 
 ######################################################################
 ##                         PARSE ARGUMENTS                          ##
 ######################################################################
 
-INSTALL=0
-DOCKER_UPDATE="-v"
+#include <shift-args>
 
-if [ "$1" = "-s" ]; then
-    DOCKER_UPDATE=""
-    shift
-fi
+INSTALL=0
 
 if [ "$1" = "-f" ] || [ "$1" = "--force" ]; then
     INSTALL=1
     shift
 fi
 
-if [ "$#" -ne "1" ]; then
-    fenrir-log err "$DOCKER_UPDATE" '(＃°Д°)' Wrong arguments count!
-    fenrir-log err "$DOCKER_UPDATE" "Expected <1> but got <$#>"
-    exit 15
-fi
+EXP_ARGC=1
+#include <verify-argc>
 
 TASK=$1
 
-if ! [ -d "$LOCAL_REPO/$TASK" ]; then
+if ! [ -d "${FENRIR_HOME}/repo/${TASK}" ]; then
     INSTALL=1
-    fenrir-log warn "$DOCKER_UPDATE" "Task '$TASK' has not been installed yet"
+    loki-log warn "Task '$TASK' has not been installed yet"
 else
-    fenrir-log info "$DOCKER_UPDATE" "Task '$TASK' has already been installed"
+    loki-log info "Task '$TASK' has already been installed"
 fi
-
-######################################################################
-##                            FUNCTIONS                             ##
-######################################################################
-
-function get_local_cfgs {
-    if [ "$(ls "$LOCAL_CFGS/$TASK" | wc -w)" -eq 0 ]; then
-        return
-    fi
-
-    for cfg in "$LOCAL_CFGS/$TASK"/*; do
-        if [ -f "/etc/fenrir/$(basename "$cfg")" ]; then
-            rm -f "/etc/fenrir/$(basename "$cfg")"
-        fi
-
-        cp "$cfg" "/etc/fenrir/$(basename "$cfg")"
-    done
-}
-
-function get_local_task {
-    for file in "$LOCAL_REPO/$TASK"/*; do
-        cp "$file" "$HOME/.fenrir/custom/$(basename "$file")"
-    done
-}
-
-function set_meta {
-    branch=$(jq -r .branch "$LOCAL_REPO/$TASK/index.json")
-    jq ".branch = \"$branch\"" "/etc/fenrir/main.json" > "$TMP/TMP_FENRIR"
-    cat "$TMP/TMP_FENRIR" > "/etc/fenrir/main.json"
-
-    block=$(jq -r .blocking "$LOCAL_REPO/$TASK/index.json")
-    jq ".blocking = \"$block\"" "/etc/fenrir/main.json" > "$TMP/TMP_FENRIR"
-    cat "$TMP/TMP_FENRIR" > "/etc/fenrir/main.json"
-}
 
 ######################################################################
 ##                           MAIN PROGRAM                           ##
 ######################################################################
 
 if [ "$INSTALL" -ne 0 ]; then
-    if [ -z "$DOCKER_UPDATE" ]; then
-        if ! fenrir-install-task -s "$TASK"; then
-            exit 56
-        fi
-    else
-        if ! fenrir-install-task "$TASK"; then
-            exit 56
-        fi
+    fenrir-install-task "$TASK"
+    result=$?
+    if [ $result -ne 0 ] ; then
+        exit $result
     fi
 fi
 
-get_local_cfgs
-get_local_task
-set_meta
+branch=$(fenrir-read-conf "${TASK}" branch)
+fenrir-set-conf run task "$branch"
 
-jq ".task = \"$TASK\"" "/etc/fenrir/main.json" > "$TMP/TMP_FENRIR"
-cat "$TMP/TMP_FENRIR" > "/etc/fenrir/main.json"
+block=$(fenrir-read-conf "${TASK}" blocking)
+fenrir-set-conf run blocking "$block"
 
-fenrir-log succ "$DOCKER_UPDATE" '[]~(￣▽￣)~*' "Fenrir is ready to check task '$TASK'"
+loki-log succ '[]~(￣▽￣)~*' "Fenrir is ready to check task '$TASK'"

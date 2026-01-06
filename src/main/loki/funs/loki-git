@@ -1,0 +1,63 @@
+# >-loki-git--------------------------------------------------------------------------> #
+###############################################################
+##          COMMON FUNCTIONS USED TO WORK WITH GIT           ##
+###############################################################
+#                  loki-commit-hash                           #
+#                  loki-commit-name                           #
+#                  loki-commit-parent                         #
+#                  loki-commit-branch-exists                  #
+#                  loki-commit-                               #
+###############################################################
+
+
+##
+# Usage:
+#   loki-commit-hash <COMMIT_REF>
+#
+# Returns a prefix of commit's hash.
+# NOTE: The length of the prefix may vary according to the git version.
+##
+function loki-commit-hash {
+    git show -s --format="%h" "$1"
+}
+
+##
+# Usage:
+#   loki-commit-name <COMMIT_REF>
+#
+# Returns the message of the provided commit.
+##
+function loki-commit-name {
+    git show -s --format="%s" "$1"
+}
+
+##
+# Usage:
+#   loki-commit-parent <COMMIT_REF>
+#
+# Returns a prefix of the hash associated with the commit's parent.
+# NOTE: The length of the prefix may vary according to the git version.
+##
+function loki-commit-parent {
+    git show -s --format="%p" "$1"
+}
+
+##
+# Usage:
+#   loki-branch-exists <BRANCH_NAME>
+#
+# Returns 0 if the specified branch exists, otherwise returns 1.
+##
+function loki-branch-exists {
+    local branch=$1
+
+    loki-log info "Checking whether branch <$branch> exists.."
+
+    if git branch | grep -q "$branch"; then
+        loki-log succ "Branch exists"
+    else
+        loki-log err  "Branch does not exist"
+        return 1
+    fi
+}
+# <--------------------------------------------------------------------------loki-git-< #

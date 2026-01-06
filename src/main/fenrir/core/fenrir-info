@@ -1,86 +1,58 @@
-#! /bin/bash
+#! /usr/bin/env loki
+
+##
+# Usage:
+#   fenrir-help
+#
+# Show the current context of fenrir:
+#   - Tasks' remote repo
+#   - The task to be tested
+#   - Running mode of the task (whether is blocking or not)
+#   - Testing pipeline
+##
 
 ######################################################################
 ##                         VERIFY ARGUMENTS                         ##
 ######################################################################
 
-exp=0
-real=$#
+#include <shift-args>
 
-if [ "$exp" -ne "$real" ]; then
-    fenrir-log err -v '(＃°Д°)' Wrong arguments count!
-    fenrir-log err -v "Expected <$exp> but got <$real>"
-    exit 15
-fi
+EXP_ARGC=0
+#include <verify-argc>
 
 ######################################################################
 ##                           MAIN PROGRAM                           ##
 ######################################################################
 
+echo "$FENRIR_LOGO"
+
+curr_task=$(fenrir-read-conf run task)
+
+pipeline=""
+if [ -f "${FENRIR_HOME}/repo/${curr_task}/pipeline.hel" ]; then
+    pipeline=$(< "${FENRIR_HOME}/repo/${curr_task}/pipeline.hel")
+    inline=$(fenrir-read-conf "${curr_task}" inline)
+    inhost=$(fenrir-read-conf "${curr_task}" inhost)
+    indocker=$(fenrir-read-conf "${curr_task}" indocker)
+elif [ "$curr_task" != "-" ]; then
+    loki-log err "Found invalid state of task '${curr_task}'. It's strongly recommended to rerun 'fenrir task ${curr_task}'."
+    inline="?"
+    inhost="?"
+    indocker="?"
+fi
+
+
 cat <<____HEREDOC
-Possible options:
-fenrir help
-
-fenrir gc [-s]
-fenrir remote <URL>
-fenrir task [-s] <TASK ID>
-fenrir run [-s] [--no-lint | -nl] [--no-zero | -nz] <SOLUTION DIR>
-
-fenrir [-v|--version|version]
-fenrir version
-fenrir versions
-fenrir switch [<VERSION> | latest]
-------------------------------------------------------------------
-fenrir help:
-    Info about fenrir util
-    See https://gitlab.com/atpd/progtech/fenrir
-
-fenrir remote <URL>:
-    Set remote task repository
-
-fenrir task [-s] [-f|--force] <TASK ID>:
-    Set task tests. If they have not been installed yet then install then.
-    '-f' or '--force': Install anyway
-    '-s': Mute colours
-
-fenrir run [-s] [--no-lint|-nl] [--no-zero|-nz] <SOLUTION DIR>:
-    Run local tests on the specified local repository
-    '-s': Mute colours
-    '--no-lint' or '-nl': Skip linters
-    '--no-zero' or '-nz': Skip task0 tests
-
-fenrir gc [-s]:
-    Clean local repository. Removes all installed tasks and dependencies, fenrir-tmp.
-    '-s': Soft mode. Removes only tmp & tag directories
-
-fenrir versions:
-    Get all available versions
-
-fenrir switch [-s] latest:
-    Update up to the latest version
-    '-s': Mute colours
-
-fenrir switch <VERSION>:
-    Switch to the specified version (Error is thrown if the version is not available)
-    Run 'fenrir version' to list all available versions
-
-fenrir version:
-    Print current version
-
-fenrir [-v|--version|version]:
-    Print current version
 ------------------------------------------------------------------
 Current settings:
-    * Remote: $(fenrir-getremote)
-    * Solution branch: $(jq '.branch' '/etc/fenrir/main.json')
-    * Blocking: $(jq '.blocking' '/etc/fenrir/main.json')
-    * Last installed task: $(jq '.task' '/etc/fenrir/main.json')
+    * Remote: $(fenrir-read-conf main remote)
+    * Current task: ${curr_task}
+    * Blocking: $(fenrir-read-conf run blocking)
+    * Execution mode: ${inline:-1}${inhost:-1}${indocker:-1} (Inline-Host-Docker)
 ------------------------------------------------------------------
 Run settings:
-$(jq . "$HOME/.fenrir/custom/pipeline.json")
+$([ -n "${pipeline}" ] && loki-wrap "${YELLOW}" "${pipeline}")
 ------------------------------------------------------------------
-fenrir $(jq '.version' '/etc/fenrir/main.json'), 2025
+fenrir $(fenrir-read-conf main version), 2026
 @_1BAH_
 ____HEREDOC
-
-

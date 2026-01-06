@@ -1,0 +1,425 @@
+#! /usr/bin/env bash
+
+function out {
+    if [[ "$FENRIR_INSTALL_VERBOSE" == "-v" ]]; then
+        "$@"
+    else
+        eval "$* > /dev/null"
+    fi
+}
+
+#################################################################
+#                        GLOBAL CONSTS                          #
+#################################################################
+
+out echo "======================= Installing fenrir ======================="
+
+
+CLI_DIR=${CLI_DIR:?"Cannot execute installer: 'CLI_DIR' was not provided"}
+FENRIR_DIR=$(realpath "${CLI_DIR}/..")
+LOKI_DIR=$(realpath "${FENRIR_DIR}/../loki")
+
+update=""
+docker_update=""
+
+#################################################################
+#                         VERIFY DIRS                           #
+#################################################################
+
+echo "PROGRESS >> Verifying the source dir.."
+
+if [[ $(basename "$CLI_DIR") != "cli" ]]; then
+    printf "\033[31m'CLI_DIR' does not actually points to 'cli'\033[0m\n"
+    printf "\033[31mCLI_DIR=%s\033[0m\n" "$CLI_DIR" >& 2
+    exit 3
+fi
+
+if [[ $(basename "$FENRIR_DIR") != "fenrir" ]]; then
+    printf "\033[31m'FENRIR_DIR' does not actually points to 'fenrir'\033[0m\n" >& 2
+    printf "\033[31mFENRIR_DIR=%s\033[0m\n" "$FENRIR_DIR" >& 2
+    exit 3
+fi
+
+if [[ $(basename "$LOKI_DIR") != "loki" ]]; then
+    printf "\033[31m'LOKI_DIR' does not actually points to 'loki'\033[0m\n" >& 2
+    printf "\033[31mLOKI_DIR=%s\033[0m\n" "$LOKI_DIR" >& 2
+    exit 3
+fi
+
+echo "PROGRESS << DONE"
+
+#################################################################
+#                       LOAD PROPERTIES                         #
+#################################################################
+
+while IFS='=' read -r key value; do
+    case "$key" in
+        version)
+            VERSION=$value
+            ;;
+        requirements)
+            eval "REQUIREMENTS=$value"
+            ;;
+    esac
+done < "$CLI_DIR/fenrir.properties"
+
+if [[ $VERSION == "" ]]; then
+    printf "\033[31m'VERSION' is not specified in properties! The sources might be broken!\033[0m\n" >& 2
+    exit 3
+fi
+
+#################################################################
+#                      PREPARE BUILD DIR                        #
+#################################################################
+
+BUILD_DIR="/tmp/FENRIR_BUILD"
+
+if [ -d "$BUILD_DIR" ]; then
+    rm -fr "$BUILD_DIR"
+fi
+
+mkdir -p "$BUILD_DIR"
+
+cp -r "$LOKI_DIR" "$BUILD_DIR/loki"
+cp -r "$FENRIR_DIR" "$BUILD_DIR/fenrir"
+
+# shellcheck disable=SC2164
+pushd "$BUILD_DIR" &> /dev/null
+
+out echo "[ INFO  ] Now in BUILD_DIR: '$PWD'"
+
+CORE_UTILS_DIR=$(realpath "${BUILD_DIR}/fenrir/core")
+CFGS_DIR=$(realpath "${BUILD_DIR}/fenrir/configs")
+BASIC_UTILS_DIR=$(realpath "${BUILD_DIR}/fenrir/shared")
+
+#################################################################
+#                       POST-VERIFY DIRS                        #
+#################################################################
+
+echo "PROGRESS >> Validating BUILD_DIR structure.."
+
+if [[ $(basename "$CORE_UTILS_DIR") != "core" ]]; then
+    printf "\033[31m'CORE_UTILS_DIR' does not actually points to 'core'\033[0m\n" >& 2
+    printf "\033[31mCORE_UTILS_DIR=%s\033[0m\n" "$CORE_UTILS_DIR" >& 2
+    exit 3
+fi
+
+if [[ $(basename "$CFGS_DIR") != "configs" ]]; then
+    printf "\033[31m'CFGS_DIR' does not actually points to 'configs'\033[0m\n" >& 2
+    printf "\033[31mCFGS_DIR=%s\033[0m\n" "$CFGS_DIR" >& 2
+    exit 3
+fi
+
+if [[ $(basename "$BASIC_UTILS_DIR") != "shared" ]]; then
+    printf "\033[31m'BASIC_UTILS_DIR' does not actually points to 'shared'\033[0m\n" >& 2
+    printf "\033[31mBASIC_UTILS_DIR=%s\033[0m\n" "$BASIC_UTILS_DIR" >& 2
+    exit 3
+fi
+
+echo "PROGRESS << DONE"
+
+#################################################################
+#                    INSTALL 'LOKI' MODULE                      #
+#################################################################
+
+echo "[ INFO  ] Installing 'Loki' module.."
+
+#include <install-loki>
+
+echo "[ INFO  ] Now switching to 'loki-log'.. (Colours might appear)"
+
+loki-log succ "Loki is installed"
+
+#################################################################
+#                      INLINE FUNCTIONS                         #
+#################################################################
+
+#include <inline-funs>
+
+#################################################################
+#                       PARSE ARGUMENTS                         #
+#################################################################
+
+if [ "$1" = "update" ]; then #TODO UPDATE
+    loki-log info "Running from 'fenrir switch'"
+    loki-log warn "If you have not run that command, you should interrupt this process!"
+    sleep 3s # Some time to analyse everything
+    update=true
+fi
+
+if [ -n "$IN_DOCKER" ]; then
+    loki-log info "Running in a docker container"
+    update=true
+fi
+
+#################################################################
+#                        DETERMINE USER                         #
+#################################################################
+
+[ -n "$SUDO_USER" ] && user=$SUDO_USER || user=$USER
+loki-log info "Installing $(loki-wrap "${SKY}" "fenrir@$VERSION") for $(loki-wrap "${SKY}" "$user") user.."
+out loki-log info "Build script is located in '$(realpath "$0")'"
+
+#################################################################
+#                         DETERMINE OS                          #
+#################################################################
+
+loki-prog "Identifying OS.."
+
+case "$(uname -s)" in
+    Linux*)
+        os_pref_home="/home"
+        loki-gorp "OS is $(loki-wrap "${BOLD}" "LINUX")"
+    ;;
+    Darwin*)
+        os_pref_home="/Users"
+        loki-gorp "OS is $(loki-wrap "${BOLD}" "MACOS")"
+    ;;
+#    CYGWIN*)
+#        os=Cygwin
+#    ;;
+#    MINGW*)
+#        os=MinGw
+#    ;;
+#    MSYS_NT*)
+#        os=MSys
+#    ;;
+    *)
+        loki-gorp "Unsupported OS: $(loki-wrap "${BOLD}" "$(uname -s)")"
+        loki-log warn "Do you agree to continue? ($(loki-wrap "${BOLD}" Potentially dangerous)) [Y|N]"
+
+        read -r op
+        if [ "$op" != "y" ] && [ "$op" != "Y" ]; then
+            loki-log err "Terminating.."
+            exit 3
+        fi
+    ;;
+esac
+
+#################################################################
+#                   Check & clean filesystem                    #
+#################################################################
+
+loki-prog "Validating environment.."
+
+out loki-prog "Working directories.."
+
+if [ -d "/etc/fenrir" ]; then
+    find /etc/fenrir -mindepth 1 -not -name "*.hel" | while read -r file; do
+        loki-log warn "File '$file' is removed"
+    done
+fi
+
+if [ -d "/var/fenrir" ]; then
+    out loki-log warn "Removing '/var/fenrir/': deprecated for removal"
+    rm -fr /var/fenrir
+fi
+
+out loki-gorp
+out loki-prog "Software requirements.."
+
+for req in "${REQUIREMENTS[@]}"; do
+    if ! type "$req" &> /dev/null; then
+        loki-log err "'$(loki-wrap "${BOLD}" "$req")' is not installed!"
+        exit 5
+    else
+        out loki-log succ "'$(loki-wrap "${BOLD}" "$req")' exists"
+    fi
+done
+
+# Check that bash is 5.0.0 or newer
+if (( "$(echo "$BASH_VERSION" | cut -d'.' -f1)" < 5 )); then
+    loki-log warn "Bash version is '$(loki-wrap "${BOLD}" "$BASH_VERSION")'. Fenrir might work incorrectly: we expect bash>=5.0.0."
+    loki-log warn "Do you agree to continue? ($(loki-wrap "${BOLD}" Potentially dangerous)) [Y|N]"
+
+    read -r op
+    if [ "$op" != "y" ] && [ "$op" != "Y" ]; then
+        loki-log err "Terminating.."
+        exit 3
+    fi
+fi
+
+out loki-gorp
+out loki-prog "Previous installations..."
+
+( # Variable scope: found array
+    found=()
+
+    for cmd in "$CORE_UTILS_DIR"/*; do
+        if ! [ -f "$cmd" ]; then
+            continue
+        fi
+
+        name=$(basename "$cmd")
+
+        if type "$name" &> /dev/null; then
+            found+=("$(type "$name" | cut -d ' ' -f3)")
+        fi
+    done
+
+    if [ -n "$IN_DOCKER" ]; then
+        exit
+    fi
+
+    if [ "${#found[@]}" -eq 0 ]; then
+        exit 0 # No conflicting files were detected
+    fi
+
+    # Alerts for out-of-docker installation
+    loki-log warn "These commands already exist:"
+
+    for cmd in "${found[@]}"; do
+        echo "'$(basename "$cmd")' -> '$cmd'"
+    done | column -t | sed "s/^/$(loki-wrap "${YELLOW}" "[WARNING]")      /"
+
+    loki-log warn "They are to be replaced. Do you want to proceed? ($(loki-wrap "${BOLD}" Potentially dangerous)) [Y|N]"
+
+    read -r op
+    if [ "$op" != "y" ] && [ "$op" != "Y" ]; then
+        loki-log err "Terminating.."
+        exit 3
+    fi
+) || exit $? # propagate error
+
+out loki-prog "Cleaning local repo.."
+rm -fr "$os_pref_home/$user/.fenrir"
+out loki-gorp
+
+out loki-gorp
+loki-gorp
+
+#################################################################
+#                        Install files                          #
+#################################################################
+
+loki-prog "Installing 'Fenrir'.."
+
+out loki-prog "Creating '/etc/fenrir'.."
+
+mkdir -p /etc/fenrir
+chown "$user" /etc/fenrir
+
+out loki-gorp
+
+#################################################################
+
+out loki-prog "Installing core.."
+
+for cmd in "$CORE_UTILS_DIR"/*; do
+    name=$(basename "$cmd")
+
+    if ! [ -f "$cmd" ]; then
+        continue
+    fi
+
+    if ! mv "$cmd" "/usr/local/bin/$name"; then
+        loki-log err "Failed to install. Try again or submit an issue."
+        exit 6
+    fi
+done
+
+out loki-gorp
+
+#################################################################
+
+out loki-prog "Setting all configs.."
+
+for cfg in "$CFGS_DIR"/*.hel; do
+    name=$(basename "$cfg")
+
+    lokiw diff -q "$cfg" "/etc/fenrir/$name" && {
+        out loki-log info "File '$cfg' has no differences.."
+        continue
+    }
+
+    if ! {
+        mv "$cfg" "/etc/fenrir/$name" &&
+        chown "$user" "/etc/fenrir/$name"
+    }; then
+        loki-log err "Failed to install. Try again or submit an issue."
+        exit 7
+    fi
+done
+
+echo "version=\"$VERSION\"" >> "/etc/fenrir/main.hel"
+
+out loki-gorp
+
+#################################################################
+
+out loki-prog "Installing basic utils.."
+
+if ! mkdir -p "$os_pref_home/$user/.fenrir/shared/walk"; then
+    loki-log err "Unable to create local storage"
+    exit 189
+fi
+
+if ! mkdir -p "$os_pref_home/$user/.fenrir/repo/local"; then
+    loki-log err "Unable to create local storage"
+    exit 189
+fi
+
+chown -R "$user" "$os_pref_home/$user/.fenrir"
+
+for util in "$BASIC_UTILS_DIR"/* "$BASIC_UTILS_DIR"/**/*; do
+    relative_path=${util#"$BASIC_UTILS_DIR"/}
+
+    if ! [ -f "$util" ]; then
+        continue
+    fi
+
+    case "$(basename "$util")" in
+        "local" | "pipeline.hel" | "index.hel")
+            if ! {
+                mv "$util" "$os_pref_home/$user/.fenrir/repo/local/$relative_path" &&
+                chown "$user" "$os_pref_home/$user/.fenrir/repo/local/$relative_path"
+            }; then
+                loki-log err "Failed to install. Try again or submit an issue."
+                exit 88
+            fi
+          ;;
+        *)
+            if ! {
+                mv "$util" "$os_pref_home/$user/.fenrir/shared/$relative_path" &&
+                chown "$user" "$os_pref_home/$user/.fenrir/shared/$relative_path"
+            }; then
+                loki-log err "Failed to install. Try again or submit an issue."
+                exit 8
+            fi
+          ;;
+    esac
+done
+
+out loki-gorp
+
+###################################################################
+
+out loki-prog "Installing autocompletion.."
+
+mv "$(which fenrir-autocomplete)" "/etc/bash_completion.d/"
+
+out loki-log warn "Run 'source ~/.bashrc' or reload terminal to apply autocompletion"
+
+out loki-gorp
+
+###################################################################
+
+out loki-prog "Installing uninstaller.."
+
+if ! {
+    mv "${BUILD_DIR}/fenrir/cli/uninstall-fenrir" "/usr/local/bin/uninstall-fenrir" &&
+    chmod +x "/usr/local/bin/uninstall-fenrir"
+}; then
+    loki-log err "Failed to install. Try again or submit an issue."
+    exit 19
+fi
+
+out loki-gorp
+
+loki-gorp
+
+###################################################################
+#                       Finish installation                       #
+###################################################################
+
+out loki-log succ "Installation has finished!"

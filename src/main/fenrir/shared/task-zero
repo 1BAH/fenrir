@@ -1,0 +1,22 @@
+#! /usr/bin/env loki
+
+destination=$(fenrir-read-conf run root)
+
+loki-log info "TZ: Validating task0"
+
+if ! fenrir-change-branch "task0"; then
+    loki-log err "TZ: Validation failed"
+    exit 3
+fi
+
+if ! lokiw pushd "$destination/task0"; then
+    loki-log fail "TZ: Failed"
+    exit 4
+fi
+
+if ! [ -x "run.sh" ]; then
+    loki-log err "TZ: File 'run.sh' does not exist or is not executable"
+    exit 5
+fi
+
+loki-log succ "TZ: task0 is completed"

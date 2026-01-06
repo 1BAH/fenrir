@@ -1,8 +1,0 @@
-#! /bin/bash
-
-points=$1
-score_file=$(jq -r '.score' "/etc/fenrir/main.json")
-
-######################################################################
-
-echo -n $(( points + $(cat "$score_file") )) > "$score_file"

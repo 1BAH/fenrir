@@ -1,0 +1,51 @@
+#! /usr/bin/env loki
+
+
+loki-log info "WI: Start"
+
+declare -A skip_list
+
+for item in $(fenrir-read-conf -a walk skip); do
+    skip_list+=( ["$item"]=1 )
+done
+
+function terminate {
+    loki-log err "WI: terminate"
+    exit 3
+}
+
+function dir_check {
+    local dir=$1
+
+    if ! [[ ${skip_list[$(basename "$dir")]+_} ]]; then
+        for inspection in $(fenrir-read-conf -a walk dirs); do
+            if ! "${FENRIR_HOME}/shared/walk/$inspection" "$dir"; then
+                terminate
+            fi
+        done
+
+        inspect_dir "$dir"
+    fi
+}
+
+function inspect_dir {
+    local dir=$1
+
+    for file in "$dir"/* "$dir"/.*; do
+        if [ -f "$file" ]; then
+            for inspection in $(fenrir-read-conf -a walk files); do
+                if ! "${FENRIR_HOME}/shared/walk/$inspection" "$file"; then
+                    terminate
+                fi
+            done
+        else
+            if [ -d "$file" ]; then
+                dir_check "$file"
+            fi
+        fi
+    done
+}
+
+dir_check "$PWD"
+
+loki-log succ "WI: All inspections have passed"

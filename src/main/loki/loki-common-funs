@@ -1,0 +1,129 @@
+# >-loki-common-funs------------------------------------------------------------------> #
+
+############################################
+#>                Logging                 <#
+############################################
+
+function loki-dup {
+    local str="$1"
+    local cnt="$2"
+    printf -v template '%*s' "$cnt"
+    printf '%s\n' "${template// /$str}"
+}
+
+function loki-wrap {
+    local flags=""
+    if [[ $1 == "-n" ]]; then
+        flags="$flags -n"
+        shift
+    fi
+
+    local ansi=$1
+    shift
+
+    if [ "$LOKI_VERBOSE" = "-v" ]; then
+        # shellcheck disable=SC2086
+        echo $flags -e "${ansi}$*${ENDC}"
+    else
+        # shellcheck disable=SC2086
+        echo $flags "$*"
+    fi
+}
+
+function loki-prog {
+    (( LOKI_PROGRESS++ ))
+
+    loki-wrap -n "${EMERALD}" "PROGRESS $(loki-dup ">>" "$LOKI_PROGRESS")"
+    echo " ${LOKI_LOG_PREFIX}$*"
+}
+
+function loki-gorp {
+trap '(( JOTUNHEIM_DEPTH -= 2 ))' RETURN
+
+    loki-wrap -n "${PURPLE}" "PROGRESS $(loki-dup "<<" "$LOKI_PROGRESS")"
+    if [ $# -eq 0 ]; then
+        echo " DONE"
+    else
+        echo " $*"
+    fi
+
+    (( LOKI_PROGRESS-- ))
+}
+
+
+function loki-log {
+    local cmd=$1
+    shift
+
+    case "$cmd" in
+        "warn" | "info" | "err" | "succ" | "fail" | "fault")
+            local -A descr=(
+                [warn]="[WARNING] "
+                [info]="[ INFO  ] "
+                 [err]="[ ERROR ] "
+                [succ]="[SUCCESS] "
+               [fault]="[ FAULT ] "
+            )
+
+            local -A colours=(
+                [warn]="${YELLOW}"
+                [info]="${BLUE}"
+                 [err]="${RED}"
+                [succ]="${GREEN}"
+               [fault]="${MAGENTA}"
+            )
+
+            local stdout_desc="| STDOUT || "
+            local stderr_desc="| STDERR || "
+            local strace_desc="| STRACE || "
+            ;;
+        *)
+            loki-log err "loki-log: Subcommand <$cmd> was not found"
+            exit 1
+            ;;
+    esac
+
+    if [[ "$cmd" != "fail" ]]; then
+        loki-wrap -n "${colours[$cmd]}" "${descr[$cmd]}"
+        echo "${LOKI_LOG_PREFIX}$*"
+        return
+    fi
+
+    local LINE="***----------------------------------------------------------------------------------***"
+
+    loki-log err "$*"
+    loki-wrap "$GRAY" "$LINE"
+    cat -- "$CMD_FILE" | sed "s/^/$(loki-wrap "${PEACH}"   "${strace_desc}")/"
+    loki-wrap "$GRAY" "$LINE"
+    cat -- "$OUT_FILE" | sed "s/^/$(loki-wrap "${EMERALD}" "${stdout_desc}")/"
+    loki-wrap "$GRAY" "$LINE"
+    cat -- "$ERR_FILE" | sed "s/^/$(loki-wrap "${PURPLE}"  "${stderr_desc}")/"
+    loki-wrap "$GRAY" "$LINE"
+}
+
+
+function loki-strace-clean {
+    echo -n > "$CMD_FILE"
+}
+
+function loki-set-log-prefix {
+    LOKI_LOG_PREFIX="$1"
+}
+
+######################################################################
+
+#include <loki-points>
+
+######################################################################
+
+#include <loki-git>
+
+######################################################################
+
+#include <loki-wrapper>
+
+######################################################################
+
+#include <loki-asserts>
+
+# <------------------------------------------------------------------loki-common-funs-< #

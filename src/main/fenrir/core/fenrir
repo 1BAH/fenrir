@@ -1,0 +1,98 @@
+#! /usr/bin/env loki
+
+##
+# Usage:
+#   fenrir <SUBCOMMAND> [SUBCMD'S OPTIONS]...
+#
+# Fenrir's entrypoint and main interface. Unless you know what you are doing,
+# DO NOT use subcommands directly! It's potentially dangerous.
+# For the detailed information about subcommands see their documentation.
+# Fenrir uses Loki module as custom interpreter based on bash.
+#
+# Special configs:
+#    FENRIR_TMP_DIR      The directory where fenrir creates its temporary files
+#                        The default value is '/tmp/fenrir/tmp'
+#    FENRIR_HOME         The directory where fenrir local repository is stored
+#                        The default value is '$HOME/.fenrir'
+#    LOKI_VERBOSE        Coloured output with extra details
+#                        The default value is '-v'
+##
+
+#include <verify-non-sudo>
+#include <shift-args>
+
+cmd=$1
+shift
+
+######################################################################
+
+loki-strace-clean
+
+case "$cmd" in
+    "remote")
+        EXP_ARGC=1
+        #include <verify-argc>
+
+        fenrir-set-conf main remote "${1}"
+    ;;
+
+    "--help" | "h" | "help")
+        fenrir-help "$@"
+    ;;
+
+    "i" | "info")
+        fenrir-info "$@"
+    ;;
+
+    "task")
+        fenrir-task "$@"
+    ;;
+
+    "install" | "il")
+        fenrir-install-task-local "$@"
+    ;;
+
+    "run")
+        fenrir-run "$@"
+    ;;
+
+    "rund")
+        fenrir-run-docker "$@"
+    ;;
+
+    "switch")
+        loki-log err "Currently is not supported" # TODO
+        exit 5
+        update-fenrir "$@"
+    ;;
+
+    "versions")
+        EXP_ARGC=0
+        #include <verify-argc>
+
+        if ! wget -o "$ERR_FILE" -O "$OUT_FILE" https://gitlab.com/api/v4/projects/67614102/repository/tags; then
+            loki-log fail '(っ °Д °;)っ' "Failed to get"
+            exit 13
+        fi
+
+        echo "Available versions:"
+
+        grep -o '"name":"[^"]*"' "$OUT_FILE" | sed 's|"name":"||' | sed 's|"||' | sed 's|^|* |'
+    ;;
+
+    "v" | "version")
+        EXP_ARGC=0
+        #include <verify-argc>
+
+        fenrir-read-conf main version
+    ;;
+
+    "gc")
+        fenrir-gc "$@"
+    ;;
+
+    *)
+        loki-log err '(+_+)?' "Command '$(loki-wrap "${BOLD}" "$cmd")' not found"
+        exit 1
+    ;;
+esac

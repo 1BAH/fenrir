@@ -1,0 +1,4 @@
+#! /usr/bin/env loki
+
+loki-log warn "This is a mock testing script"
+loki-log succ "PASSED"

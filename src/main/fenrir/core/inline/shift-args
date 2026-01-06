@@ -1,0 +1,14 @@
+# >>= START =<<
+
+##
+# Usage:
+#   #include <shift-args>
+#
+# Shifts the args when it is required (since we use custom interpreter).
+##
+
+if [[ $1 == "${BASH_SOURCE[0]}" ]]; then
+    shift
+fi
+
+# >>= END =<<

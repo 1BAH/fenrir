@@ -1,75 +1,49 @@
-#! /bin/bash
+#! /usr/bin/env loki
+
+##
+# Usage:
+#   fenrir-gc [-f|--force]
+#
+# Removes unused files. Has two modes: SOFT and HARD. The default is 'SOFT'
+# Soft:
+#   - temporary files
+# Hard:
+#   - temporary files
+#   - local repo
+#   - local configs
+#
+# Options:
+#    -f,--force     Run in 'HARD' mode.
+##
 
 ######################################################################
 ##                         VERIFY ARGUMENTS                         ##
 ######################################################################
 
-SOFT="NO"
+#include <shift-args>
 
-if [ "$1" = '-s' ]; then
-    fenrir-log warn -v "Running in 'soft' mode"
+SOFT="YES"
+
+if [ "$1" = '-f' ] || [ "$1" = '--force' ]; then
+    loki-log warn "Running in 'forced' mode"
     SOFT=""
     shift
 fi
 
-exp=0
-real=$#
-
-if [ "$exp" -ne "$real" ]; then
-    fenrir-log err -v '(＃°Д°)' Wrong arguments count!
-    fenrir-log err -v "Expected <$exp> but got <$real>"
-    exit 15
-fi
+EXP_ARGC=0
+#include <verify-argc>
 
 ######################################################################
 ##                           MAIN PROGRAM                           ##
 ######################################################################
 
-fenrir-log info -v "Removing update repo.."
-rm -fr "$HOME/.fenrir/tag"
+loki-log info "Removing tmp.."
+rm -fr "${FENRIR_TMP_DIR}"
 
-fenrir-log info -v "Removing tmp.."
-rm -fr "$HOME/.fenrir/tmp"
+[ -n "$SOFT" ] || loki-log info "Removing local repo.."
+[ -n "$SOFT" ] || rm -fr "${FENRIR_HOME}/repo"
 
-[ -n "$SOFT" ] && fenrir-log info -v "Removing local repo.."
-[ -n "$SOFT" ] && rm -fr "$HOME/.fenrir/repo"
+[ -n "$SOFT" ] || loki-log info "Removing local configs.."
+[ -n "$SOFT" ] || rm -fr "${FENRIR_HOME}/cfgs"
 
-[ -n "$SOFT" ] && fenrir-log info -v "Removing local configs.."
-[ -n "$SOFT" ] && rm -fr "$HOME/.fenrir/cfgs"
-
-[ -n "$SOFT" ] && fenrir-log info -v "Cleaning default task.."
-for file in "$HOME/.fenrir/custom"/*; do
-    if [ -d "$file" ]; then
-        continue
-    fi
-
-    if [ "$file" = "$HOME/.fenrir/custom/task-zero" ] ||
-       [ "$file" = "$HOME/.fenrir/custom/walk-inspections" ]; then
-           continue
-    fi
-
-    [ -n "$SOFT" ] && rm -f "$file"
-done
-
-[ -n "$SOFT" ] && fenrir-log info -v "Cleaning global configs.."
-for file in /etc/fenrir/*; do
-    if [ "$file" = "/etc/fenrir/main.json" ] ||
-       [ "$file" = "/etc/fenrir/walk.json" ] ||
-       [ "$file" = "/etc/fenrir/forbidden-files.json" ]; then
-           continue
-    fi
-
-    [ -n "$SOFT" ] && rm -f "$file"
-done
-
-[ -n "$SOFT" ] && fenrir-log info -v "Setting default configs.."
-
-TMP=$(fenrir-tmp -v)
-
-[ -n "$SOFT" ] && jq '.branch = "-"' "/etc/fenrir/main.json" > "$TMP/TMP_FENRIR"
-[ -n "$SOFT" ] && cat "$TMP/TMP_FENRIR" > "/etc/fenrir/main.json"
-
-[ -n "$SOFT" ] && jq '.task = "-"' "/etc/fenrir/main.json" > "$TMP/TMP_FENRIR"
-[ -n "$SOFT" ] && cat "$TMP/TMP_FENRIR" > "/etc/fenrir/main.json"
-
-fenrir-log succ -v "Done"
+loki-log succ "Done"
