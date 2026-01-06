@@ -50,6 +50,6 @@ Current settings:
 Run settings:
 $([ -n "${pipeline}" ] && loki-wrap "${YELLOW}" "${pipeline}")
 ------------------------------------------------------------------
-fenrir $(fenrir-read-conf main version), 2025
+fenrir $(fenrir-read-conf main version), 2026
 @_1BAH_
 ____HEREDOC

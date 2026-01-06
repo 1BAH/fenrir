@@ -69,7 +69,7 @@ fenrir version:
 fenrir [-v|--version|version]:
     Print current version
 ------------------------------------------------------------------
-fenrir $(fenrir-read-conf main version), 2025
+fenrir $(fenrir-read-conf main version), 2026
 @_1BAH_
 ____HEREDOC
 
