@@ -37,7 +37,6 @@ case "$cmd" in
     ;;
 
     "--help" | "h" | "help")
-        loki-log warn "IN PROGRESS" # TODO
         fenrir-help "$@"
     ;;
 
@@ -62,7 +61,8 @@ case "$cmd" in
     ;;
 
     "switch")
-        loki-log err "NOT UP TO DATE" # TODO
+        loki-log err "Currently is not supported" # TODO
+        exit 5
         update-fenrir "$@"
     ;;
 
