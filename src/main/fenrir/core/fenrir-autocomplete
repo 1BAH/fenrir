@@ -39,7 +39,7 @@ _fenrir()
         [rund]="rund"
         [task]="task"
         [versions]="versions"
-#        [switch]="switch" TODO autocomplete for switch
+        [switch]="switch"
         [remote]="remote"
     )
 
@@ -60,7 +60,7 @@ _fenrir()
         local raw=()
         local -A inuse
 
-        for cmd in $(compgen -W "${CMDS[@]}" -- "${COMP_WORDS[1]}"); do
+        for cmd in $(compgen -W "${CMDS[*]}" -- "${COMP_WORDS[COMP_CWORD]}"); do
             local long_cmd="$cmd"
 
             case "$cmd" in
@@ -110,7 +110,41 @@ _fenrir()
                 output=("$(printf "$printfstr" "<NONE>" "Run in SOFT mode")")
                 raw=()
 
-                for cmd in $(compgen -W "${CMDS[@]}" -- "${COMP_WORDS[2]}"); do
+                for cmd in $(compgen -W "${CMDS[*]}" -- "${COMP_WORDS[2]}"); do
+                    local desc=${helpmsg["$cmd"]}
+                    local display_name="${display_name_map["$cmd"]}"
+
+                    output+=("$(printf "$printfstr" "$display_name" "$desc")")
+                    raw+=("$cmd")
+                done
+
+                if [ "${#raw[@]}" -eq 0 ]; then
+                    return 0
+                fi
+
+                # When the command is found, there is no need for info message
+                if [ "${#raw[@]}" -eq 1 ]; then
+                    COMPREPLY=("${raw[0]}")
+                    return 0
+                fi
+
+                COMPREPLY=("${output[@]}")
+                ;;
+#>>>>>>>>>>>###################################################################################################
+            switch)
+                helpmsg=(
+                    [latest]="Switch to the latest version"
+                )
+
+                display_name_map=(
+                    [latest]="latest"
+                )
+
+                CMDS=("latest")
+                output=("$(printf "$printfstr" "<VERSION>" "Switch to the specific version (see 'fenrir versions' for available)")")
+                raw=()
+
+                for cmd in $(compgen -W "${CMDS[*]}" -- "${COMP_WORDS[2]}"); do
                     local desc=${helpmsg["$cmd"]}
                     local display_name="${display_name_map["$cmd"]}"
 
@@ -151,7 +185,7 @@ _fenrir()
                     output=("$(printf "$printfstr" "<NONE>" "Download tests only when they are not presented")")
                     raw=()
 
-                    for cmd in $(compgen -W "${CMDS[@]}" -- "${COMP_WORDS[2]}"); do
+                    for cmd in $(compgen -W "${CMDS[*]}" -- "${COMP_WORDS[2]}"); do
                         local desc=${helpmsg["$cmd"]}
                         local display_name="${display_name_map["$cmd"]}"
 
@@ -172,7 +206,7 @@ _fenrir()
                     COMPREPLY=("${output[@]}")
                 else
                     mapfile -t CMDS < <(find_all_tasks | uniq)
-                    COMPREPLY=($(compgen -W "${CMDS[@]}" -- "${COMP_WORDS[COMP_CWORD]}"))
+                    COMPREPLY=($(compgen -W "${CMDS[*]}" -- "${COMP_WORDS[COMP_CWORD]}"))
                 fi
                 ;;
 #>>>>>>>>>>>###################################################################################################
@@ -198,7 +232,7 @@ _fenrir()
                     output=("$(printf "$printfstr" "<directory>" "Solution directory")")
                     raw=()
 
-                    for cmd in $(compgen -W "${CMDS[@]}" -- "${COMP_WORDS[2]}"); do
+                    for cmd in $(compgen -W "${CMDS[*]}" -- "${COMP_WORDS[2]}"); do
                         local desc=${helpmsg["$cmd"]}
                         local display_name="${display_name_map["$cmd"]}"
 
@@ -246,7 +280,7 @@ _fenrir()
                     output=("$(printf "$printfstr" "<directory>" "Solution directory")")
                     raw=()
 
-                    for cmd in $(compgen -W "${CMDS[@]}" -- "${COMP_WORDS[2]}"); do
+                    for cmd in $(compgen -W "${CMDS[*]}" -- "${COMP_WORDS[2]}"); do
                         local desc=${helpmsg["$cmd"]}
                         local display_name="${display_name_map["$cmd"]}"
 
@@ -283,7 +317,7 @@ _fenrir()
                 fi
 
                 mapfile -t CMDS < <(find_all_tasks | uniq)
-                COMPREPLY=($(compgen -W "${CMDS[@]}" -- "${COMP_WORDS[COMP_CWORD]}"))
+                COMPREPLY=($(compgen -W "${CMDS[*]}" -- "${COMP_WORDS[COMP_CWORD]}"))
                 ;;
 #>>>>>>>>>>>###################################################################################################
             run)
@@ -308,7 +342,7 @@ _fenrir()
                     output=("$(printf "$printfstr" "<directory>" "Solution directory")")
                     raw=()
 
-                    for cmd in $(compgen -W "${CMDS[@]}" -- "${COMP_WORDS[COMP_CWORD]}"); do
+                    for cmd in $(compgen -W "${CMDS[*]}" -- "${COMP_WORDS[COMP_CWORD]}"); do
                         local desc=${helpmsg["$cmd"]}
                         local display_name="${display_name_map["$cmd"]}"
 
@@ -356,7 +390,7 @@ _fenrir()
                     output=("$(printf "$printfstr" "<directory>" "Solution directory")")
                     raw=()
 
-                    for cmd in $(compgen -W "${CMDS[@]}" -- "${COMP_WORDS[COMP_CWORD]}"); do
+                    for cmd in $(compgen -W "${CMDS[*]}" -- "${COMP_WORDS[COMP_CWORD]}"); do
                         local desc=${helpmsg["$cmd"]}
                         local display_name="${display_name_map["$cmd"]}"
 
@@ -415,7 +449,7 @@ _fenrir()
                     output=("$(printf "$printfstr" "<directory>" "Solution directory")")
                     raw=()
 
-                    for cmd in $(compgen -W "${CMDS[@]}" -- "${COMP_WORDS[COMP_CWORD]}"); do
+                    for cmd in $(compgen -W "${CMDS[*]}" -- "${COMP_WORDS[COMP_CWORD]}"); do
                         local desc=${helpmsg["$cmd"]}
                         local display_name="${display_name_map["$cmd"]}"
 
@@ -463,7 +497,7 @@ _fenrir()
                     output=("$(printf "$printfstr" "<directory>" "Solution directory")")
                     raw=()
 
-                    for cmd in $(compgen -W "${CMDS[@]}" -- "${COMP_WORDS[COMP_CWORD]}"); do
+                    for cmd in $(compgen -W "${CMDS[*]}" -- "${COMP_WORDS[COMP_CWORD]}"); do
                         local desc=${helpmsg["$cmd"]}
                         local display_name="${display_name_map["$cmd"]}"
 
