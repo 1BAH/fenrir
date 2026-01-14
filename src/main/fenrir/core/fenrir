@@ -61,8 +61,6 @@ case "$cmd" in
     ;;
 
     "switch")
-        loki-log err "Currently is not supported" # TODO
-        exit 5
         update-fenrir "$@"
     ;;
 

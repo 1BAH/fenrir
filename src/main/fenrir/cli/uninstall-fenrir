@@ -1,10 +1,6 @@
 #! /usr/bin/env bash
 
-# TODO REMOVE ALL OLD ARTIFACTS FROM THE PREVIOUS VERSIONS
-
 [ -n "$SUDO_USER" ] && user=$SUDO_USER || user=$USER
-
-update=""
 
 ###################################################################
 
@@ -16,32 +12,32 @@ ENDC="\033[0m"
 
 
 function info {
-    [ -z "$update" ] && echo -e "${BLUE}[ INFO  ]${ENDC} $*" # > /dev/tty
+    [ -n "${FENRIR_IN_DOCKER}" ] || echo -e "${BLUE}[ INFO  ]${ENDC} $*"
 }
 
 function warn {
-    [ -z "$update" ] && echo -e "${YELLOW}[WARNING]${ENDC} $*" # > /dev/tty
+    [ -n "${FENRIR_IN_DOCKER}" ] || echo -e "${YELLOW}[WARNING]${ENDC} $*"
 }
 
 function err {
-    [ -z "$update" ] && echo -e "${RED}[ ERROR ]${ENDC} $*" # > /dev/tty
+    [ -n "${FENRIR_IN_DOCKER}" ] || echo -e "${RED}[ ERROR ]${ENDC} $*"
 }
 
 function succ {
-    [ -z "$update" ] && echo -e "${GREEN}[SUCCESS]${ENDC} $*" # > /dev/tty
+    [ -n "${FENRIR_IN_DOCKER}" ] || echo -e "${GREEN}[SUCCESS]${ENDC} $*"
 }
 
-#################################################################
-# FIXME get rid of jq
-if [ "$1" = "update" ]; then
-    info "Uninstalling previous version of fenrir: $(jq '.version' '/etc/fenrir/main.json')"
-    update=true
-fi
+FENRIR_TMP_DIR=${FENRIR_TMP_DIR:-"/tmp/fenrir/tmp"}
+FENRIR_HOME=${FENRIR_HOME:-"/home/$user/.fenrir"}
 
-# FIXME get rid of jq
-if [ "$1" = "docker" ]; then
-    echo "[ INFO  ] Uninstalling previous version of fenrir: $(jq '.version' '/etc/fenrir/main.json')"
-    update=true
+#################################################################
+
+version=$(fenrir-read-conf main version)
+
+if [ -n "${FENRIR_IN_DOCKER}" ]; then
+    echo "[ INFO  ] Uninstalling previous version of fenrir: ${version}"
+else
+    info "Uninstalling previous version of fenrir: ${version}"
 fi
 
 #################################################################
@@ -50,6 +46,24 @@ if [ "$(id -u)" -ne 0 ]; then
     err "The script must be run under sudo!"
     exit 111
 fi
+
+#################################################################
+
+info "Removing working directories.."
+
+if [ -d "${FENRIR_TMP_DIR}" ]; then
+    rm -r "${FENRIR_TMP_DIR}"
+else
+    warn "fenrir's tmp directory was not found!"
+fi
+
+if [ -d "${FENRIR_HOME}" ]; then
+    rm -r "${FENRIR_HOME}"
+else
+    warn "fenrir's local repository was not found!"
+fi
+
+succ "Done"
 
 #################################################################
 
@@ -65,36 +79,15 @@ succ "Done"
 
 #################################################################
 
-info "Removing '/var/fenrir'.."
+info "Removing Loki.."
 
-if [ -d "/var/fenrir" ]; then
-    rm -r /var/fenrir
+if [ -f "/usr/local/bin/loki" ]; then
+    rm -fr "/usr/local/bin/loki"
 else
-    warn "The directory does not exist!"
+    warn "'loki' binary was not find"
 fi
 
 succ "Done"
-
-#################################################################
-
-info "Removing Loki.."
-
-for cmd in /usr/local/bin/loki*; do
-    if [ "$cmd" = "/usr/local/bin/loki*" ]; then
-        warn "No core commands were found!"
-        break
-    fi
-
-    name=$(basename "$cmd") # TODO simplify
-
-    if ! rm "/usr/local/bin/$name"; then
-        err "Terminating.."
-        exit 10
-    fi
-done
-
-succ "Done"
-
 
 #################################################################
 
@@ -106,55 +99,29 @@ for cmd in /usr/local/bin/fenrir-*; do
         break
     fi
 
-    name=$(basename "$cmd")
-
-    if ! rm "/usr/local/bin/$name"; then
+    if ! rm "$cmd"; then
         err "Terminating.."
         exit 10
     fi
 done
 
+if [ -f "/usr/local/bin/update-fenrir" ]; then
+    rm "/usr/local/bin/update-fenrir"
+fi
+
 succ "Done"
 
 #################################################################
 
-info "Removing basic utils.."
+info "Removing cli tool.."
 
-# FIXME moved to shared
-if [ -d "/home/$user/.fenrir/custom" ]; then
-    if ! rm -r "/home/$user/.fenrir/custom"; then
-        err "Terminating .."
-        exit 10
-    fi
+if [ -f "/usr/local/bin/fenrir" ]; then
+    rm "/usr/local/bin/fenrir"
 else
-    warn "fenrir's local repository was not found!"
+    warn "fenrir cli is not installed"
 fi
 
 succ "Done"
 
-#################################################################
-
-info "Removing additional .."
-
-if [ -z "$update" ]; then
-    if [ -f "/usr/local/bin/update-fenrir" ]; then
-        rm "/usr/local/bin/update-fenrir"
-    fi
-fi
-
-succ "Done"
-
-#################################################################
-
-info "Removing cli tool .."
-
-if [ -z "$update" ]; then
-    if [ -f "/usr/local/bin/fenrir" ]; then
-        rm "/usr/local/bin/fenrir"
-    else
-        warn "fenrir cli is not installed"
-    fi
-fi
-
-succ "Done"
-
+# Remove the script itself
+rm -fr "/usr/local/bin/uninstall-fenrir"
