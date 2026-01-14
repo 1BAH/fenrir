@@ -327,7 +327,7 @@ out loki-prog "Setting all configs.."
 for cfg in "$CFGS_DIR"/*.hel; do
     name=$(basename "$cfg")
 
-    lokiw diff -q "$cfg" "/etc/fenrir/$name" && {
+    diff -q "$cfg" "/etc/fenrir/$name" &> /dev/null && {
         out loki-log info "File '$cfg' has no differences.."
         continue
     }
