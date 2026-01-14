@@ -2,6 +2,10 @@
 
 [ -n "$SUDO_USER" ] && user=$SUDO_USER || user=$USER
 
+if [[ "$1" == update ]]; then
+    update="YES"
+fi
+
 ###################################################################
 
 GREEN="\033[38;5;112m"
@@ -51,7 +55,7 @@ fi
 
 info "Removing working directories.."
 
-if [ -d "${FENRIR_TMP_DIR}" ]; then
+if [ -z "${update}" ] && [ -d "${FENRIR_TMP_DIR}" ]; then
     rm -r "${FENRIR_TMP_DIR}"
 else
     warn "fenrir's tmp directory was not found!"

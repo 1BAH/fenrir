@@ -15,6 +15,11 @@ JOTUNHEIM=()
 # When no args, we just want to load all global functions and global consts
 if (( $# != 0 )); then
     function save_cmd {
+        # Sudo night occur during update
+        if [ "$(id -u)" -eq 0 ]; then
+            return 0
+        fi
+
         if [[ "${BASH_SOURCE[1]}" == "/usr/local/bin/loki" ]]; then
             return 0
         fi
@@ -74,7 +79,7 @@ if (( $# != 0 )); then
     other=("$@")
     other=("${other[@]:1}")
 
-    if ! [[ $(basename "$file") =~ ^fenrir.*$ ]]; then
+    if [ "$(id -u)" -ne 0 ] && [[ ! $(basename "$file") =~ ^fenrir.*$ ]]; then
         echo -n > "$CMD_FILE"
         trap 'save_cmd' DEBUG
     fi

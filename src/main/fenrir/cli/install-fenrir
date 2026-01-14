@@ -1,7 +1,6 @@
 #! /usr/bin/env bash
 
 out=(">" "/dev/null")
-in_docker=""
 verbose=""
 
 while (( $# > 0 )); do
@@ -9,9 +8,6 @@ while (( $# > 0 )); do
     -v)
         out=()
         verbose="-v"
-        ;;
-    -d)
-        in_docker="1"
         ;;
     esac
 
@@ -42,9 +38,10 @@ if [ -f "$BUILD_SCRIPT" ]; then
 fi
 
 
+
 ( # Do not pollute the global variable scope
     first=1
-    for script in install/*; do
+    for script in "${CLI_DIR}"/install/*; do
         if [[ $script == "install-fenrir" ]]; then
             continue
         fi
@@ -55,7 +52,7 @@ fi
         pattern="#include <$file>"
 
         if (( first == 1 )); then
-            sed -e "/$pattern/r $script" -e "/$pattern/d" install/install-fenrir > $BUILD_SCRIPT
+            sed -e "/$pattern/r $script" -e "/$pattern/d" "${CLI_DIR}"/install/install-fenrir > $BUILD_SCRIPT
             first=0
         else
             sed -i -e "/$pattern/r $script" -e "/$pattern/d" $BUILD_SCRIPT
@@ -68,7 +65,4 @@ chmod +x $BUILD_SCRIPT
 eval "echo \"[ INFO  ] The final build script is <$BUILD_SCRIPT>\" ${out[*]}"
 echo "PROGRESS << DONE"
 
-CLI_DIR="$CLI_DIR" FENRIR_INSTALL_VERBOSE="$verbose" LOKI_VERBOSE="$verbose" IN_DOCKER="$in_docker" $BUILD_SCRIPT
-# TODO save to local repo
-
-# TODO BUILD SCRIPT CHOWN!
+CLI_DIR="$CLI_DIR" FENRIR_INSTALL_VERBOSE="$verbose" LOKI_VERBOSE="$verbose" $BUILD_SCRIPT

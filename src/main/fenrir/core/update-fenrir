@@ -33,7 +33,7 @@ function safe_tag_clone {
 }
 
 function safe_clone {
-    lokiw git clone --depth 1 "$url" "$HOME/.fenrir/tag" "${clone_dir}" || {
+    lokiw git clone --depth 1 "$url" "${clone_dir}" || {
         loki-log fail 'ヽ（≧□≦）ノ' "Failed to clone repo"
         exit 66
     }
@@ -44,7 +44,7 @@ function safe_clone {
 ######################################################################
 
 tag=$1
-clone_dir=$(fenrir-tmp -d)
+clone_dir=$(mktemp -d)
 
 if [ "$tag" = "latest" ]; then
     safe_clone
@@ -56,11 +56,13 @@ else
 fi
 
 if [ -n "${FENRIR_IN_DOCKER}" ]; then
-    echo "$PASS" | sudo -S uninstall-fenrir
+    echo "$PASS" | sudo -S uninstall-fenrir update
     echo "$PASS" | sudo -S "${clone_dir}/src/main/fenrir/cli/install-fenrir"
 else
-    sudo uninstall-fenrir
+    sudo uninstall-fenrir update
     sudo "${clone_dir}/src/main/fenrir/cli/install-fenrir"
 fi
+
+rm -fr "${clone_dir}"
 
 loki-log succ '♪(^∇^*)' "Successfully switched to $(fenrir version) version"
