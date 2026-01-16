@@ -15,9 +15,20 @@
 2. Go to `src/main/fenrir/cli`
 3. Run `./install-fenrir`
 
+> Install script supports these options:
+> ```text
+> bash     Install autocompletion for bash
+> zsh      Install autocompletion for zsh
+> -v       Verbose mode
+> ```
+
+If you use `zsh` without `Oh My Zsh` than make sure
+1. `autoload -U compinit && compinit` is present at `~/.zshrc`
+2. `~/.oh-my-zsh/completions` is present at `fpath`
+
 ## Uninstall
 
-> TODO
+Run `uninstall-fenrir` in terminal
 
 ## Usage
 
@@ -30,6 +41,7 @@ fenrir info
 fenrir gc
 fenrir remote <URL>
 fenrir task [-f|--force] <TASK ID>
+fenrir switch [--bash|--zsh] <VERSION>
 fenrir run [-i] [-nl|--no-lint] [-nz|--no-zero] <SOLUTION DIRECTORY>
 fenrir-rund [-d|--debug] [-nl|--no-lint] [-nz|--no-zero] <SOLUTION DIRECTORY>
 
@@ -50,6 +62,17 @@ fenrir i, info:
 
 fenrir remote <URL>:
     Set remote task repository
+
+fenrir switch [--bash|--zsh] <VERSION>:
+    Automatically updates fenrir up to the selected version.
+    The version is one of the existing tags (see 'fenrir versions').
+    If the version is 'latest', the main branch is used.
+
+    Options:
+       --zsh      Update autocompletion for zsh
+       --bash     Update autocompletion for bash
+
+    If no option is provided, 'complete' param from main.hel is used
 
 fenrir task [-f|--force] <TASK ID>
     Set the task to be checked and optionally download its tests.
