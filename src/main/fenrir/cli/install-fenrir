@@ -8,7 +8,13 @@ while (( $# > 0 )); do
     -v)
         out=()
         verbose="-v"
-        ;;
+    ;;
+    bash)
+        export FENRIR_INSTALL_BASH=1
+    ;;
+    zsh)
+        export FENRIR_INSTALL_ZSH=1
+    ;;
     esac
 
     shift

@@ -1,2 +1,3 @@
 
 remote="https://gitlab.com/atpd/fenrir-tasks"
+complete=docker

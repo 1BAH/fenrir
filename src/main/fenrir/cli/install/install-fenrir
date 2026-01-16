@@ -308,6 +308,19 @@ out loki-prog "Installing core.."
 for cmd in "$CORE_UTILS_DIR"/*; do
     name=$(basename "$cmd")
 
+    if [ "$name" = "fenrir-autocomplete" ]; then
+        [ -n "${FENRIR_INSTALL_BASH}" ] || continue
+
+        mv "$cmd" "/etc/bash_completion.d/"
+    fi
+
+    if [ "$name" = "fenrir-autocomplete-zsh" ]; then
+        [ -n "${FENRIR_INSTALL_ZSH}" ] || continue
+
+        mkdir -p "$os_pref_home/$user/.oh-my-zsh/completions"
+        mv "$cmd" "$os_pref_home/$user/.oh-my-zsh/completions/"
+    fi
+
     if ! [ -f "$cmd" ]; then
         continue
     fi
@@ -396,9 +409,13 @@ out loki-gorp
 
 out loki-prog "Installing autocompletion.."
 
-mv "$(which fenrir-autocomplete)" "/etc/bash_completion.d/"
-
-out loki-log warn "Run 'source ~/.bashrc' or reload terminal to apply autocompletion"
+if [ -n "${FENRIR_INSTALL_BASH}" ]; then
+    fenrir-set-conf main complete bash
+    out loki-log warn "Run 'source ~/.bashrc' or reload terminal to apply autocompletion"
+elif [ -n "${FENRIR_INSTALL_ZSH}" ]; then
+    fenrir-set-conf main complete zsh
+    out loki-log warn "If you use 'Oh My Zsh' than reload your terminal, otherwise read the docs to set up autocompletion"
+fi
 
 out loki-gorp
 

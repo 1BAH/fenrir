@@ -15,16 +15,16 @@ _fenrir()
 
     local -A helpmsg
     helpmsg=(
-        [help]="Help about the command"
+        [help]="Show help information"
         [gc]="Remove unused files"
         [run]="Run tests"
         [rund]="Run tests in a docker container"
         [task]="Set the task to be tested"
-        [info]="Fenrir's execution context"
+        [info]="Show execution context"
         [install]="Install a script as 'local' task"
-        [switch]="Change fenrir's version"
-        [versions]="All supported versions"
-        [version]="Current version"
+        [switch]="Update fenrir"
+        [versions]="Show all supported versions"
+        [version]="Show current version"
         [remote]="Set task remote repository"
     )
 

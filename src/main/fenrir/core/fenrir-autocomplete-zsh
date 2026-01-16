@@ -1,0 +1,100 @@
+#compdef _fenrir fenrir
+
+
+function _fenrir {
+    local line
+
+    _arguments -C \
+        "--help[Show help information]" \
+        "1:subcommand:((
+            h\:'Show help information'
+            help\:'Show help information'
+            i\:'Show execution context'
+            info\:'Show execution context'
+            remote\:'Set task remote repository'
+            version\:'Show current version'
+            versions\:'Show all supported versions'
+            gc\:'Remove unused files'
+            switch\:'Update fenrir'
+            run\:'Run tests'
+            rund\:'Run tests in a docker container'
+            task\:'Set the task to be tested'
+            install\:'Install a script as _local_ task'
+            il\:'Install a script as _local_ task'
+            ))" \
+        "*::arg:->args"
+    
+    case $line[1] in
+        gc)
+            _fenrir_gc
+        ;;
+        switch)
+            _fenrir_switch
+        ;;
+        run)
+            _fenrir_run
+        ;;
+        rund)
+            _fenrir_rund
+        ;;
+        task)
+            _fenrir_task
+        ;;
+        il)
+            _fenrir_install
+        ;;
+        install)
+            _fenrir_install
+        ;;
+    esac
+}
+
+function _fenrir_gc {
+    _arguments -C \
+        "-f[Run in HARD mode]" \
+        "--force[Run in HARD mode]"
+}
+
+function _fenrir_switch {
+    _arguments -C \
+        "--zsh[Install autocompletion for zsh]" \
+        "--bash[Install autocompletion for bash]" \
+        "1:Switch to the latest version:(latest)"
+}
+
+function _fenrir_run {
+    _arguments -C \
+        "-i[Run test inside the provided directory without cloning it]" \
+        "-nz[Skip task0 validation]" \
+        "--no-zero[Skip task0 validation]" \
+        "-nl[Skip linting stage (walk-inspections)]" \
+        "--no-lint[Skip linting stage (walk-inspections)]" \
+        "1:Directory with solution:_path_files -/"
+}
+
+function _fenrir_rund {
+    _arguments -C \
+        "-d[Does not stop the container (allows further debug)]" \
+        "--debug[Does not stop the container (allows further debug)]" \
+        "-nz[Skip task0 validation]" \
+        "--no-zero[Skip task0 validation]" \
+        "-nl[Skip linting stage (walk-inspections)]" \
+        "--no-lint[Skip linting stage (walk-inspections)]" \
+        "1:Directory with solution:_path_files -/"
+}
+
+function _find_all_tasks {
+    find "$HOME/.fenrir/repo" -type d -print0 | while IFS= read -r -d '' d; do
+        find "$d" -mindepth 1 -type d -print -quit | grep -q . || echo "$d" | sed 's|.*/repo/\(.*\)|\1|p'
+    done
+}
+
+function _fenrir_task {
+    _arguments -C \
+        "-f[Download tests anyway]" \
+        "--force[Download tests anyway]" \
+        "1:Select task:($(_find_all_tasks | uniq))"
+}
+function _fenrir_install {
+    _arguments -C "1:Path to the script:_files"
+}
