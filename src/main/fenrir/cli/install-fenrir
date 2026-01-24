@@ -52,7 +52,7 @@ sed --help &> /dev/null || {
     }
 
     sed_cmd="gsed"
-    echo -e "\033[1m\033[38;5;214m[ WARN  ]\033[0m \033[38;5;209m(シ. .)シ  \033[Now using 'gsed' instead!"
+    echo -e "\033[1m\033[38;5;214m[ WARN  ]\033[0m \033[38;5;209m(シ. .)シ  \033[0mNow using 'gsed' instead!"
 }
 
 export sed_cmd
