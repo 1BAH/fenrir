@@ -1,5 +1,5 @@
 # >-loki-asserts----------------------------------------------------------------------> #
-LOKI_ASSERT_CB="echo -n ''"
+LOKI_ASSERT_CB="echo -n "
 
 function loki-assert-cb {
     LOKI_ASSERT_CB="eval $1"
