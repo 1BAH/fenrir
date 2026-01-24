@@ -60,6 +60,7 @@ function switch_solution {
         return 3
     fi
 
+    # No task directory => just return
     if [ -n "$nib_task" ] || [ "$task" = "local" ]; then
         return
     fi
@@ -68,7 +69,13 @@ function switch_solution {
     curr_branch=$(git rev-parse --abbrev-ref HEAD)
 
     if [ "$task" = "$curr_branch" ]; then
-        return
+        if lokiw cd "$task"; then
+            loki-log succ "Inside task's directory"
+            return
+        else
+            loki-log fail "Cannot change directory"
+            return 3
+        fi
     fi
 
     if fenrir-change-branch "$task"; then
