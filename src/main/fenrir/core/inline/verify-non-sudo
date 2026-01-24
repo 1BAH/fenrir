@@ -8,7 +8,7 @@
 # Otherwise interrupts its execution with code 123.
 ##
 
-if [ "$(id -u)" -eq 0 ]; then
+if [ -z "${FENRIR_IN_DOCKER}" ] && [ "$(id -u)" -eq 0 ]; then
     loki-log err 'ᕙ( •̀ ᗜ •́ )ᕗ' "The script must not be run under sudo!"
     exit 123
 fi
