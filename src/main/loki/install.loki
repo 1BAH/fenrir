@@ -2,7 +2,10 @@
 
 LOKI_COMMON_FUNS="LOKI_COMMON_FUNS"
 out=(">" "/dev/null")
-verbose=""
+
+if [ -n "${LOKI_VERBOSE}" ]; then
+    out=()
+fi
 
 # Build 'common-funs'
 first=1
@@ -17,7 +20,7 @@ for part in funs/*; do
         ${sed_cmd} -i -e "/$pattern/r $part" -e "/$pattern/d" $LOKI_COMMON_FUNS
     fi
 
-    eval "echo \"[ INFO  ] Inlining module <$part>..\" ${out[*]}"
+    eval "echo \"[ INFO  ] Inlining function module <$part>..\" ${out[*]}"
 done
 
 # Assemble loki
