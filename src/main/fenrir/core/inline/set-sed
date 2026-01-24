@@ -1,0 +1,16 @@
+# >>= START =<<
+
+##
+# Usage:
+#   #include <set-sed>
+#
+# Sets sed to GNU's version. To use sed replace it with '${sed_cmd}'
+##
+
+sed_cmd="sed"
+
+sed --help &> /dev/null || {
+    sed_cmd="gsed"
+}
+
+# >>= END =<<

@@ -2,6 +2,7 @@
 
 out=(">" "/dev/null")
 verbose=""
+sed_cmd="sed"
 
 while (( $# > 0 )); do
     case "$1" in
@@ -42,6 +43,20 @@ if [ -f "/etc/fenrir/main.hel" ]; then
     esac
 fi
 
+sed --help &> /dev/null || {
+    echo -e "\033[1m\033[38;5;214m[ WARN  ]\033[0m \033[38;5;209m(シ. .)シ  \033[0mYou use BSD's version of sed!"
+
+    which gsed &> /dev/null || {
+        echo -e "\033[1m\033[38;5;196m[ ERROR ]\033[0m \033[38;5;197mᕙ( •̀ ᗜ •́ )ᕗ  \033[0mInstall 'gsed': brew install gnu-sed!"
+        exit 111
+    }
+
+    sed_cmd="gsed"
+    echo -e "\033[1m\033[38;5;214m[ WARN  ]\033[0m \033[38;5;209m(シ. .)シ  \033[Now using 'gsed' instead!"
+}
+
+export sed_cmd
+
 #################################################################
 #                         VERIFY SUDO                           #
 #################################################################
@@ -80,10 +95,10 @@ fi
         pattern="#include <$file>"
 
         if (( first == 1 )); then
-            sed -e "/$pattern/r $script" -e "/$pattern/d" "${CLI_DIR}"/install/install-fenrir > $BUILD_SCRIPT
+            ${sed_cmd} -e "/$pattern/r $script" -e "/$pattern/d" "${CLI_DIR}"/install/install-fenrir > $BUILD_SCRIPT
             first=0
         else
-            sed -i -e "/$pattern/r $script" -e "/$pattern/d" $BUILD_SCRIPT
+            ${sed_cmd} -i -e "/$pattern/r $script" -e "/$pattern/d" $BUILD_SCRIPT
         fi
     done
 )

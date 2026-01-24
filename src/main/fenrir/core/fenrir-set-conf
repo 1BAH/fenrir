@@ -8,6 +8,7 @@
 ##
 
 #include <shift-args>
+#include <set-sed>
 
 CONF_FILE="/etc/fenrir"
 
@@ -41,4 +42,4 @@ case "$1" in
     ;;
 esac
 
-sed -i "s|^${2}=.*$|${2}=\"${3}\"|" "${CONF_FILE}"
+${sed_cmd} -i "s|^${2}=.*$|${2}=\"${3}\"|" "${CONF_FILE}"

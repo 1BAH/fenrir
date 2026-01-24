@@ -20,6 +20,7 @@
 
 #include <verify-non-sudo>
 #include <shift-args>
+#include <set-sed>
 
 cmd=$1
 shift
@@ -75,7 +76,7 @@ case "$cmd" in
 
         echo "Available versions:"
 
-        grep -o '"name":"[^"]*"' "$OUT_FILE" | sed 's|"name":"||' | sed 's|"||' | sed 's|^|* |'
+        grep -o '"name":"[^"]*"' "$OUT_FILE" | ${sed_cmd} 's|"name":"||' | ${sed_cmd} 's|"||' | ${sed_cmd} 's|^|* |'
     ;;
 
     "v" | "version")

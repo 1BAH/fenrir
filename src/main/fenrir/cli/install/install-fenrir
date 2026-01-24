@@ -270,7 +270,7 @@ out loki-prog "Previous installations..."
 
     for cmd in "${found[@]}"; do
         echo "'$(basename "$cmd")' -> '$cmd'"
-    done | column -t | sed "s/^/$(loki-wrap "${YELLOW}" "[WARNING]")      /"
+    done | column -t | ${sed_cmd} "s/^/$(loki-wrap "${YELLOW}" "[WARNING]")      /"
 
     loki-log warn "They are to be replaced. Do you want to proceed? ($(loki-wrap "${BOLD}" Potentially dangerous)) [Y|N]"
 
