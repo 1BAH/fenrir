@@ -21,6 +21,28 @@ while (( $# > 0 )); do
 done
 
 #################################################################
+#                    CHECK EXISTING CONFIGS                     #
+#################################################################
+
+if [ -f "/etc/fenrir/main.hel" ]; then
+    eval "echo \"[ INFO  ] Found existing configs: </etc/fenrir/main.hel>\" ${out[*]}"
+
+    case "$(grep -oP 'complete="\K[^"]*' /etc/fenrir/main.hel)" in
+        bash)
+            eval "echo \"[ INFO  ] Bash autocompletion to be installed\" ${out[*]}"
+            export FENRIR_INSTALL_BASH=1
+        ;;
+        zsh)
+            eval "echo \"[ INFO  ] Zsh autocompletion to be installed\" ${out[*]}"
+            export FENRIR_INSTALL_ZSH=1
+        ;;
+        *)
+            eval "echo \"[ WARN  ] Unknown option\" ${out[*]}"
+        ;;
+    esac
+fi
+
+#################################################################
 #                         VERIFY SUDO                           #
 #################################################################
 
