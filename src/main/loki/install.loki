@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-LOKI_COMMON_FUNS="LOKI_COMMON_FUNS"
+LOKI_COMMON_FUNS="LOKI_COMMON_FUNS_ASM"
 out=(">" "/dev/null")
 
 if [ -n "${LOKI_VERBOSE}" ]; then
@@ -26,12 +26,6 @@ done
 # Assemble loki
 eval "echo \"[ INFO  ] Assembling final file..\" ${out[*]}"
 
-if (( $(wc -l loki | cut -f1 -d' ') == 0 )); then
-    eval "echo \"[ ERROR ] INVALID FILE: 'loki'\" ${out[*]}"
-    exit 222
-fi
-
-cp loki LOKI
-${sed_cmd} -i -e "/#include <loki-common-funs>/r $LOKI_COMMON_FUNS" -e "/#include <loki-common-funs>/d" LOKI
-${sed_cmd} -i -e "/#include <loki-common-const>/r loki-common-const" -e "/#include <loki-common-const>/d" LOKI
-
+cp loki LOKI_ASSEMBLED
+${sed_cmd} -i -e "/#include <loki-common-funs>/r $LOKI_COMMON_FUNS" -e "/#include <loki-common-funs>/d" LOKI_ASSEMBLED
+${sed_cmd} -i -e "/#include <loki-common-const>/r loki-common-const" -e "/#include <loki-common-const>/d" LOKI_ASSEMBLED

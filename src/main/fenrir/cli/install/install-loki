@@ -3,7 +3,7 @@ pushd "$BUILD_DIR/loki" &> /dev/null
 
 ./install.loki
 
-sudo cp LOKI /usr/local/bin/loki
+sudo cp LOKI_ASSEMBLED /usr/local/bin/loki
 sudo chmod +x /usr/local/bin/loki
 
 source /usr/local/bin/loki
