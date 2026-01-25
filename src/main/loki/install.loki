@@ -24,20 +24,14 @@ for part in funs/*; do
 done
 
 # Assemble loki
-first=1
-for part in loki-common-*; do
-    pattern="#include <$part>"
+eval "echo \"[ INFO  ] Assembling final file..\" ${out[*]}"
 
-    if [[ $part == "loki-common-funs" ]]; then
-        part=$LOKI_COMMON_FUNS
-    fi
+if (( $(wc -l loki | cut -f1 -d' ') == 0 )); then
+    eval "echo \"[ ERROR ] INVALID FILE: 'loki'\" ${out[*]}"
+    exit 222
+fi
 
-    if (( first == 1 )); then
-        ${sed_cmd} -e "/$pattern/r $part" -e "/$pattern/d" loki > LOKI
-        first=0
-    else
-        ${sed_cmd} -i -e "/$pattern/r $part" -e "/$pattern/d" LOKI
-    fi
+cp loki LOKI
+${sed_cmd} -i -e "/#include <loki-common-funs>/r $LOKI_COMMON_FUNS" -e "/#include <loki-common-funs>/d" LOKI
+${sed_cmd} -i -e "/#include <loki-common-const>/r loki-common-const" -e "/#include <loki-common-const>/d" LOKI
 
-    eval "echo \"[ INFO  ] Inlining module <$part>..\" ${out[*]}"
-done
