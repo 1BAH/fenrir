@@ -82,6 +82,8 @@ fi
 ##                           MAIN PROGRAM                           ##
 ######################################################################
 
+task=$(fenrir-read-conf run task)
+
 if ! [ -f "${FENRIR_HOME}/repo/${task}/pipeline.hel" ]; then
     loki-log err "Task '${task}' is not installed. Try to run 'fenrir task ${task}'"
     exit 144
