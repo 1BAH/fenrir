@@ -1,0 +1,36 @@
+= Usage
+
+== Workflow
+
+To test solutions with fenrir these steps are required:
+
+. Install tests (optional)
+. Select task
+. Run tests
+
+
+=== Install tests
+
+`fenrir task <TASK ID>`
+
+Installs the task from the remote repository. To check the repository run `fenrir i`.
+
+If the task has been downloaded before, uses those sources. To update the sources use flag `--force`.
+
+=== Select task
+
+`fenrir task <TASK ID>`
+
+The selected task is shown in `fenrir i`.
+
+=== Run tests
+
+`fenrir run <SOLUTION DIR>`
+
+CAUTION: The `SOLUTION DIR` must be a git repository!
+
+== Update & Uninstall
+
+To update fenrir run `fenrir switch latest`.
+
+To uninstall fenrir run `uninstall-fenrir`.

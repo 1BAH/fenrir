@@ -35,3 +35,6 @@ bin/
 **/build.sh
 **/*ocker*
 **/ssh
+
+build/
+node_modules/

@@ -2,9 +2,26 @@ image: taekwandodo/fenrir:1.0
 
 stages:
   - test
+  - site
 
-TEST:
-  stage: test
-  before_script:
-    - cd src/test/core
-  script: ./run_tests.sh
+cache:
+  paths:
+    - node_modules
+
+#TEST:
+#  stage: test
+#  before_script:
+#    - cd src/test/core
+#  script: ./run_tests.sh
+
+pages:
+  stage: site
+  image: node:18.19.1
+  script:
+    - npm install
+    - npx antora antora-playbook.yml
+    - cp -r build/site public
+    - ls -R public
+  artifacts:
+    paths:
+      - public

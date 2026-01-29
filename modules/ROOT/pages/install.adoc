@@ -1,0 +1,42 @@
+= Install
+
+== Linux
+
+Currently, we support autocompletion for bash and zsh only. The installation guides are listed below. If you want to use fenrir without autocompletion then verify that `bash` is installed and run the following commands:
+
+    git clone https://gitlab.com/atpd/fenrir.git /tmp/fenr
+    cd /tmp/fenr/src/main/fenrir/cli
+    ./install-fenrir -v
+
+=== Bash
+Run the following commands:
+
+    git clone https://gitlab.com/atpd/fenrir.git /tmp/fenr
+    cd /tmp/fenr/src/main/fenrir/cli
+    ./install-fenrir --bash -v
+
+=== Zsh
+. Make sure `bash` is installed (even though the autocompletion for `zsh` is provided, fenrir is based on `bash`)
+. Run the following commands:
+
+    git clone https://gitlab.com/atpd/fenrir.git /tmp/fenr
+    cd /tmp/fenr/src/main/fenrir/cli
+    ./install-fenrir --zsh -v
+
+== MacOS
+
+. Update `bash` with `brew` (must be v5.0+)
+. Install `gsed`
+. Run the following commands from terminal:
+
+    git clone https://gitlab.com/atpd/fenrir.git /tmp/fenr
+    cd /tmp/fenr/src/main/fenrir/cli
+    ./install-fenrir --zsh -v
+
+. Verify the installation with `fenrir i`
+
+== Windows
+
+You cannot use fenrir directly in `Windows` that's why we recommend to use https://learn.microsoft.com/en-us/windows/wsl/install[WSL]. Chose any distro and use <<Linux>> install guide.
+
+
