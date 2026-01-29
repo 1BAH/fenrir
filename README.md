@@ -17,12 +17,12 @@
 
 > Install script supports these options:
 > ```text
-> bash     Install autocompletion for bash
-> zsh      Install autocompletion for zsh
+> --bash     Install autocompletion for bash
+> --zsh      Install autocompletion for zsh
 > -v       Verbose mode
 > ```
 
-If you use `zsh` without `Oh My Zsh` than make sure
+If you use `zsh` without `Oh My Zsh` then make sure
 1. `autoload -U compinit && compinit` is present at `~/.zshrc`
 2. `~/.oh-my-zsh/completions` is present at `fpath`
 

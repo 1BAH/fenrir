@@ -23,6 +23,11 @@ Run the following commands:
     cd /tmp/fenr/src/main/fenrir/cli
     ./install-fenrir --zsh -v
 
+If you use `zsh` without `Oh My Zsh` then make sure
+
+. `autoload -U compinit && compinit` is present at `~/.zshrc`
+. `~/.oh-my-zsh/completions` is present at `fpath`
+
 == MacOS
 
 . Update `bash` with `brew` (must be v5.0+)
