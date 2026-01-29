@@ -108,11 +108,11 @@ if [ "$task" = "-" ]; then
 fi
 
 image=$(fenrir-read-conf "$task" image)
-# FIXME switch to gitlab registry! (download quotas)
-image=${image:-"taekwandodo/fenrir-base"}
+image=${image:-"registry.gitlab.com/atpd/progtech/tech-tasks/containers/fenrir-base"}
 
 container=$(docker run -e LOKI_VERBOSE --rm -d "$image")
 
+loki-log info "Running on: " "$(docker exec -it "$container" fenrir v)"
 
 lokiw docker exec -it "$container" fenrir info || {
     finalise "Failed to find 'fenrir' in container" "$?"
