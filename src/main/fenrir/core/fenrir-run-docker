@@ -132,8 +132,16 @@ lokiw docker cp "$FENRIR_HOME" "$container:/home/fikus" || {
     finalise "Unable to copy local repo into container" "$?"
 }
 
+lokiw docker exec "$container" chown fikus -R "/home/fikus" || {
+    finalise "Unable to change owner" "$?"
+}
+
 lokiw docker cp "$RUN_CONF_FILE" "$container:/tmp/fenrir/tmp/run-conf.hel" || {
     finalise "Unable to copy run-conf into container" "$?"
+}
+
+lokiw docker exec "$container" chown fikus -R "/tmp/fenrir" || {
+    finalise "Unable to change owner" "$?"
 }
 
 docker exec -it "$container" bash -c "cd solution && fenrir run -i ${NO_LINT} ${NO_ZERO} ."
