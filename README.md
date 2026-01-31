@@ -2,6 +2,8 @@
 
 > Framework for testing
 
+[![pipeline status](https://gitlab.com/atpd/fenrir/badges/main/pipeline.svg)](https://gitlab.com/atpd/fenrir/-/commits/main)
+
 ## Install
 
 ### System requirements
