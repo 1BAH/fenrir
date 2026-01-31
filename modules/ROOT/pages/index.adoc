@@ -1,6 +1,6 @@
 = Fenrir
 
-image::fenrir-modified.png[width=50%]
+image::logo.png[width=50%]
 
 > A lightweight testing framework
 
