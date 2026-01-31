@@ -4,6 +4,8 @@ image::logo.png[width=50%]
 
 > A lightweight testing framework
 
+image::https://gitlab.com/atpd/fenrir/badges/main/pipeline.svg[]
+
 WARNING: The site is under development!
 
 '''
