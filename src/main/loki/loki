@@ -15,7 +15,7 @@ JOTUNHEIM=()
 # When no args, we just want to load all global functions and global consts
 if (( $# != 0 )); then
     function save_cmd {
-        # Sudo night occur during update
+        # Sudo might occur during update
         if [ "$(id -u)" -eq 0 ]; then
             return 0
         fi
