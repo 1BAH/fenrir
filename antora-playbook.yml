@@ -3,7 +3,7 @@ site:
   start_page: fenrir::index.adoc
 content:
   sources:
-    - url: .
+    - url: https://gitlab.com/atpd/fenrir
       tags:
         - HEAD
         - v1.0.0-rc.3-alpha
