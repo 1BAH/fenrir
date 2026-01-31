@@ -7,10 +7,12 @@ stages:
 cache:
   paths:
     - node_modules
+    - /usr/bin/wget
 
 tests:
   stage: test
   before_script:
+    - apt install wget
     - cd src/test/runtime
   script: ./run_tests.sh
 
