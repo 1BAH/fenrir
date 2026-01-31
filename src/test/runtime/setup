@@ -2,6 +2,11 @@
 
 set -e
 
+type fenrir &> /dev/null && {
+    echo -e "\033[1m\033[38;5;214mFenrir is already installed. Tests might work incorrectly!\033[0m"
+    sleep 3s
+}
+
 # ASSUMPTION: running from src/test/runtime
 src_dir=$(realpath "$(pwd)/../../main/fenrir")
 
