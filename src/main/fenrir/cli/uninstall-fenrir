@@ -39,9 +39,9 @@ FENRIR_HOME=${FENRIR_HOME:-"/home/$user/.fenrir"}
 version=$(fenrir-read-conf main version)
 
 if [ -n "${FENRIR_IN_DOCKER}" ]; then
-    echo "[ INFO  ] Uninstalling previous version of fenrir: ${version}"
+    echo "[ INFO  ] Uninstalling fenrir v${version}"
 else
-    info "Uninstalling previous version of fenrir: ${version}"
+    info "Uninstalling fenrir v${version}"
 fi
 
 #################################################################
