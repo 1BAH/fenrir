@@ -2,9 +2,6 @@
 
 # ASSUMPTION: running from src/test/runtime
 
-PATH=$(cat "${FENRIR_TEST_DIR}/PATH_NEW")
-export PATH
-
 return_code=0
 
 cat <<__HEREDOC
