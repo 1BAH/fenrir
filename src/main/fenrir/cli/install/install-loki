@@ -3,9 +3,9 @@ pushd "$BUILD_DIR/loki" &> /dev/null
 
 ./install.loki
 
-sudo cp LOKI_ASSEMBLED /usr/local/bin/loki
-sudo chmod +x /usr/local/bin/loki
+sudo cp LOKI_ASSEMBLED "${FENRIR_INSTALL_DIR}/loki"
+sudo chmod +x "${FENRIR_INSTALL_DIR}/loki"
 
-source /usr/local/bin/loki
+source "${FENRIR_INSTALL_DIR}/loki"
 
 popd &> /dev/null

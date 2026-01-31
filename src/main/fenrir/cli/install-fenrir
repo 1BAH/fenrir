@@ -3,6 +3,8 @@
 out=(">" "/dev/null")
 verbose=""
 sed_cmd="sed"
+out_dir="/usr/local/bin"
+conf_dir="/etc/fenrir"
 
 while (( $# > 0 )); do
     case "$1" in
@@ -16,19 +18,29 @@ while (( $# > 0 )); do
     zsh)
         export FENRIR_INSTALL_ZSH=1
     ;;
+    --install-dir)
+        out_dir="$2"
+        shift
+    ;;
+    --conf-dir)
+        conf_dir="$2"
+        shift
+    ;;
     esac
 
     shift
 done
 
+eval "echo \"[ INFO  ] Install dir is: <${out_dir}>\" ${out[*]}"
+eval "echo \"[ INFO  ] Config dir is: <${conf_dir}>\" ${out[*]}"
 #################################################################
 #                    CHECK EXISTING CONFIGS                     #
 #################################################################
 
-if [ -f "/etc/fenrir/main.hel" ]; then
-    eval "echo \"[ INFO  ] Found existing configs: </etc/fenrir/main.hel>\" ${out[*]}"
+if [ -f "${conf_dir}/main.hel" ]; then
+    eval "echo \"[ INFO  ] Found existing configs: <${conf_dir}/main.hel>\" ${out[*]}"
 
-    case "$(grep -oP 'complete="\K[^"]*' /etc/fenrir/main.hel)" in
+    case "$(grep -oP 'complete="\K[^"]*' "${conf_dir}/main.hel")" in
         bash)
             eval "echo \"[ INFO  ] Bash autocompletion to be installed\" ${out[*]}"
             export FENRIR_INSTALL_BASH=1
@@ -38,7 +50,7 @@ if [ -f "/etc/fenrir/main.hel" ]; then
             export FENRIR_INSTALL_ZSH=1
         ;;
         *)
-            eval "echo \"[ WARN  ] Unknown option\" ${out[*]}"
+            eval "echo \"[ WARN  ] Autocomplete: Unknown option\" ${out[*]}"
         ;;
     esac
 fi
@@ -108,4 +120,15 @@ chmod +x $BUILD_SCRIPT
 eval "echo \"[ INFO  ] The final build script is <$BUILD_SCRIPT>\" ${out[*]}"
 echo "PROGRESS << DONE"
 
-CLI_DIR="$CLI_DIR" FENRIR_INSTALL_VERBOSE="$verbose" LOKI_VERBOSE="$verbose" $BUILD_SCRIPT
+CLI_DIR="$CLI_DIR" \
+FENRIR_INSTALL_VERBOSE="$verbose" \
+LOKI_VERBOSE="$verbose" \
+FENRIR_INSTALL_DIR="$out_dir" \
+FENRIR_CONF_DIR="$conf_dir" \
+$BUILD_SCRIPT
+
+res=$?
+
+rm -fr "$BUILD_SCRIPT" &> /dev/null
+exit $res
+
