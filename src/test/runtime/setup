@@ -1,0 +1,32 @@
+#! /usr/bin/env bash
+
+
+# ASSUMPTION: running from src/test/runtime
+src_dir=$(realpath "$(pwd)/../../main/fenrir")
+
+if [ -z "${FENRIR_TEST_DIR}" ]; then
+    echo "FENRIR_TEST_DIR is empty!"
+    exit 77
+fi
+
+if [ -d "${FENRIR_TEST_DIR}" ]; then
+    rm -fr "${FENRIR_TEST_DIR}"
+fi
+
+mkdir -p "${FENRIR_TEST_DIR}/etc"
+mkdir -p "${FENRIR_TEST_DIR}/bin"
+
+echo "Installing fenrir for test env"
+
+"${src_dir}/cli/install-fenrir" -v --install-dir "${FENRIR_TEST_DIR}/bin" --conf-dir "${FENRIR_TEST_DIR}/etc" -t
+
+echo "Setting PATH.."
+
+echo "$PATH" > "${FENRIR_TEST_DIR}/path.save"
+echo "+ Old PATH is saved to '${FENRIR_TEST_DIR}/path.save'"
+
+export PATH="${FENRIR_TEST_DIR}/bin:$PATH"
+echo "+ New PATH is '$PATH'"
+
+echo "$PATH" > "${FENRIR_TEST_DIR}/PATH_NEW"
+echo "+ New PATH is saved to '${FENRIR_TEST_DIR}/PATH_NEW'"

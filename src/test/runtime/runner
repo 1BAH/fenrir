@@ -1,0 +1,31 @@
+#! /usr/bin/env loki
+
+# ASSUMPTION: running from src/test/runtime
+
+PATH=$(cat "${FENRIR_TEST_DIR}/PATH_NEW")
+export PATH
+
+return_code=0
+
+cat <<__HEREDOC
+==================================================================
+                          Running tests
+==================================================================
+__HEREDOC
+
+for test_file in ../*Tests.sh; do
+    if ! [ -x "$test_file" ]; then
+        continue
+    fi
+
+    loki-log info "> Test: $(loki-wrap "${SKY}" "$(basename "$test_file")")"
+    echo "⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅"
+    if ! "$test_file"; then
+        loki-log err "Test failed"
+        (( return_code++ ))
+    else
+        loki-log succ "Test passed"
+    fi
+
+    echo "=================================================================="
+done

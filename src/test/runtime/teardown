@@ -1,0 +1,9 @@
+#! /usr/bin/env bash
+
+echo "Restoring PATH"
+export PATH=$(cat "${FENRIR_TEST_DIR}/path.save")
+
+echo "Cleaning test environment"
+if [ -z "${FENRIR_TEST_DEBUG}" ]; then
+    rm -r "${FENRIR_TEST_DIR}"
+fi
