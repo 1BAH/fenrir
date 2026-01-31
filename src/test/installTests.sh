@@ -3,8 +3,9 @@
 ##########################################################################
 
 # DO NOT MAKE IT AUTOLOADABLE!
-version="1.0.0-rc.3-alpha"
-year="2026"
+version="1.0.0"
+
+year=$(date +%Y)
 
 loki-prog "fenrir v"
 

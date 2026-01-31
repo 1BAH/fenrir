@@ -1,8 +1,10 @@
-# Fenrir v1.0.0
+# Fenrir
 
 > Framework for testing
 
 [![pipeline status](https://gitlab.com/atpd/fenrir/badges/main/pipeline.svg)](https://gitlab.com/atpd/fenrir/-/commits/main)
+
+Latest version is `1.0.0`
 
 ## Install
 
