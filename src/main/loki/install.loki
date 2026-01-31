@@ -14,13 +14,14 @@ for part in funs/*; do
     pattern="#include <$file>"
 
     if (( first == 1 )); then
+        # shellcheck disable=SC2154
         ${sed_cmd} -e "/$pattern/r $part" -e "/$pattern/d" loki-common-funs > $LOKI_COMMON_FUNS
         first=0
     else
         ${sed_cmd} -i -e "/$pattern/r $part" -e "/$pattern/d" $LOKI_COMMON_FUNS
     fi
 
-    eval "echo \"[ INFO  ] Inlining function module <$part>..\" ${out[*]}"
+    eval "echo \"[ INFO  ] Inlining function-module <$part>..\" ${out[*]}"
 done
 
 # Assemble loki

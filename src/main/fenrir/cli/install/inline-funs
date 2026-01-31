@@ -15,6 +15,7 @@ out loki-prog "Inlining functions..."
             file=$(basename "$inline")
             pattern="#include <$file>"
 
+            # shellcheck disable=SC2154
             ${sed_cmd} -i -e "/$pattern/r $inline" -e "/$pattern/d" "$util"
         done
     done

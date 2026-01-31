@@ -76,6 +76,7 @@ case "$cmd" in
 
         echo "Available versions:"
 
+        # shellcheck disable=SC2154
         grep -o '"name":"[^"]*"' "$OUT_FILE" | ${sed_cmd} 's|"name":"||' | ${sed_cmd} 's|"||' | ${sed_cmd} 's|^|* |'
     ;;
 

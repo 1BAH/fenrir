@@ -7,6 +7,7 @@
 function loki-dup {
     local str="$1"
     local cnt="$2"
+    # shellcheck disable=SC2183
     printf -v template '%*s' "$cnt"
     printf '%s\n' "${template// /$str}"
 }
