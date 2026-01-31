@@ -36,3 +36,7 @@ echo "+ New PATH is '$PATH'"
 
 echo "$PATH" > "${FENRIR_TEST_DIR}/PATH_NEW"
 echo "+ New PATH is saved to '${FENRIR_TEST_DIR}/PATH_NEW'"
+
+echo "Test environment:"
+echo "+ $(type fenrir)"
+echo "+ $(type loki)"
