@@ -1,4 +1,4 @@
-image: taekwandodo/fenrir:1.0
+image: ubuntu:latest
 
 stages:
   - test
@@ -8,11 +8,11 @@ cache:
   paths:
     - node_modules
 
-#TEST:
-#  stage: test
-#  before_script:
-#    - cd src/test/core
-#  script: ./run_tests.sh
+tests:
+  stage: test
+  before_script:
+    - cd src/test/runtime
+  script: ./run_tests.sh
 
 pages:
   stage: site
@@ -25,3 +25,5 @@ pages:
   artifacts:
     paths:
       - public
+  needs:
+    - tests
