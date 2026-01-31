@@ -83,16 +83,6 @@ if [ -n "$test_mode" ]; then
 elif ! [ "$(id -u)" -eq 0 ]; then
     echo -e "\033[1m\033[38;5;196m[ ERROR ]\033[0m \033[38;5;197mᕙ( •̀ ᗜ •́ )ᕗ  \033[0mThe script must be run in a \033[1mprivileged mode\033[0m (sudo)!"
     exit 111
-else
-    [ -d "${out_dir}" ] || {
-        echo -e "\033[1m\033[38;5;196m[ ERROR ]\033[0m \033[38;5;197mᕙ( •̀ ᗜ •́ )ᕗ  \033[0mThe install dir <${out_dir}> does not exist!"
-        exit 112
-    }
-
-    [ -d "${conf_dir}" ] || {
-        echo -e "\033[1m\033[38;5;196m[ ERROR ]\033[0m \033[38;5;197mᕙ( •̀ ᗜ •́ )ᕗ  \033[0mThe config dir <${conf_dir}> does not exist!"
-        exit 113
-    }
 fi
 
 echo "PROGRESS >> Assembling the build script.."

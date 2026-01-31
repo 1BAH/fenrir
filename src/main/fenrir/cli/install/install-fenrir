@@ -341,6 +341,10 @@ for cmd in "$CORE_UTILS_DIR"/*; do
     fi
 done
 
+# Update config location
+${sed_cmd} -i "s|^CONF_FILE=.*$|CONF_FILE=\"${FENRIR_CONF_DIR}\"|" "${FENRIR_INSTALL_DIR}/fenrir-read-conf"
+${sed_cmd} -i "s|^CONF_FILE=.*$|CONF_FILE=\"${FENRIR_CONF_DIR}\"|" "${FENRIR_INSTALL_DIR}/fenrir-set-conf"
+
 out loki-gorp
 
 #################################################################

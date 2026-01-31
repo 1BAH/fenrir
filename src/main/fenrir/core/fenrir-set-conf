@@ -42,4 +42,5 @@ case "$1" in
     ;;
 esac
 
+# shellcheck disable=SC2154
 ${sed_cmd} -i "s|^${2}=.*$|${2}=\"${3}\"|" "${CONF_FILE}"
