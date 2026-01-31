@@ -7,7 +7,6 @@ stages:
 cache:
   paths:
     - node_modules
-    - /usr/bin/wget
 
 tests:
   stage: test

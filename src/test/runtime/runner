@@ -26,3 +26,5 @@ for test_file in ../*Tests.sh; do
 
     echo "=================================================================="
 done
+
+exit $return_code
