@@ -17,7 +17,7 @@ TMP_IDX_FILE="$FENRIR_TMP_DIR/idx"
 SCORE_FILE="${FENRIR_TMP_DIR}/score"
 RUN_CONF_FILE="${FENRIR_TMP_DIR}/run-conf.hel"
 
-if [ "$(id -u)" -ne 0 ]; then # Non sudo execution
+if [ "$(id -u)" -ne 0 ] || [ -n "${FENRIR_IN_DOCKER}" ]; then # Non sudo execution
     # Ensure FENRIR_TMP_DIR exists
     if ! [ -d "$FENRIR_TMP_DIR" ]; then
         mkdir -p "$FENRIR_TMP_DIR"
