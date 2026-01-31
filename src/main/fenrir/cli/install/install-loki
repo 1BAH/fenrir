@@ -3,8 +3,13 @@ pushd "$BUILD_DIR/loki" &> /dev/null
 
 ./install.loki
 
-sudo cp LOKI_ASSEMBLED "${FENRIR_INSTALL_DIR}/loki"
-sudo chmod +x "${FENRIR_INSTALL_DIR}/loki"
+if [ -n "${FENRIR_TEST_MODE}" ]; then
+    cp LOKI_ASSEMBLED "${FENRIR_INSTALL_DIR}/loki"
+    chmod +x "${FENRIR_INSTALL_DIR}/loki"
+else
+    sudo cp LOKI_ASSEMBLED "${FENRIR_INSTALL_DIR}/loki"
+    sudo chmod +x "${FENRIR_INSTALL_DIR}/loki"
+fi
 
 source "${FENRIR_INSTALL_DIR}/loki"
 

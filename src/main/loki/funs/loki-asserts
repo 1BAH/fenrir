@@ -19,7 +19,11 @@ function loki-assert-eq {
 
     if [[ "$exp" != "$real" ]]; then
         [ -n "$msg" ] && loki-log err "$msg"
-        loki-log fail "Expected <$real> to be <$exp>"
+        if [ -n "${FENRIR_TEST_DEBUG}" ]; then
+            loki-log err "Expected <$real> to be <$exp>"
+        else
+            loki-log fail "Expected <$real> to be <$exp>"
+        fi
         ${LOKI_ASSERT_CB}
         exit 99
     fi
@@ -40,7 +44,11 @@ function loki-assert-neq {
 
     if [[ "$exp" == "$real" ]]; then
         [ -n "$msg" ] && loki-log err "$msg"
-        loki-log fail "Expected <$real> to differ from <$exp>"
+        if [ -n "${FENRIR_TEST_DEBUG}" ]; then
+            loki-log err "Expected <$real> to differ from <$exp>"
+        else
+            loki-log fail "Expected <$real> to differ from <$exp>"
+        fi
         ${LOKI_ASSERT_CB}
         exit 99
     fi
@@ -61,7 +69,11 @@ function loki-assert-regeq {
 
     if ! [[ $real =~ $regexp ]]; then
         [ -n "$msg" ] && loki-log err "$msg"
-        loki-log fail "Expected <$real> to match regexp <$regexp>"
+        if [ -n "${FENRIR_TEST_DEBUG}" ]; then
+            loki-log err "Expected <$real> to match regexp <$regexp>"
+        else
+            loki-log fail "Expected <$real> to match regexp <$regexp>"
+        fi
         ${LOKI_ASSERT_CB}
         exit 99
     fi

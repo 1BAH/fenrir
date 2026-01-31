@@ -250,6 +250,8 @@ out loki-gorp
 out loki-prog "Previous installations..."
 
 ( # Variable scope: 'found' array
+    [ -n "${FENRIR_TEST_MODE}" ] && exit 0
+
     found=()
 
     for cmd in "$CORE_UTILS_DIR"/*; do

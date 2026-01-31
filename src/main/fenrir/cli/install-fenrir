@@ -26,6 +26,9 @@ while (( $# > 0 )); do
         conf_dir="$2"
         shift
     ;;
+    -t)
+        test_mode=True
+    ;;
     esac
 
     shift
@@ -72,10 +75,24 @@ export sed_cmd
 #################################################################
 #                         VERIFY SUDO                           #
 #################################################################
+if [ -n "$test_mode" ]; then
+    echo -e "\033[1m\033[38;5;214m[ WARN  ]\033[0m \033[38;5;209m\(˚☐˚)/  \033[0mTest mode is on!"
 
-if ! [ "$(id -u)" -eq 0 ]; then
+    [ -d "${out_dir}" ] || mkdir -p "${out_dir}"
+    [ -d "${conf_dir}" ] || mkdir -p "${conf_dir}"
+elif ! [ "$(id -u)" -eq 0 ]; then
     echo -e "\033[1m\033[38;5;196m[ ERROR ]\033[0m \033[38;5;197mᕙ( •̀ ᗜ •́ )ᕗ  \033[0mThe script must be run in a \033[1mprivileged mode\033[0m (sudo)!"
     exit 111
+else
+    [ -d "${out_dir}" ] || {
+        echo -e "\033[1m\033[38;5;196m[ ERROR ]\033[0m \033[38;5;197mᕙ( •̀ ᗜ •́ )ᕗ  \033[0mThe install dir <${out_dir}> does not exist!"
+        exit 112
+    }
+
+    [ -d "${conf_dir}" ] || {
+        echo -e "\033[1m\033[38;5;196m[ ERROR ]\033[0m \033[38;5;197mᕙ( •̀ ᗜ •́ )ᕗ  \033[0mThe config dir <${conf_dir}> does not exist!"
+        exit 113
+    }
 fi
 
 echo "PROGRESS >> Assembling the build script.."
@@ -125,6 +142,7 @@ FENRIR_INSTALL_VERBOSE="$verbose" \
 LOKI_VERBOSE="$verbose" \
 FENRIR_INSTALL_DIR="$out_dir" \
 FENRIR_CONF_DIR="$conf_dir" \
+FENRIR_TEST_MODE="$test_mode" \
 $BUILD_SCRIPT
 
 res=$?
