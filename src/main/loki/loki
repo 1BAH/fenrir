@@ -11,6 +11,12 @@ shopt -s extdebug
 #include <loki-common-const>
 #include <loki-common-funs>
 
+if [ "$1" = "-c" ]; then
+    shift
+    "$@"
+    exit
+fi
+
 # IMPORTANT!! DO NOT USE 'JOTUNHEIM_..' AS A NAME FOR VARIABLES!!
 JOTUNHEIM_LAST_CMD=""
 JOTUNHEIM=()
