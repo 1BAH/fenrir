@@ -1,5 +1,8 @@
 #! /usr/bin/env bash
 
+# Load rc file:
+source "/etc/fenrir/lokirc" &> /dev/null
+
 set -T
 shopt -s extdebug
 

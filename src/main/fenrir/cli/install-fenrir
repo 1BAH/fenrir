@@ -1,5 +1,13 @@
 #! /usr/bin/env bash
 
+function warn_msg {
+    echo -e "\033[1m\033[38;5;214m[ WARN  ]\033[0m \033[38;5;209m(シ. .)シ\033[0m $*"
+}
+
+function err_msg {
+    echo -e "\033[1m\033[38;5;196m[ ERROR ]\033[0m \033[38;5;197mᕙ( •̀ ᗜ •́ )ᕗ\033[0m $*"
+}
+
 out=(">" "/dev/null")
 verbose=""
 sed_cmd="sed"
@@ -12,10 +20,10 @@ while (( $# > 0 )); do
         out=()
         verbose="-v"
     ;;
-    bash)
+    --bash)
         export FENRIR_INSTALL_BASH=1
     ;;
-    zsh)
+    --zsh)
         export FENRIR_INSTALL_ZSH=1
     ;;
     --install-dir)
@@ -29,19 +37,41 @@ while (( $# > 0 )); do
     -t)
         test_mode=True
     ;;
+    --debug)
+        debug_mode=True
+    ;;
     esac
 
     shift
 done
 
-eval "echo \"[ INFO  ] Install dir is: <${out_dir}>\" ${out[*]}"
-eval "echo \"[ INFO  ] Config dir is: <${conf_dir}>\" ${out[*]}"
+CLI_DIR=$(dirname "$(realpath "$0")") # 'cli' directory
+
+#################################################################
+#                         VERIFY SUDO                           #
+#################################################################
+if [ -n "$test_mode" ]; then
+    echo -e "\033[1m\033[38;5;214m[ WARN  ]\033[0m \033[38;5;209m\(˚☐˚)/  \033[0mTest mode is on!"
+
+    [ -d "${out_dir}" ]  || mkdir -p "${out_dir}"
+    [ -d "${conf_dir}" ] || mkdir -p "${conf_dir}"
+elif ! [ "$(id -u)" -eq 0 ]; then
+    err_msg "The script must be run in a \033[1mprivileged mode\033[0m (sudo)!"
+    exit 111
+elif ! [ -d "${out_dir}" ]; then
+    err_msg "Install directory <${out_dir}> does not exist!"
+    exit 112
+fi
+
 #################################################################
 #                    CHECK EXISTING CONFIGS                     #
 #################################################################
 
+eval "echo \"[ INFO  ] Install dir is: <${out_dir}>\" ${out[*]}"
+eval "echo \"[ INFO  ] Config dir is: <${conf_dir}>\" ${out[*]}"
+
 if [ -f "${conf_dir}/main.hel" ]; then
-    eval "echo \"[ INFO  ] Found existing configs: <${conf_dir}/main.hel>\" ${out[*]}"
+    eval "echo \"[ INFO  ] Using existing configs: <${conf_dir}/main.hel>\" ${out[*]}"
 
     case "$(grep -oP 'complete="\K[^"]*' "${conf_dir}/main.hel")" in
         bash)
@@ -58,47 +88,74 @@ if [ -f "${conf_dir}/main.hel" ]; then
     esac
 fi
 
+#################################################################
+#                      VERIFY DEPENDENCIES                      #
+#################################################################
+
+while IFS='=' read -r key value; do
+    case "$key" in
+        requirements)
+            eval "REQUIREMENTS=$value"
+        ;;
+    esac
+done < "$CLI_DIR/fenrir.properties"
+
+echo "PROGRESS >> Validating software requirements.."
+
+# sed must be from GNU! (-i work differently in BSD)
 sed --help &> /dev/null || {
-    echo -e "\033[1m\033[38;5;214m[ WARN  ]\033[0m \033[38;5;209m(シ. .)シ  \033[0mYou use BSD's version of sed!"
+    # The problem occurs on Mac => colours (humans)
+    warn_msg "BSD sed is detected.."
 
     which gsed &> /dev/null || {
-        echo -e "\033[1m\033[38;5;196m[ ERROR ]\033[0m \033[38;5;197mᕙ( •̀ ᗜ •́ )ᕗ  \033[0mInstall 'gsed': brew install gnu-sed!"
+        err_msg "Install <gsed>: 'brew install gnu-sed'!"
         exit 111
     }
 
     sed_cmd="gsed"
-    echo -e "\033[1m\033[38;5;214m[ WARN  ]\033[0m \033[38;5;209m(シ. .)シ  \033[0mNow using 'gsed' instead!"
+    warn_msg "Now using <gsed> (GNU sed) instead"
 }
 
 export sed_cmd
+eval "echo -e \"+ '\033[1msed\033[0m' exists\" ${out[*]}"
 
-#################################################################
-#                         VERIFY SUDO                           #
-#################################################################
-if [ -n "$test_mode" ]; then
-    echo -e "\033[1m\033[38;5;214m[ WARN  ]\033[0m \033[38;5;209m\(˚☐˚)/  \033[0mTest mode is on!"
+for req in "${REQUIREMENTS[@]}"; do
+    if ! type "$req" &> /dev/null; then
+        err_msg "- '\033[1m$req\033[0m' is not installed!"
+        exit 5
+    else
+        eval "echo -e \"+ '\033[1m$req\033[0m' exists\" ${out[*]}"
+    fi
+done
 
-    [ -d "${out_dir}" ] || mkdir -p "${out_dir}"
-    [ -d "${conf_dir}" ] || mkdir -p "${conf_dir}"
-elif ! [ "$(id -u)" -eq 0 ]; then
-    echo -e "\033[1m\033[38;5;196m[ ERROR ]\033[0m \033[38;5;197mᕙ( •̀ ᗜ •́ )ᕗ  \033[0mThe script must be run in a \033[1mprivileged mode\033[0m (sudo)!"
-    exit 111
+# Check that bash is 5.0.0 or newer
+if (( "$(echo "$BASH_VERSION" | cut -d'.' -f1)" < 5 )); then
+    warn_msg "Bash version is '\033[1m$BASH_VERSION\033[0m'. Fenrir might work incorrectly: bash should be >=5.0.0"
+    warn_msg "Do you agree to continue? (\033[1mPotentially dangerous\033[0m) [Y|N]"
+
+    read -r op
+    if [ "$op" != "y" ] && [ "$op" != "Y" ]; then
+        err_msg "Terminating.."
+        exit 3
+    fi
 fi
 
-echo "PROGRESS >> Assembling the build script.."
+eval "echo -e \"+ '\033[1mbash\033[0m' exists\" ${out[*]}"
+
+echo "PROGRESS << DONE"
 
 #################################################################
 #                       ASSEMBLE INSTALLER                      #
 #################################################################
 
-CLI_DIR=$(dirname "$(realpath "$0")") # 'cli' directory
+echo "PROGRESS >> Assembling the build script.."
+
 BUILD_SCRIPT="/tmp/FENRIR_BUILD_SCRIPT"
 
 if [ -f "$BUILD_SCRIPT" ]; then
     eval "echo \"[ INFO  ] Found an old build script: <$BUILD_SCRIPT>\" ${out[*]}"
     rm -fr "$BUILD_SCRIPT" &> /dev/null
 fi
-
 
 
 ( # Do not pollute the global variable scope
@@ -127,16 +184,20 @@ chmod +x $BUILD_SCRIPT
 eval "echo \"[ INFO  ] The final build script is <$BUILD_SCRIPT>\" ${out[*]}"
 echo "PROGRESS << DONE"
 
+# Running script with env parameters
 CLI_DIR="$CLI_DIR" \
 FENRIR_INSTALL_VERBOSE="$verbose" \
 LOKI_VERBOSE="$verbose" \
 FENRIR_INSTALL_DIR="$out_dir" \
 FENRIR_CONF_DIR="$conf_dir" \
 FENRIR_TEST_MODE="$test_mode" \
+FENRIR_DEBUG_MODE="$debug_mode" \
 $BUILD_SCRIPT
 
 res=$?
 
-rm -fr "$BUILD_SCRIPT" &> /dev/null
-exit $res
+if [ -z "${debug_mode}" ]; then
+    rm -fr "$BUILD_SCRIPT" &> /dev/null
+fi
 
+exit $res

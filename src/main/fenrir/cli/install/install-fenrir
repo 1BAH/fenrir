@@ -212,41 +212,6 @@ if [ -d "/var/fenrir" ]; then
 fi
 
 out loki-gorp
-out loki-prog "Software requirements.."
-
-if [ -n "$on_macos" ]; then
-    for req in "${MAC_REQUIREMENTS[@]}"; do
-        if ! type "$req" &> /dev/null; then
-            loki-log err "'$(loki-wrap "${BOLD}" "$req")' is not installed!"
-            exit 5
-        else
-            out loki-log succ "'$(loki-wrap "${BOLD}" "$req")' exists"
-        fi
-    done
-else
-    for req in "${REQUIREMENTS[@]}"; do
-        if ! type "$req" &> /dev/null; then
-            loki-log err "'$(loki-wrap "${BOLD}" "$req")' is not installed!"
-            exit 5
-        else
-            out loki-log succ "'$(loki-wrap "${BOLD}" "$req")' exists"
-        fi
-    done
-fi
-
-# Check that bash is 5.0.0 or newer
-if (( "$(echo "$BASH_VERSION" | cut -d'.' -f1)" < 5 )); then
-    loki-log warn "Bash version is '$(loki-wrap "${BOLD}" "$BASH_VERSION")'. Fenrir might work incorrectly: we expect bash>=5.0.0."
-    loki-log warn "Do you agree to continue? ($(loki-wrap "${BOLD}" Potentially dangerous)) [Y|N]"
-
-    read -r op
-    if [ "$op" != "y" ] && [ "$op" != "Y" ]; then
-        loki-log err "Terminating.."
-        exit 3
-    fi
-fi
-
-out loki-gorp
 out loki-prog "Previous installations..."
 
 ( # Variable scope: 'found' array
@@ -370,6 +335,18 @@ done
 
 echo "version=\"$VERSION\"" >> "${FENRIR_CONF_DIR}/main.hel"
 
+out loki-log info "Installing 'lokirc'.."
+# lokirc file
+if ! {
+    mv "$CFGS_DIR/lokirc" "${FENRIR_CONF_DIR}/lokirc" &&
+    chown "$user" "${FENRIR_CONF_DIR}/lokirc"
+}; then
+    loki-log err "Failed to install. Try again or submit an issue."
+    exit 7
+fi
+
+${sed_cmd} -i "s|/etc/fenrir/lokirc|${FENRIR_CONF_DIR}/lokirc|" "${FENRIR_INSTALL_DIR}/loki"
+
 out loki-gorp
 
 #################################################################
@@ -453,5 +430,8 @@ loki-gorp
 #                       Finish installation                       #
 ###################################################################
 
-rm -fr ${BUILD_DIR}
+if [ -z "${FENRIR_DEBUG_MODE}" ]; then
+    rm -fr ${BUILD_DIR}
+fi
+
 out loki-log succ "Installation has finished!"
