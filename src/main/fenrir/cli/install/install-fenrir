@@ -54,12 +54,6 @@ while IFS='=' read -r key value; do
         version)
             VERSION=$value
             ;;
-        requirements)
-            eval "REQUIREMENTS=$value"
-            ;;
-        mac_requirements)
-            eval "MAC_REQUIREMENTS=$value"
-            ;;
     esac
 done < "$CLI_DIR/fenrir.properties"
 
@@ -200,6 +194,8 @@ out loki-prog "Working directories.."
 
 if [ -d "${FENRIR_CONF_DIR}" ]; then
     find "${FENRIR_CONF_DIR}" -mindepth 1 -not -name "*.hel" | while read -r file; do
+        [ "$(basename "$file")" = "lokirc" ] && continue
+
         rm -fr "$file"
         loki-log warn "File '$file' is removed"
     done
@@ -335,18 +331,24 @@ done
 
 echo "version=\"$VERSION\"" >> "${FENRIR_CONF_DIR}/main.hel"
 
-out loki-log info "Installing 'lokirc'.."
-# lokirc file
-if ! {
-    mv "$CFGS_DIR/lokirc" "${FENRIR_CONF_DIR}/lokirc" &&
-    chown "$user" "${FENRIR_CONF_DIR}/lokirc"
-}; then
-    loki-log err "Failed to install. Try again or submit an issue."
-    exit 7
+
+out loki-prog "Installing 'lokirc'.."
+
+if [ -f "${FENRIR_CONF_DIR}/lokirc" ]; then
+    out loki-log info "Found existing lokirc: <${FENRIR_CONF_DIR}/lokirc>"
+else
+    if ! {
+        mv "$CFGS_DIR/lokirc" "${FENRIR_CONF_DIR}/lokirc" &&
+        chown "$user" "${FENRIR_CONF_DIR}/lokirc"
+    }; then
+        loki-log err "Failed to install. Try again or submit an issue."
+        exit 7
+    fi
 fi
 
 ${sed_cmd} -i "s|/etc/fenrir/lokirc|${FENRIR_CONF_DIR}/lokirc|" "${FENRIR_INSTALL_DIR}/loki"
 
+out loki-gorp
 out loki-gorp
 
 #################################################################

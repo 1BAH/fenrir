@@ -24,10 +24,10 @@ url="https://gitlab.com/atpd/fenrir.git"
 
 complete=$(fenrir-read-conf main complete)
 if [ "$1" = "--bash" ]; then
-    complete=bash
+    complete=--bash
     shift
 elif [ "$1" = "--zsh" ]; then
-    complete=zsh
+    complete=--zsh
     shift
 fi
 
@@ -42,14 +42,14 @@ function safe_tag_clone {
     tag=$1
 
     lokiw git clone --depth 1 --branch "$tag" "$url" "${clone_dir}" || {
-        loki-log fail 'ヽ（≧□≦）ノ' "Failed to clone repo"
+        loki-log fail 'ヽ(≧□≦)ノ' "Failed to clone repo"
         exit 66
     }
 }
 
 function safe_clone {
     lokiw git clone --depth 1 "$url" "${clone_dir}" || {
-        loki-log fail 'ヽ（≧□≦）ノ' "Failed to clone repo"
+        loki-log fail 'ヽ(≧□≦)ノ' "Failed to clone repo"
         exit 66
     }
 }

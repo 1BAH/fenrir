@@ -55,10 +55,12 @@ fi
 
 info "Removing working directories.."
 
-if [ -z "${update}" ] && [ -d "${FENRIR_TMP_DIR}" ]; then
-    rm -r "${FENRIR_TMP_DIR}"
-else
-    warn "fenrir's tmp directory was not found!"
+if [ -z "${update}" ]; then
+    if [ -d "${FENRIR_TMP_DIR}" ]; then
+        rm -r "${FENRIR_TMP_DIR}"
+    else
+        warn "fenrir's tmp directory was not found!"
+    fi
 fi
 
 if [ -d "${FENRIR_HOME}" ]; then

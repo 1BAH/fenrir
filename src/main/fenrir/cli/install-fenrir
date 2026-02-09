@@ -108,7 +108,7 @@ sed --help &> /dev/null || {
     warn_msg "BSD sed is detected.."
 
     which gsed &> /dev/null || {
-        err_msg "Install <gsed>: 'brew install gnu-sed'!"
+        err_msg "Cannot find <gsed>! Install it: 'brew install gnu-sed'"
         exit 111
     }
 
