@@ -165,7 +165,7 @@ done
 loki-log info "-----------------------------------------------------------"
 
 
-echo "</testsuites>" >> "${REPORT_FILE}"
 echo "  </testsuite>" >> "${REPORT_FILE}"
+echo "</testsuites>" >> "${REPORT_FILE}"
 
 finalise
