@@ -5,7 +5,7 @@
 [![pipeline status](https://gitlab.com/atpd/fenrir/badges/main/pipeline.svg)](https://gitlab.com/atpd/fenrir/-/commits/main)
 [![Latest Release](https://gitlab.com/atpd/fenrir/-/badges/release.svg)](https://gitlab.com/atpd/fenrir/-/releases)
 
-Latest version is `1.0.0`
+Latest version is `1.1.0-beta`
 
 ## Install
 
