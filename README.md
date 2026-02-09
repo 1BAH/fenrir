@@ -47,8 +47,8 @@ fenrir gc
 fenrir remote <URL>
 fenrir task [-f|--force] <TASK ID>
 fenrir switch [--bash|--zsh] <VERSION>
-fenrir run [-i] [-nl|--no-lint] [-nz|--no-zero] <SOLUTION DIRECTORY>
-fenrir-rund [-d|--debug] [-nl|--no-lint] [-nz|--no-zero] <SOLUTION DIRECTORY>
+fenrir run [-i] [-nl|--no-lint] <SOLUTION DIRECTORY>
+fenrir-rund [-d|--debug] [-nl|--no-lint] <SOLUTION DIRECTORY>
 
 fenrir v
 fenrir version
@@ -87,21 +87,19 @@ fenrir task [-f|--force] <TASK ID>
        none            Download tests only when they are not presented
        -f, --force     Download tests anyway
 
-fenrir run [-i] [-nl|--no-lint] [-nz|--no-zero] <SOLUTION DIRECTORY>
+fenrir run [-i] [-nl|--no-lint] <SOLUTION DIRECTORY>
     Test the provided solution. The test must be set beforehand with 'fenrir-task' command.
     This command is an interface. For the detailed execution pipeline see 'fenrir-main'.
     Options:
        -i                 Run test inside the provided directory without cloning it
                           WARNING! In case of test's impurity it might produce some side-effects
-      -nz, --no-zero      Skip task0 validation
       -nl, --no-lint      Skip linting stage (walk-inspections)
 
-fenrir-rund [-d|--debug] [-nl|--no-lint] [-nz|--no-zero] <SOLUTION DIRECTORY>
+fenrir-rund [-d|--debug] [-nl|--no-lint] <SOLUTION DIRECTORY>
     Starts a container and executes 'fenrir-run' inside.
     After the execution the container is removed unless the 'debug' flag is set.
     Options:
        -d, --debug        Does not stop the container (allows further debug)
-      -nz, --no-zero      Skip task0 validation
       -nl, --no-lint      Skip linting stage (walk-inspections)
 
 fenrir gc [-f|--force]:

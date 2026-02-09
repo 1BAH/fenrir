@@ -2,7 +2,7 @@
 
 ##
 # Usage:
-#   fenrir-run [-i] [-nl|--no-lint] [-nz|--no-zero] <SOLUTION DIRECTORY>
+#   fenrir-run [-i] [-nl|--no-lint] <SOLUTION DIRECTORY>
 #
 # Test the provided solution. The test must be set beforehand with 'fenrir-task' command.
 # This command is an interface. For the detailed execution pipeline see 'fenrir-main'.
@@ -10,7 +10,6 @@
 # Options:
 #    -i                 Run test inside the provided directory without cloning it
 #                       WARNING! In case of test's impurity it might produce some side-effects
-#   -nz, --no-zero      Skip task0 validation
 #   -nl, --no-lint      Skip linting stage (walk-inspections)
 ##
 
@@ -35,7 +34,6 @@ function local_clone {
 #include <shift-args>
 
 NO_LINT=""
-NO_ZERO=""
 INLINE=""
 
 hit=0
@@ -45,10 +43,6 @@ while [ "$#" -ne 0 ]; do
     case $1 in
         "--no-lint" | "-nl")
             NO_LINT="nl"
-        ;;
-
-        "--no-zero" | "-nz")
-            NO_ZERO="nz"
         ;;
 
         "-i")
@@ -140,4 +134,4 @@ else
     local_clone "$src"
 fi
 
-fenrir-main $NO_ZERO $NO_LINT
+fenrir-main $NO_LINT

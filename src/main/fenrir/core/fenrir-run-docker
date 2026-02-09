@@ -2,14 +2,13 @@
 
 ##
 # Usage:
-#   fenrir-rund [-d|--debug] [-nl|--no-lint] [-nz|--no-zero] <SOLUTION DIRECTORY>
+#   fenrir-rund [-d|--debug] [-nl|--no-lint] <SOLUTION DIRECTORY>
 #
 # Starts a container and executes 'fenrir-run' inside.
 # After the execution the container is removed unless the 'debug' flag is set.
 #
 # Options:
 #    -d, --debug        Does not stop the container (allows further debug)
-#   -nz, --no-zero      Skip task0 validation
 #   -nl, --no-lint      Skip linting stage (walk-inspections)
 ##
 
@@ -36,7 +35,6 @@ function finalise {
 #include <shift-args>
 
 NO_LINT=""
-NO_ZERO=""
 debug=""
 
 hit=0
@@ -46,10 +44,6 @@ while [ "$#" -ne 0 ]; do
     case $1 in
         "--no-lint" | "-nl")
             NO_LINT="-nl"
-        ;;
-
-        "--no-zero" | "-nz")
-            NO_ZERO="-nz"
         ;;
 
         "--debug" | "-d")
@@ -144,7 +138,7 @@ lokiw docker exec -u root "$container" chown fikus -R "/tmp/fenrir" || {
     finalise "Unable to change owner" "$?"
 }
 
-docker exec -it "$container" bash -c "cd solution && fenrir run -i ${NO_LINT} ${NO_ZERO} ."
+docker exec -it "$container" bash -c "cd solution && fenrir run -i ${NO_LINT} ."
 ecode=$?
 
 if (( ecode == 0 )); then

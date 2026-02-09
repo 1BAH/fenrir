@@ -65,8 +65,6 @@ function _fenrir_switch {
 function _fenrir_run {
     _arguments -C \
         "-i[Run test inside the provided directory without cloning it]" \
-        "-nz[Skip task0 validation]" \
-        "--no-zero[Skip task0 validation]" \
         "-nl[Skip linting stage (walk-inspections)]" \
         "--no-lint[Skip linting stage (walk-inspections)]" \
         "1:Directory with solution:_path_files -/"
@@ -76,8 +74,6 @@ function _fenrir_rund {
     _arguments -C \
         "-d[Does not stop the container (allows further debug)]" \
         "--debug[Does not stop the container (allows further debug)]" \
-        "-nz[Skip task0 validation]" \
-        "--no-zero[Skip task0 validation]" \
         "-nl[Skip linting stage (walk-inspections)]" \
         "--no-lint[Skip linting stage (walk-inspections)]" \
         "1:Directory with solution:_path_files -/"
