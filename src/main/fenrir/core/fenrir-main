@@ -130,7 +130,6 @@ switch_solution || {
 for script in $main; do
     echo "    <testcase name=\"${script}\">" >> "${REPORT_FILE}"
 
-    loki-log info "--------------------------($script)--------------------------"
     if [ "$script" = "walk-inspections" ]; then
         if [ -n "$NL" ]; then
             echo "      <skipped>Running with --no-lint option</skipped>" >> "${REPORT_FILE}"
@@ -144,17 +143,15 @@ for script in $main; do
             save_error_report
         }
     else
-        if [ -n "$skip" ]; then
+        if [ "$blocking" -ne 0 ] && [ -n "$skip" ]; then
             echo "      <skipped>Blocking execution</skipped>" >> "${REPORT_FILE}"
         else
+            loki-log info "--------------------------($script)--------------------------"
+
             "$(fenrir-task-path repo)/$script" || {
                 ecode=$?
                 skip=YES
                 save_error_report
-
-                if [ "$blocking" -ne 0 ]; then
-                    finalise "$ecode"
-                fi
             }
         fi
     fi
