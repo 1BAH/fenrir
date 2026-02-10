@@ -45,15 +45,15 @@ function finalise {
 }
 
 function save_error_report {
-    echo -n "      <failure><![CDATA[" >> "${REPORT_FILE}"
+    echo "      <failure><![CDATA[" >> "${REPORT_FILE}"
     cat "${CMD_FILE}" >> "$REPORT_FILE"
     echo "      ]]></failure>" >> "${REPORT_FILE}"
 
-    echo -n "      <system-out><![CDATA[" >> "${REPORT_FILE}"
+    echo "      <system-out><![CDATA[" >> "${REPORT_FILE}"
     cat "${OUT_FILE}" >> "$REPORT_FILE"
     echo "      ]]></system-out>" >> "${REPORT_FILE}"
 
-    echo -n "      <system-err><![CDATA[" >> "${REPORT_FILE}"
+    echo "      <system-err><![CDATA[" >> "${REPORT_FILE}"
     cat "${ERR_FILE}" >> "$REPORT_FILE"
     echo "      ]]></system-err>" >> "${REPORT_FILE}"
 }
