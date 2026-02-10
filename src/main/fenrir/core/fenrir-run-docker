@@ -78,9 +78,15 @@ fi
 
 task=$(fenrir-read-conf run task)
 
-if ! [ -f "${FENRIR_HOME}/repo/${task}/pipeline.hel" ]; then
-    loki-log err "Task '${task}' is not installed. Try to run 'fenrir task ${task}'"
-    exit 144
+if [ "$task" = "-" ]; then
+    loki-log err 'ᕙ( •̀ ᗜ •́ )ᕗ' "The task was not set!"
+    exit 89
+fi
+
+if ! [ -d "$(fenrir-task-path repo)" ]; then
+    loki-log err "Task <$task> is not installed!"
+    loki-log err "Install it via 'fenrir task $task' to be able to run tests"
+    exit 77
 fi
 
 allowed=$(fenrir-read-conf "$task" indocker)
@@ -94,12 +100,6 @@ if (( allowed != 1 )); then
 fi
 
 src=$(realpath "$path")
-task=$(fenrir-read-conf run task)
-
-if [ "$task" = "-" ]; then
-    loki-log err 'ᕙ( •̀ ᗜ •́ )ᕗ' "The task was not set!"
-    exit 89
-fi
 
 image=$(fenrir-read-conf "$task" image)
 image=${image:-"registry.gitlab.com/atpd/progtech/tech-tasks/containers/fenrir-base"}

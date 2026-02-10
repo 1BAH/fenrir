@@ -78,6 +78,11 @@ fi
 
 task=$(fenrir-read-conf run task)
 
+if [ "$task" = "-" ]; then
+    loki-log err 'ᕙ( •̀ ᗜ •́ )ᕗ' "The task was not set!"
+    exit 89
+fi
+
 if ! [ -d "$(fenrir-task-path repo)" ]; then
     loki-log err "Task <$task> is not installed!"
     loki-log err "Install it via 'fenrir task $task' to be able to run tests"
@@ -89,11 +94,6 @@ fi
 ######################################################################
 
 echo "$FENRIR_LOGO"
-
-if ! [ -f "${FENRIR_HOME}/repo/${task}/pipeline.hel" ]; then
-    loki-log err "Task '${task}' is not installed. Try to run 'fenrir task ${task}'"
-    exit 144
-fi
 
 allowed_inline=$(fenrir-read-conf "$task" inline)
 allowed_inline=${allowed_inline:-1}
@@ -117,11 +117,6 @@ if [ -z "${FENRIR_IN_DOCKER}" ]; then
 fi
 
 src=$(realpath "$path")
-
-if [ "$task" = "-" ]; then
-    loki-log err 'ᕙ( •̀ ᗜ •́ )ᕗ' "The task was not set!"
-    exit 89
-fi
 
 [ -n "$INLINE" ] || if ! [ -d "$src/.git" ]; then
     loki-log err '(╬▔皿▔)╯' "The provided file is not a project root"
