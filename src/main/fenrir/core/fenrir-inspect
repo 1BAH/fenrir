@@ -1,0 +1,53 @@
+#! /usr/bin/env loki
+
+##
+# Usage:
+#   fenrir-inspect [task] <TEST ID>
+#
+# Read the test sources. When no 'task' is provided, the current task is used.
+#
+# Options:
+#    task               Select the specific task
+#
+# Special configs:
+#    FENRIR_EDITOR      The application used to show the text
+#                       Default: less
+##
+
+######################################################################
+##                         VERIFY ARGUMENTS                         ##
+######################################################################
+
+#include <shift-args>
+
+task=$(fenrir-read-conf run task)
+
+MAX_ARGC=2
+#include <verify-argc>
+
+if (( $# == 2 )); then
+    task=$1
+    shift
+fi
+
+testcase=$1
+taskdir=$(fenrir-task-path repo "$task")
+
+if ! [ -d "$taskdir" ]; then
+    loki-log err "Task <$task> is not installed!"
+    loki-log err "Install it via 'fenrir task $task' to be able to inspect tests"
+    exit 77
+fi
+
+testfile="$taskdir/$testcase"
+
+if ! [ -x "$testfile" ]; then
+    loki-log err "Test <$testcase> does not exist!"
+    exit 78
+fi
+
+######################################################################
+##                           MAIN PROGRAM                           ##
+######################################################################
+
+eval "${FENRIR_EDITOR} \"$testfile\""
