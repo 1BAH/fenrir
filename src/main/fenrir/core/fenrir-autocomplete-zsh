@@ -22,6 +22,8 @@ function _fenrir {
             task\:'Set the task to be tested'
             install\:'Install a script as _local_ task'
             il\:'Install a script as _local_ task'
+            in\:'Show test sources'
+            inspect\:'Show test sources'
             ))" \
         "*::arg:->args"
     
@@ -46,6 +48,12 @@ function _fenrir {
         ;;
         install)
             _fenrir_install
+        ;;
+        in)
+            _fenrir_inspect
+        ;;
+        inspect)
+            _fenrir_inspect
         ;;
     esac
 }
@@ -98,4 +106,20 @@ function _fenrir_task {
 
 function _fenrir_install {
     _arguments -C "1:Path to the script:_files"
+}
+
+function _find_all_tests {
+    dir=$(fenrir-task-path repo 2> /dev/null)
+    if ! [ -d "$dir" ]; then
+        return 0
+    fi
+
+    find "$dir" -type f -print0 | while IFS= read -r -d '' d; do
+        echo "$d" | grep -vE ".*\.hel" | sed 's|.*/\([^/]*\)|\1|p'
+    done
+}
+
+function _fenrir_inspect {
+    _arguments -C \
+        "1:Select test:($(_find_all_tests | uniq))"
 }
