@@ -3,7 +3,7 @@
 ##########################################################################
 
 # DO NOT MAKE IT AUTOLOADABLE!
-version="1.1.0-beta"
+version="1.1.0"
 
 year=$(date +%Y)
 

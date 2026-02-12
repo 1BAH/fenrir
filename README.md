@@ -5,7 +5,7 @@
 [![pipeline status](https://gitlab.com/atpd/fenrir/badges/main/pipeline.svg)](https://gitlab.com/atpd/fenrir/-/commits/main)
 [![Latest Release](https://gitlab.com/atpd/fenrir/-/badges/release.svg)](https://gitlab.com/atpd/fenrir/-/releases)
 
-Latest version is `1.1.0-beta`
+Latest version is `1.1.0`
 
 ## Install
 
@@ -45,6 +45,7 @@ fenrir info
 
 fenrir gc
 fenrir remote <URL>
+fenrir inspect [task] <TEST ID>
 fenrir task [-f|--force] <TASK ID>
 fenrir switch [--bash|--zsh] <VERSION>
 fenrir run [-i] [-nl|--no-lint] <SOLUTION DIRECTORY>
@@ -78,6 +79,17 @@ fenrir switch [--bash|--zsh] <VERSION>:
        --bash     Update autocompletion for bash
 
     If no option is provided, 'complete' param from main.hel is used
+
+fenrir inspect [task] <TEST ID>
+
+    Read the test sources. When no 'task' is provided, the current task is used.
+
+    Options:
+       task               Select the specific task
+
+    Special configs:
+       FENRIR_EDITOR      The application used to show the text
+                          Default: less
 
 fenrir task [-f|--force] <TASK ID>
     Set the task to be checked and optionally download its tests.
