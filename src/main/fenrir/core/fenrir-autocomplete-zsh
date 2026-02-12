@@ -1,5 +1,6 @@
 #compdef _fenrir fenrir
 
+# Read: https://blog.mads-hartmann.com/2017/08/06/writing-zsh-completion-scripts.html
 
 function _fenrir {
     local line
@@ -91,6 +92,7 @@ function _fenrir_task {
         "--force[Download tests anyway]" \
         "1:Select task:($(_find_all_tasks | uniq))"
 }
+
 function _fenrir_install {
     _arguments -C "1:Path to the script:_files"
 }
