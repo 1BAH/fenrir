@@ -334,11 +334,19 @@ echo "version=\"$VERSION\"" >> "${FENRIR_CONF_DIR}/main.hel"
 
 out loki-prog "Installing 'lokirc'.."
 
-if [ -f "${FENRIR_CONF_DIR}/lokirc" ]; then
+# TODO
+if [ -z "${FENRIR_ENV_FILE}" ] && [ -f "${FENRIR_CONF_DIR}/lokirc" ]; then
     out loki-log info "Found existing lokirc: <${FENRIR_CONF_DIR}/lokirc>"
 else
+    env_file=${FENRIR_ENV_FILE:-"/dev/null"}
+
+    if ! [ -f "$env_file" ]; then
+        out loki-log err "The provided env file <$env_file> does not exist!"
+        exit 43
+    fi
+
     if ! {
-        mv "$CFGS_DIR/lokirc" "${FENRIR_CONF_DIR}/lokirc" &&
+        cat "$CFGS_DIR/lokirc" "$env_file" > "${FENRIR_CONF_DIR}/lokirc" &&
         chown "$user" "${FENRIR_CONF_DIR}/lokirc"
     }; then
         loki-log err "Failed to install. Try again or submit an issue."

@@ -40,6 +40,10 @@ while (( $# > 0 )); do
     --debug)
         debug_mode=True
     ;;
+    --env)
+        env_file=$2
+        shift
+    ;;
     esac
 
     shift
@@ -192,6 +196,7 @@ FENRIR_INSTALL_DIR="$out_dir" \
 FENRIR_CONF_DIR="$conf_dir" \
 FENRIR_TEST_MODE="$test_mode" \
 FENRIR_DEBUG_MODE="$debug_mode" \
+FENRIR_ENV_FILE="$env_file" \
 $BUILD_SCRIPT
 
 res=$?
