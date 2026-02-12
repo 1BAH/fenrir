@@ -289,7 +289,7 @@ for cmd in "$CORE_UTILS_DIR"/*; do
         [ -n "${FENRIR_INSTALL_ZSH}" ] || continue
 
         mkdir -p "$os_pref_home/$user/.oh-my-zsh/completions"
-        mv "$cmd" "$os_pref_home/$user/.oh-my-zsh/completions/"
+        mv "$cmd" "$os_pref_home/$user/.oh-my-zsh/completions/_fenrir"
     fi
 
     if ! [ -f "$cmd" ]; then
