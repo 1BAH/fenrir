@@ -1,0 +1,62 @@
+= Installation process
+
+== Options
+
+* `-v` Verbosity flag. Allows coloured output and extended logging information
+* `--bash` Install autocompletion for bash
+* `--zsh` Install autocompletion for zsh
+
+CAUTION: The options below are for testing and debug purposes. You should not use them unless your os does not follow FHS.
+
+* `--instal-dir <dir>` Set the location where all scripts will be installed (default: `/usr/local/bin`)
+* `--conf-dir <dir>` Set the location where all configuration files will be installed (default: `/etc/fenrir`)
+* `-t` Test mode. Warning messages are muted and non-sudo execution is allowed
+* `--debug` Debug mode. Build artifacts are not removed after the installation
+* `--env <file>` Initial values for `lokirc` file
+
+== Assembling installation script
+
+IMPORTANT: Build directory is `/tmp/FENRIR_BUILD`
+
+File https://gitlab.com/atpd/fenrir/-/blob/main/src/main/fenrir/cli/install-fenrir[`install-fenrir`] assembles the installation script and saves it to `/tmp/FENRIR_BUILD_SCRIPT`. It contains subscripts:
+
+* `install-fenrir` (main script)
+* `install-loki` (loki module installation)
+* `inline-funs` (inlining stage)
+
+=== Installing loki
+
+`loki` is custom interpreter for the project. It is `bash` with predefined environment and signal handlers.
+
+File https://gitlab.com/atpd/fenrir/-/blob/main/src/main/loki/install.loki[`install.loki`] assembles the final interpreter. It is produced by inlining `#include` directives in `loki`.
+
+. `loki-common-funs` is assembled into `/tmp/FENRIR_BUILD/loki/LOKI_COMMON_FUNS_ASM` (scripts from `funs` are inlined)
+. `loki-common-*` and `loki` are merged into `/tmp/FENRIR_BUILD/loki/LOKI_ASSEMBLED`
+. The resulting file is copied to _install-dir_
+
+=== Inlining functions
+
+The scripts in `fenrir/core/inline` are inlined into the scripts in `fenrir/core` according to `#include` directives
+
+=== Installing fenrir
+
+. Check for superuser permissions
+. Check for autocompletion preferences
+. Check for requirements
+. Assembling installer
+. Running installer
+.. Verify sources structure
+.. Load configs from `fenrir.properties`
+.. Create build directory
+.. Verify build directory
+.. Install loki
+.. Switch to loki from bash
+.. Inline functions
+.. Determine user
+.. Determine OS
+.. Check filesystem for previous installations and conflicting apps
+.. Install files
+.. Install config
+.. Setup `FENRIR_HOME`
+.. Install autocompletion
+.. Remove build artifacts

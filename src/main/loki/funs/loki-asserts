@@ -18,7 +18,11 @@ function loki-assert-eq {
     local msg=$3
 
     if [[ "$exp" != "$real" ]]; then
-        [ -n "$msg" ] && loki-log err "$msg"
+        [ -n "$msg" ] && {
+            echo "<error><![CDATA[$msg]]></error>" >> "${REPORT_FILE}"
+            loki-log err "$msg"
+        }
+
         if [ -n "${FENRIR_TEST_DEBUG}" ]; then
             loki-log err "Expected <$real> to be <$exp>"
         else
@@ -43,7 +47,11 @@ function loki-assert-neq {
     local msg=$3
 
     if [[ "$exp" == "$real" ]]; then
-        [ -n "$msg" ] && loki-log err "$msg"
+        [ -n "$msg" ] && {
+            echo "<error><![CDATA[$msg]]></error>" >> "${REPORT_FILE}"
+            loki-log err "$msg"
+        }
+
         if [ -n "${FENRIR_TEST_DEBUG}" ]; then
             loki-log err "Expected <$real> to differ from <$exp>"
         else
@@ -68,7 +76,11 @@ function loki-assert-regeq {
     local msg=$3
 
     if ! [[ $real =~ $regexp ]]; then
-        [ -n "$msg" ] && loki-log err "$msg"
+        [ -n "$msg" ] && {
+            echo "<error><![CDATA[$msg]]></error>" >> "${REPORT_FILE}"
+            loki-log err "$msg"
+        }
+
         if [ -n "${FENRIR_TEST_DEBUG}" ]; then
             loki-log err "Expected <$real> to match regexp <$regexp>"
         else

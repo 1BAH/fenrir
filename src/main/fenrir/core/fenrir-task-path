@@ -2,9 +2,10 @@
 
 ##
 # Usage:
-#   fenrir-task-path (repo|cfgs)
+#   fenrir-task-path (repo|cfgs) [task]
 #
-# Returns the absolute path to the current task's scripts or configs.
+# Returns the absolute path to the task's scripts or configs.
+# When [task] is empty, the current task is used.
 ##
 
 LOCAL_REPO="$FENRIR_HOME/repo"
@@ -16,10 +17,14 @@ LOCAL_CFGS="$FENRIR_HOME/cfgs"
 
 #include <shift-args>
 
-EXP_ARGC=1
+MAX_ARGC=2
 #include <verify-argc>
 
-curr_task=$(fenrir-read-conf run task)
+if (( $# == 2 )); then
+    curr_task=$2
+else
+    curr_task=$(fenrir-read-conf run task)
+fi
 
 case "${1}" in
     "repo")

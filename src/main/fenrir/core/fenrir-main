@@ -2,29 +2,20 @@
 
 ##
 # Usage:
-#   fenrir-main [nl] [nz]
+#   fenrir-main [nl]
 #
 # Executes task validation pipeline.
 #
 # Options:
 #    nl     See fenrir-run '-nl' option
-#    nz     See fenrir-run '-nz' option
 ##
 
 #include <shift-args>
-
-# TODO ???
-#UNCOMMENT# cat ~/key > ~/.ssh/id_rsa
 
 while [ "$#" -ne 0 ]; do
     case $1 in
         "nl")
             NL=1
-            shift
-        ;;
-
-        "nz")
-            NZ=1
             shift
         ;;
     esac
@@ -44,12 +35,27 @@ fi
 
 ###########################################
 
-function finalise {
-    local ecode=${1:-0}
+ecode=0
+skip=""
 
+function finalise {
     # Print score
     echo "Final score: $(cat "${SCORE_FILE}")"
     exit "$ecode"
+}
+
+function save_error_report {
+    echo "      <failure><![CDATA[" >> "${REPORT_FILE}"
+    cat "${CMD_FILE}" | perl -pe 's/\x1b\[[0-9;]*[mG]//g' >> "$REPORT_FILE"
+    echo "      ]]></failure>" >> "${REPORT_FILE}"
+
+    echo "      <system-out><![CDATA[" >> "${REPORT_FILE}"
+    cat "${OUT_FILE}" | perl -pe 's/\x1b\[[0-9;]*[mG]//g' >> "$REPORT_FILE"
+    echo "      ]]></system-out>" >> "${REPORT_FILE}"
+
+    echo "      <system-err><![CDATA[" >> "${REPORT_FILE}"
+    cat "${ERR_FILE}" | perl -pe 's/\x1b\[[0-9;]*[mG]//g' >> "$REPORT_FILE"
+    echo "      ]]></system-err>" >> "${REPORT_FILE}"
 }
 
 function switch_solution {
@@ -93,23 +99,26 @@ function switch_solution {
 
 # Initialise score file
 echo -n 0 > "${SCORE_FILE}"
+# Initialise report file
+echo "<testsuites>" > "${REPORT_FILE}"
+echo "  <testsuite name=\"${task}\">" >> "${REPORT_FILE}"
 
 for script in $pre; do
-    loki-log info "--------------------------($script)--------------------------"
-    if [ "$script" = "task-zero" ]; then
-        if [ -n "$NZ" ]; then
-            loki-log warn "Running with '--no-zero' option"
-            continue
-        fi
+    echo "    <testcase name=\"${script}\">" >> "${REPORT_FILE}"
 
-        "${FENRIR_HOME}/shared/task-zero" || {
-            finalise "$?"
-        }
+    loki-log info "--------------------------($script)--------------------------"
+
+    if [ -n "$skip" ]; then
+        echo "      <skipped>Blocking execution</skipped>" >> "${REPORT_FILE}"
     else
         "$(fenrir-task-path repo)/$script" || {
-            finalise "$?"
+            ecode=$?
+            skip=YES
+            save_error_report
         }
     fi
+
+    echo "    </testcase>" >> "${REPORT_FILE}"
 done
 
 loki-log info "--------------------------(switch-solution)--------------------------"
@@ -119,27 +128,41 @@ switch_solution || {
 }
 
 for script in $main; do
-    loki-log info "--------------------------($script)--------------------------"
+    echo "    <testcase name=\"${script}\">" >> "${REPORT_FILE}"
+
     if [ "$script" = "walk-inspections" ]; then
         if [ -n "$NL" ]; then
+            echo "      <skipped>Running with --no-lint option</skipped>" >> "${REPORT_FILE}"
             loki-log warn "Running with '--no-lint' option"
             continue
         fi
 
         "${FENRIR_HOME}/shared/walk-inspections" || {
-            finalise "$?"
+            ecode=$?
+            skip=YES
+            save_error_report
         }
     else
-        "$(fenrir-task-path repo)/$script" || {
-            ecode="$?"
+        if [ "$blocking" -ne 0 ] && [ -n "$skip" ]; then
+            echo "      <skipped>Blocking execution</skipped>" >> "${REPORT_FILE}"
+        else
+            loki-log info "--------------------------($script)--------------------------"
 
-            if [ "$blocking" -ne 0 ]; then
-                finalise "$ecode"
-            fi
-        }
+            "$(fenrir-task-path repo)/$script" || {
+                ecode=$?
+                skip=YES
+                save_error_report
+            }
+        fi
     fi
+
+    echo "    </testcase>" >> "${REPORT_FILE}"
 done
 
 loki-log info "-----------------------------------------------------------"
+
+
+echo "  </testsuite>" >> "${REPORT_FILE}"
+echo "</testsuites>" >> "${REPORT_FILE}"
 
 finalise

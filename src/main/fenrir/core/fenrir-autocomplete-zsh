@@ -1,5 +1,6 @@
 #compdef _fenrir fenrir
 
+# Read: https://blog.mads-hartmann.com/2017/08/06/writing-zsh-completion-scripts.html
 
 function _fenrir {
     local line
@@ -21,6 +22,8 @@ function _fenrir {
             task\:'Set the task to be tested'
             install\:'Install a script as _local_ task'
             il\:'Install a script as _local_ task'
+            in\:'Show test sources'
+            inspect\:'Show test sources'
             ))" \
         "*::arg:->args"
     
@@ -46,6 +49,12 @@ function _fenrir {
         install)
             _fenrir_install
         ;;
+        in)
+            _fenrir_inspect
+        ;;
+        inspect)
+            _fenrir_inspect
+        ;;
     esac
 }
 
@@ -65,8 +74,6 @@ function _fenrir_switch {
 function _fenrir_run {
     _arguments -C \
         "-i[Run test inside the provided directory without cloning it]" \
-        "-nz[Skip task0 validation]" \
-        "--no-zero[Skip task0 validation]" \
         "-nl[Skip linting stage (walk-inspections)]" \
         "--no-lint[Skip linting stage (walk-inspections)]" \
         "1:Directory with solution:_path_files -/"
@@ -76,15 +83,16 @@ function _fenrir_rund {
     _arguments -C \
         "-d[Does not stop the container (allows further debug)]" \
         "--debug[Does not stop the container (allows further debug)]" \
-        "-nz[Skip task0 validation]" \
-        "--no-zero[Skip task0 validation]" \
         "-nl[Skip linting stage (walk-inspections)]" \
         "--no-lint[Skip linting stage (walk-inspections)]" \
         "1:Directory with solution:_path_files -/"
 }
 
 function _find_all_tasks {
-    find "$HOME/.fenrir/repo" -type d -print0 | while IFS= read -r -d '' d; do
+    dir=$(fenrir-task-path repo 2> /dev/null)
+
+    # Duplication occurs : no idea why...
+    find "$(echo "$dir" | sed 's|\(.*/repo\).*|\1|p' | uniq)" -mindepth 1 -type d -print0 | while IFS= read -r -d '' d; do
         find "$d" -mindepth 1 -type d -print -quit | grep -q . || echo "$d" | sed 's|.*/repo/\(.*\)|\1|p'
     done
 }
@@ -95,6 +103,23 @@ function _fenrir_task {
         "--force[Download tests anyway]" \
         "1:Select task:($(_find_all_tasks | uniq))"
 }
+
 function _fenrir_install {
     _arguments -C "1:Path to the script:_files"
+}
+
+function _find_all_tests {
+    dir=$(fenrir-task-path repo 2> /dev/null)
+    if ! [ -d "$dir" ]; then
+        return 0
+    fi
+
+    find "$dir" -type f -print0 | while IFS= read -r -d '' d; do
+        echo "$d" | grep -vE ".*\.hel" | sed 's|.*/\([^/]*\)|\1|p'
+    done
+}
+
+function _fenrir_inspect {
+    _arguments -C \
+        "1:Select test:($(_find_all_tests | uniq))"
 }

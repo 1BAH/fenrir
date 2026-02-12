@@ -54,12 +54,6 @@ while IFS='=' read -r key value; do
         version)
             VERSION=$value
             ;;
-        requirements)
-            eval "REQUIREMENTS=$value"
-            ;;
-        mac_requirements)
-            eval "MAC_REQUIREMENTS=$value"
-            ;;
     esac
 done < "$CLI_DIR/fenrir.properties"
 
@@ -200,6 +194,8 @@ out loki-prog "Working directories.."
 
 if [ -d "${FENRIR_CONF_DIR}" ]; then
     find "${FENRIR_CONF_DIR}" -mindepth 1 -not -name "*.hel" | while read -r file; do
+        [ "$(basename "$file")" = "lokirc" ] && continue
+
         rm -fr "$file"
         loki-log warn "File '$file' is removed"
     done
@@ -209,41 +205,6 @@ fi
 if [ -d "/var/fenrir" ]; then
     out loki-log warn "Removing '/var/fenrir/': deprecated for removal"
     rm -fr /var/fenrir
-fi
-
-out loki-gorp
-out loki-prog "Software requirements.."
-
-if [ -n "$on_macos" ]; then
-    for req in "${MAC_REQUIREMENTS[@]}"; do
-        if ! type "$req" &> /dev/null; then
-            loki-log err "'$(loki-wrap "${BOLD}" "$req")' is not installed!"
-            exit 5
-        else
-            out loki-log succ "'$(loki-wrap "${BOLD}" "$req")' exists"
-        fi
-    done
-else
-    for req in "${REQUIREMENTS[@]}"; do
-        if ! type "$req" &> /dev/null; then
-            loki-log err "'$(loki-wrap "${BOLD}" "$req")' is not installed!"
-            exit 5
-        else
-            out loki-log succ "'$(loki-wrap "${BOLD}" "$req")' exists"
-        fi
-    done
-fi
-
-# Check that bash is 5.0.0 or newer
-if (( "$(echo "$BASH_VERSION" | cut -d'.' -f1)" < 5 )); then
-    loki-log warn "Bash version is '$(loki-wrap "${BOLD}" "$BASH_VERSION")'. Fenrir might work incorrectly: we expect bash>=5.0.0."
-    loki-log warn "Do you agree to continue? ($(loki-wrap "${BOLD}" Potentially dangerous)) [Y|N]"
-
-    read -r op
-    if [ "$op" != "y" ] && [ "$op" != "Y" ]; then
-        loki-log err "Terminating.."
-        exit 3
-    fi
 fi
 
 out loki-gorp
@@ -328,7 +289,7 @@ for cmd in "$CORE_UTILS_DIR"/*; do
         [ -n "${FENRIR_INSTALL_ZSH}" ] || continue
 
         mkdir -p "$os_pref_home/$user/.oh-my-zsh/completions"
-        mv "$cmd" "$os_pref_home/$user/.oh-my-zsh/completions/"
+        mv "$cmd" "$os_pref_home/$user/.oh-my-zsh/completions/_fenrir"
     fi
 
     if ! [ -f "$cmd" ]; then
@@ -370,6 +331,32 @@ done
 
 echo "version=\"$VERSION\"" >> "${FENRIR_CONF_DIR}/main.hel"
 
+
+out loki-prog "Installing 'lokirc'.."
+
+if [ -z "${FENRIR_ENV_FILE}" ] && [ -f "${FENRIR_CONF_DIR}/lokirc" ]; then
+    out loki-log info "Found existing lokirc: <${FENRIR_CONF_DIR}/lokirc>"
+else
+    env_file=${FENRIR_ENV_FILE:-"/dev/null"}
+    out loki-log info "Using env file <$env_file>"
+
+    if ! { [ -f "$env_file" ] || [ "$env_file" = "/dev/null" ]; }; then
+        out loki-log err "The provided env file <$env_file> does not exist!"
+        exit 43
+    fi
+
+    if ! {
+        cat "$CFGS_DIR/lokirc" "$env_file" > "${FENRIR_CONF_DIR}/lokirc" &&
+        chown "$user" "${FENRIR_CONF_DIR}/lokirc"
+    }; then
+        loki-log err "Failed to install. Try again or submit an issue."
+        exit 7
+    fi
+fi
+
+${sed_cmd} -i "s|/etc/fenrir/lokirc|${FENRIR_CONF_DIR}/lokirc|" "${FENRIR_INSTALL_DIR}/loki"
+
+out loki-gorp
 out loki-gorp
 
 #################################################################
@@ -453,5 +440,8 @@ loki-gorp
 #                       Finish installation                       #
 ###################################################################
 
-rm -fr ${BUILD_DIR}
+if [ -z "${FENRIR_DEBUG_MODE}" ]; then
+    rm -fr ${BUILD_DIR}
+fi
+
 out loki-log succ "Installation has finished!"

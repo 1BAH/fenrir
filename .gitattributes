@@ -1,0 +1,3 @@
+fenrir* gitlab-language=bash
+loki* gitlab-language=bash
+*.hel gitlab-language=bash

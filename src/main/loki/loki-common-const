@@ -15,6 +15,7 @@ FENRIR_TMP_DIR=${FENRIR_TMP_DIR:-"/tmp/fenrir/tmp"}
 FENRIR_HOME=${FENRIR_HOME:-"$HOME/.fenrir"}
 TMP_IDX_FILE="$FENRIR_TMP_DIR/idx"
 SCORE_FILE="${FENRIR_TMP_DIR}/score"
+REPORT_FILE="${FENRIR_TMP_DIR}/fenrir_report.xml"
 RUN_CONF_FILE="${FENRIR_TMP_DIR}/run-conf.hel"
 
 if [ "$(id -u)" -ne 0 ] || [ -n "${FENRIR_IN_DOCKER}" ]; then # Non sudo execution

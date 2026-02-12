@@ -65,6 +65,10 @@ case "$cmd" in
         update-fenrir "$@"
     ;;
 
+    "in" | "inspect")
+        fenrir-inspect "$@"
+    ;;
+
     "versions")
         EXP_ARGC=0
         #include <verify-argc>

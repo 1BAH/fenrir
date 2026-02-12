@@ -5,7 +5,7 @@
 [![pipeline status](https://gitlab.com/atpd/fenrir/badges/main/pipeline.svg)](https://gitlab.com/atpd/fenrir/-/commits/main)
 [![Latest Release](https://gitlab.com/atpd/fenrir/-/badges/release.svg)](https://gitlab.com/atpd/fenrir/-/releases)
 
-Latest version is `1.0.0`
+Latest version is `1.1.0`
 
 ## Install
 
@@ -45,10 +45,11 @@ fenrir info
 
 fenrir gc
 fenrir remote <URL>
+fenrir inspect [task] <TEST ID>
 fenrir task [-f|--force] <TASK ID>
 fenrir switch [--bash|--zsh] <VERSION>
-fenrir run [-i] [-nl|--no-lint] [-nz|--no-zero] <SOLUTION DIRECTORY>
-fenrir-rund [-d|--debug] [-nl|--no-lint] [-nz|--no-zero] <SOLUTION DIRECTORY>
+fenrir run [-i] [-nl|--no-lint] <SOLUTION DIRECTORY>
+fenrir-rund [-d|--debug] [-nl|--no-lint] <SOLUTION DIRECTORY>
 
 fenrir v
 fenrir version
@@ -79,6 +80,17 @@ fenrir switch [--bash|--zsh] <VERSION>:
 
     If no option is provided, 'complete' param from main.hel is used
 
+fenrir inspect [task] <TEST ID>
+
+    Read the test sources. When no 'task' is provided, the current task is used.
+
+    Options:
+       task               Select the specific task
+
+    Special configs:
+       FENRIR_EDITOR      The application used to show the text
+                          Default: less
+
 fenrir task [-f|--force] <TASK ID>
     Set the task to be checked and optionally download its tests.
     The tests are downloaded from 'remote' which is defined in '/etc/fenrir/main.hel'.
@@ -87,21 +99,19 @@ fenrir task [-f|--force] <TASK ID>
        none            Download tests only when they are not presented
        -f, --force     Download tests anyway
 
-fenrir run [-i] [-nl|--no-lint] [-nz|--no-zero] <SOLUTION DIRECTORY>
+fenrir run [-i] [-nl|--no-lint] <SOLUTION DIRECTORY>
     Test the provided solution. The test must be set beforehand with 'fenrir-task' command.
     This command is an interface. For the detailed execution pipeline see 'fenrir-main'.
     Options:
        -i                 Run test inside the provided directory without cloning it
                           WARNING! In case of test's impurity it might produce some side-effects
-      -nz, --no-zero      Skip task0 validation
       -nl, --no-lint      Skip linting stage (walk-inspections)
 
-fenrir-rund [-d|--debug] [-nl|--no-lint] [-nz|--no-zero] <SOLUTION DIRECTORY>
+fenrir-rund [-d|--debug] [-nl|--no-lint] <SOLUTION DIRECTORY>
     Starts a container and executes 'fenrir-run' inside.
     After the execution the container is removed unless the 'debug' flag is set.
     Options:
        -d, --debug        Does not stop the container (allows further debug)
-      -nz, --no-zero      Skip task0 validation
       -nl, --no-lint      Skip linting stage (walk-inspections)
 
 fenrir gc [-f|--force]:

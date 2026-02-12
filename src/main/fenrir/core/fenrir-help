@@ -16,7 +16,7 @@ EXP_ARGC=0
 ######################################################################
 
 cat <<____HEREDOC
-Fenrir is lightweight testing framework based on bash.
+Fenrir is a lightweight testing framework based on bash.
 
 Help pages to be done..
 

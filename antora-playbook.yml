@@ -5,7 +5,7 @@ content:
   sources:
     - url: https://gitlab.com/atpd/fenrir
       tags:
-        - HEAD
+        - v1.0.0
         - v1.0.0-rc.3-alpha
 ui:
   bundle:

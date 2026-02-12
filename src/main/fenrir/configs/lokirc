@@ -1,0 +1,7 @@
+# Default viewer
+FENRIR_EDITOR="less"
+
+# If you want to use batcat instead, uncomment the following lines
+#FENRIR_EDITOR='batcat --map-syntax="*:Bourne Again Shell (bash)"'
+
+FENRIR_HOME=""

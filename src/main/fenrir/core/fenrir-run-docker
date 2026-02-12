@@ -2,14 +2,13 @@
 
 ##
 # Usage:
-#   fenrir-rund [-d|--debug] [-nl|--no-lint] [-nz|--no-zero] <SOLUTION DIRECTORY>
+#   fenrir-rund [-d|--debug] [-nl|--no-lint] <SOLUTION DIRECTORY>
 #
 # Starts a container and executes 'fenrir-run' inside.
 # After the execution the container is removed unless the 'debug' flag is set.
 #
 # Options:
 #    -d, --debug        Does not stop the container (allows further debug)
-#   -nz, --no-zero      Skip task0 validation
 #   -nl, --no-lint      Skip linting stage (walk-inspections)
 ##
 
@@ -36,7 +35,6 @@ function finalise {
 #include <shift-args>
 
 NO_LINT=""
-NO_ZERO=""
 debug=""
 
 hit=0
@@ -46,10 +44,6 @@ while [ "$#" -ne 0 ]; do
     case $1 in
         "--no-lint" | "-nl")
             NO_LINT="-nl"
-        ;;
-
-        "--no-zero" | "-nz")
-            NO_ZERO="-nz"
         ;;
 
         "--debug" | "-d")
@@ -84,9 +78,15 @@ fi
 
 task=$(fenrir-read-conf run task)
 
-if ! [ -f "${FENRIR_HOME}/repo/${task}/pipeline.hel" ]; then
-    loki-log err "Task '${task}' is not installed. Try to run 'fenrir task ${task}'"
-    exit 144
+if [ "$task" = "-" ]; then
+    loki-log err 'ᕙ( •̀ ᗜ •́ )ᕗ' "The task was not set!"
+    exit 89
+fi
+
+if ! [ -d "$(fenrir-task-path repo)" ]; then
+    loki-log err "Task <$task> is not installed!"
+    loki-log err "Install it via 'fenrir task $task' to be able to run tests"
+    exit 77
 fi
 
 allowed=$(fenrir-read-conf "$task" indocker)
@@ -100,12 +100,6 @@ if (( allowed != 1 )); then
 fi
 
 src=$(realpath "$path")
-task=$(fenrir-read-conf run task)
-
-if [ "$task" = "-" ]; then
-    loki-log err 'ᕙ( •̀ ᗜ •́ )ᕗ' "The task was not set!"
-    exit 89
-fi
 
 image=$(fenrir-read-conf "$task" image)
 image=${image:-"registry.gitlab.com/atpd/progtech/tech-tasks/containers/fenrir-base"}
@@ -144,7 +138,7 @@ lokiw docker exec -u root "$container" chown fikus -R "/tmp/fenrir" || {
     finalise "Unable to change owner" "$?"
 }
 
-docker exec -it "$container" bash -c "cd solution && fenrir run -i ${NO_LINT} ${NO_ZERO} ."
+docker exec -it "$container" bash -c "cd solution && fenrir run -i ${NO_LINT} ."
 ecode=$?
 
 if (( ecode == 0 )); then
