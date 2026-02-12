@@ -81,7 +81,10 @@ function _fenrir_rund {
 }
 
 function _find_all_tasks {
-    find "$HOME/.fenrir/repo" -type d -print0 | while IFS= read -r -d '' d; do
+    dir=$(fenrir-task-path repo 2> /dev/null)
+
+    # Duplication occurs : no idea why...
+    find "$(echo "$dir" | sed 's|\(.*/repo\).*|\1|p' | uniq)" -mindepth 1 -type d -print0 | while IFS= read -r -d '' d; do
         find "$d" -mindepth 1 -type d -print -quit | grep -q . || echo "$d" | sed 's|.*/repo/\(.*\)|\1|p'
     done
 }
