@@ -334,13 +334,13 @@ echo "version=\"$VERSION\"" >> "${FENRIR_CONF_DIR}/main.hel"
 
 out loki-prog "Installing 'lokirc'.."
 
-# TODO
 if [ -z "${FENRIR_ENV_FILE}" ] && [ -f "${FENRIR_CONF_DIR}/lokirc" ]; then
     out loki-log info "Found existing lokirc: <${FENRIR_CONF_DIR}/lokirc>"
 else
     env_file=${FENRIR_ENV_FILE:-"/dev/null"}
+    out loki-log info "Using env file <$env_file>"
 
-    if ! [ -f "$env_file" ]; then
+    if ! { [ -f "$env_file" ] || [ "$env_file" = "/dev/null" ]; }; then
         out loki-log err "The provided env file <$env_file> does not exist!"
         exit 43
     fi
