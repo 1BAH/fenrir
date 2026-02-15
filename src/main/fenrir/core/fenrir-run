@@ -105,7 +105,7 @@ allowed=${allowed:-1}
 if [ -z "${FENRIR_IN_DOCKER}" ]; then
     if (( allowed != 1 )); then
         loki-log err "This task does not support execution in host system"
-        loki-log err "Use 'fenrir rund $task' instead"
+        loki-log err "Use 'fenrir rund \"$path\"' instead"
         exit 101
     fi
 
