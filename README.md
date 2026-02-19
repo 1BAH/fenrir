@@ -7,6 +7,8 @@
 
 Latest version is `1.1.0`
 
+Available in a docker container: `registry.gitlab.com/atpd/fenrir/fenrir-base:latest`
+
 ## Install
 
 ### System requirements
