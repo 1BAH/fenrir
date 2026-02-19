@@ -51,9 +51,7 @@ docker-amd:
   stage: docker
   extends: .docker-default
   script:
-    - docker buildx build --platform linux/amd64 \
-                          -t "$IMAGE_TAG-amd" \
-                          -f docker/base.Dockerfile .
+    - docker buildx build --platform linux/amd64 -t "$IMAGE_TAG-amd" -f docker/base.Dockerfile .
     - docker push "$IMAGE_TAG-amd"
   needs:
     - tests
@@ -62,9 +60,7 @@ docker-arm:
   stage: docker
   extends: .docker-default
   script:
-    - docker buildx build --platform linux/arm64 \
-                          -t "$IMAGE_TAG-arm" \
-                          -f docker/base.Dockerfile .
+    - docker buildx build --platform linux/arm64 -t "$IMAGE_TAG-arm" -f docker/base.Dockerfile .
     - docker push "$IMAGE_TAG-arm"
   needs:
     - tests
