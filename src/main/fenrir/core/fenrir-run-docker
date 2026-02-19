@@ -102,7 +102,7 @@ fi
 src=$(realpath "$path")
 
 image=$(fenrir-read-conf "$task" image)
-image=${image:-"registry.gitlab.com/atpd/progtech/tech-tasks/containers/fenrir-base:latest"}
+image=${image:-"registry.gitlab.com/atpd/fenrir/fenrir-base:latest"}
 
 lokiw docker pull "$image" || {
     loki-log warn "Cannot update image.. Trying to use a cached one instead.."

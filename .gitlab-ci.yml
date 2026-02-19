@@ -2,11 +2,15 @@ image: ubuntu:latest
 
 stages:
   - test
+  - docker
   - site
 
 cache:
   paths:
     - node_modules
+
+variables:
+  FENRIR_IMAGE_NAME: "fenrir-base"
 
 tests:
   stage: test
@@ -32,3 +36,55 @@ pages:
     - tests
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
+
+.docker-default:
+  image: docker
+  services:
+    - docker:dind
+  variables:
+    IMAGE_TAG: $CI_REGISTRY_IMAGE/$FENRIR_IMAGE_NAME:$CI_COMMIT_SHORT_SHA
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
+
+
+docker-amd:
+  stage: docker
+  extends: .docker-default
+  script:
+    - docker buildx build --platform linux/amd64 -t "$IMAGE_TAG-amd" -f docker/base.Dockerfile .
+    - docker push "$IMAGE_TAG-amd"
+  needs:
+    - tests
+
+docker-arm:
+  stage: docker
+  extends: .docker-default
+  script:
+    - docker buildx build --platform linux/arm64 -t "$IMAGE_TAG-arm" -f docker/base.Dockerfile .
+    - docker push "$IMAGE_TAG-arm"
+  needs:
+    - tests
+
+docker-all:
+  stage: docker
+  extends: .docker-default
+  script:
+    - docker manifest create   "$IMAGE_TAG" "$IMAGE_TAG-amd" "$IMAGE_TAG-arm"
+    - docker manifest annotate "$IMAGE_TAG" "$IMAGE_TAG-amd" --arch amd64
+    - docker manifest annotate "$IMAGE_TAG" "$IMAGE_TAG-arm" --arch arm64
+    - docker manifest push "$IMAGE_TAG"
+  needs:
+    - docker-amd
+    - docker-arm
+
+docker-latest:
+  stage: docker
+  extends: .docker-default
+  script:
+    - docker manifest create   "$CI_REGISTRY_IMAGE/$FENRIR_IMAGE_NAME:latest" "$IMAGE_TAG-amd" "$IMAGE_TAG-arm"
+    - docker manifest annotate "$CI_REGISTRY_IMAGE/$FENRIR_IMAGE_NAME:latest" "$IMAGE_TAG-amd" --arch amd64
+    - docker manifest annotate "$CI_REGISTRY_IMAGE/$FENRIR_IMAGE_NAME:latest" "$IMAGE_TAG-arm" --arch arm64
+    - docker manifest push "$CI_REGISTRY_IMAGE/$FENRIR_IMAGE_NAME:latest"
+  needs:
+    - docker-all
+  when: manual
