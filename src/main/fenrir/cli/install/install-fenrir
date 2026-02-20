@@ -201,6 +201,7 @@ if [ -d "${FENRIR_CONF_DIR}" ]; then
     done
 fi
 
+# DEPRECATED: to be removed in fenrir 1.2.0 (TODO)
 # For those who used fenrir 0.x.x
 if [ -d "/var/fenrir" ]; then
     out loki-log warn "Removing '/var/fenrir/': deprecated for removal"
@@ -253,7 +254,13 @@ out loki-prog "Previous installations..."
 ) || exit $? # propagate error
 
 out loki-prog "Cleaning local repo.."
-rm -fr "$os_pref_home/$user/.fenrir"
+
+if [ -n "${FENRIR_KEEP_LOCAL_REPO}" ]; then
+    out loki-log warn "'FENRIR_KEEP_LOCAL_REPO' is on: preserving the local repo"
+else
+    rm -fr "$os_pref_home/$user/.fenrir"
+fi
+
 out loki-gorp
 
 out loki-gorp

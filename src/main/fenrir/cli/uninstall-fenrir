@@ -33,6 +33,7 @@ function succ {
 
 FENRIR_TMP_DIR=${FENRIR_TMP_DIR:-"/tmp/fenrir/tmp"}
 FENRIR_HOME=${FENRIR_HOME:-"/home/$user/.fenrir"}
+FENRIR_KEEP_LOCAL_REPO=$(loki -c eval 'echo ${FENRIR_KEEP_LOCAL_REPO}')
 
 #################################################################
 
@@ -63,10 +64,12 @@ if [ -z "${update}" ]; then
     fi
 fi
 
-if [ -d "${FENRIR_HOME}" ]; then
-    rm -r "${FENRIR_HOME}"
-else
-    warn "fenrir's local repository was not found!"
+if [ -z "${FENRIR_KEEP_LOCAL_REPO}" ]; then
+    if [ -d "${FENRIR_HOME}" ]; then
+        rm -r "${FENRIR_HOME}"
+    else
+        warn "fenrir's local repository was not found!"
+    fi
 fi
 
 succ "Done"
