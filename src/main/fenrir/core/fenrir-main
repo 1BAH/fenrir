@@ -58,15 +58,15 @@ function finalise {
 
 function save_error_report {
     echo "      <failure><![CDATA[" >> "${REPORT_FILE}"
-    cat "${CMD_FILE}" | perl -pe 's/\x1b\[[0-9;]*[mG]//g' >> "$REPORT_FILE"
+    cat "${CMD_FILE}" | sed -E "s/${ESC}\[[0-9;]*[mG]//g" >> "$REPORT_FILE"
     echo "      ]]></failure>" >> "${REPORT_FILE}"
 
     echo "      <system-out><![CDATA[" >> "${REPORT_FILE}"
-    cat "${OUT_FILE}" | perl -pe 's/\x1b\[[0-9;]*[mG]//g' >> "$REPORT_FILE"
+    cat "${OUT_FILE}" | sed -E "s/${ESC}\[[0-9;]*[mG]//g" >> "$REPORT_FILE"
     echo "      ]]></system-out>" >> "${REPORT_FILE}"
 
     echo "      <system-err><![CDATA[" >> "${REPORT_FILE}"
-    cat "${ERR_FILE}" | perl -pe 's/\x1b\[[0-9;]*[mG]//g' >> "$REPORT_FILE"
+    cat "${ERR_FILE}" | sed -E "s/${ESC}\[[0-9;]*[mG]//g" >> "$REPORT_FILE"
     echo "      ]]></system-err>" >> "${REPORT_FILE}"
 }
 

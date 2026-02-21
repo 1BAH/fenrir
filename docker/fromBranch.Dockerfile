@@ -8,7 +8,6 @@ RUN apk add --no-cache  \
         git             \
         openssh-client  \
         ca-certificates \
-        perl-utils      \
         shellcheck      \
         sudo            \
         wget            \
