@@ -55,6 +55,8 @@ docker-amd:
     - docker push "$IMAGE_TAG-amd"
   needs:
     - tests
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
 
 docker-arm:
   stage: docker
@@ -64,6 +66,8 @@ docker-arm:
     - docker push "$IMAGE_TAG-arm"
   needs:
     - tests
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
 
 docker-all:
   stage: docker
@@ -77,8 +81,7 @@ docker-all:
     - docker-amd
     - docker-arm
   rules:
-    - if: '$CI_COMMIT_TAG'
-      when: never
+    - if: $CI_COMMIT_BRANCH
 
 docker-version:
   stage: docker
