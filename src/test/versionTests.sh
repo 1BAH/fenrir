@@ -20,7 +20,18 @@ while IFS='=' read -r key value; do
     esac
 done < "$props"
 
-loki-prog "Version is up to date"
+loki-prog "Version is up to date with branch"
+
+branch_version=$(git branch --show-current | grep -oP "\\d+\\.\\d+\\.\\d+")
+if (( $? != 0 )); then
+    loki-log warn "Non-version branch: $(git branch --show-current)"
+else
+    loki-assert-eq "${branch_version}" "${expected_version}"
+fi
+
+loki-gorp
+
+loki-prog "fenrir.properties"
 
 loki-assert-eq "$expected_version" "$version"
 
