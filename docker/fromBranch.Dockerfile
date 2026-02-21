@@ -5,7 +5,6 @@ ENV PASS="breach"
 ENV FENRIR_IN_DOCKER=1
 
 RUN apk add --no-cache  \
-        util-linux      \
         git             \
         openssh-client  \
         ca-certificates \
