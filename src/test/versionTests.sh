@@ -2,7 +2,7 @@
 
 ##########################################################################
 
-expected_version="1.1.0"
+expected_version="1.1.1"
 
 src_dir=$(realpath "$(pwd)/../../main/fenrir")
 props="${src_dir}/cli/fenrir.properties"
