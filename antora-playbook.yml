@@ -5,8 +5,9 @@ content:
   sources:
     - url: https://gitlab.com/atpd/fenrir
       tags:
+        - HEAD
+        - v1.1.0
         - v1.0.0
-        - v1.0.0-rc.3-alpha
 ui:
   bundle:
     url: https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/HEAD/raw/build/ui-bundle.zip?job=bundle-stable
