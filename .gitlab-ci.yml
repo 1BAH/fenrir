@@ -76,6 +76,23 @@ docker-all:
   needs:
     - docker-amd
     - docker-arm
+  rules:
+    - if: '$CI_COMMIT_TAG'
+      when: never
+
+docker-version:
+  stage: docker
+  extends: .docker-default
+  script:
+    - docker manifest create   "$CI_REGISTRY_IMAGE/$FENRIR_IMAGE_NAME:$CI_COMMIT_TAG" "$IMAGE_TAG-amd" "$IMAGE_TAG-arm"
+    - docker manifest annotate "$CI_REGISTRY_IMAGE/$FENRIR_IMAGE_NAME:$CI_COMMIT_TAG" "$IMAGE_TAG-amd" --arch amd64
+    - docker manifest annotate "$CI_REGISTRY_IMAGE/$FENRIR_IMAGE_NAME:$CI_COMMIT_TAG" "$IMAGE_TAG-arm" --arch arm64
+    - docker manifest push "$CI_REGISTRY_IMAGE/$FENRIR_IMAGE_NAME:$CI_COMMIT_TAG"
+  needs:
+    - docker-amd
+    - docker-arm
+  rules:
+    - if: '$CI_COMMIT_TAG'
 
 docker-latest:
   stage: docker
