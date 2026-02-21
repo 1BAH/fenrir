@@ -201,6 +201,7 @@ if [ -d "${FENRIR_CONF_DIR}" ]; then
     done
 fi
 
+# DEPRECATED: to be removed in fenrir 1.2.0 (TODO)
 # For those who used fenrir 0.x.x
 if [ -d "/var/fenrir" ]; then
     out loki-log warn "Removing '/var/fenrir/': deprecated for removal"
@@ -239,9 +240,21 @@ out loki-prog "Previous installations..."
     loki-log warn "These commands already exist:"
 
     # shellcheck disable=SC2154
+    maxlen=0
     for cmd in "${found[@]}"; do
-        echo "'$(basename "$cmd")' => '$cmd'"
-    done | column -t | ${sed_cmd} "s/^/$(loki-wrap "${YELLOW}" "[WARNING]")      /"
+        thislen=$(basename "$cmd")
+        thislen=${#thislen}
+        maxlen=$(( maxlen < thislen ? thislen : maxlen ))
+    done
+
+    # shellcheck disable=SC2154
+    for cmd in "${found[@]}"; do
+        thislen=$(basename "$cmd")
+        thislen=${#thislen}
+        echo -n "'$(basename "$cmd")'$(loki-dup ' ' $(( maxlen - thislen )))"
+        echo -n "  =>  "
+        echo "'$cmd'"
+    done | ${sed_cmd} "s/^/$(loki-wrap "${YELLOW}" "[WARNING]")      /"
 
     loki-log warn "They are to be replaced. Do you want to proceed? ($(loki-wrap "${BOLD}" Potentially dangerous)) [Y|N]"
 
@@ -253,7 +266,13 @@ out loki-prog "Previous installations..."
 ) || exit $? # propagate error
 
 out loki-prog "Cleaning local repo.."
-rm -fr "$os_pref_home/$user/.fenrir"
+
+if [ -n "${FENRIR_KEEP_LOCAL_REPO}" ]; then
+    out loki-log warn "'FENRIR_KEEP_LOCAL_REPO' is on: preserving the local repo"
+else
+    rm -fr "$os_pref_home/$user/.fenrir"
+fi
+
 out loki-gorp
 
 out loki-gorp
@@ -412,10 +431,10 @@ out loki-prog "Installing autocompletion.."
 
 if [ -n "${FENRIR_INSTALL_BASH}" ]; then
     fenrir-set-conf main complete bash
-    out loki-log warn "Run 'source ~/.bashrc' or reload terminal to apply autocompletion"
+    out loki-log warn "Run 'source ~/.bashrc' or reload terminal to apply the autocompletion"
 elif [ -n "${FENRIR_INSTALL_ZSH}" ]; then
     fenrir-set-conf main complete zsh
-    out loki-log warn "If you use 'Oh My Zsh' than reload your terminal, otherwise read the docs to set up autocompletion"
+    out loki-log warn "If you use 'Oh My Zsh' then reload your terminal, otherwise read the docs to set up the autocompletion"
 fi
 
 out loki-gorp

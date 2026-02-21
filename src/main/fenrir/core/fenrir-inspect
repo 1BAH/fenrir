@@ -2,12 +2,14 @@
 
 ##
 # Usage:
-#   fenrir-inspect [task] <TEST ID>
+#   fenrir-inspect [<TASK>] <TEST ID>
+#   fenrir-inspect [<TASK>] (index|pipeline)
 #
-# Read the test sources. When no 'task' is provided, the current task is used.
+# Read the test sources. When no 'TASK' is provided, the current task is used.
+# When 'index' or 'pipeline' is chose the index.hel or pipeline.hel files are shown
 #
 # Options:
-#    task               Select the specific task
+#    TASK               Select the specific task
 #
 # Special configs:
 #    FENRIR_EDITOR      The application used to show the text
@@ -39,12 +41,21 @@ if ! [ -d "$taskdir" ]; then
     exit 77
 fi
 
-testfile="$taskdir/$testcase"
-
-if ! [ -x "$testfile" ]; then
-    loki-log err "Test <$testcase> does not exist!"
-    exit 78
-fi
+case "$testcase" in
+    index)
+        testfile="$taskdir/index.hel"
+    ;;
+    pipeline)
+        testfile="$taskdir/pipeline.hel"
+    ;;
+    *)
+        testfile="$taskdir/$testcase"
+        if ! [ -x "$testfile" ]; then
+            loki-log err "Test <$testcase> does not exist!"
+            exit 78
+        fi
+    ;;
+esac
 
 ######################################################################
 ##                           MAIN PROGRAM                           ##

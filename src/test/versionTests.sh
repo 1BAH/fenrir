@@ -2,7 +2,7 @@
 
 ##########################################################################
 
-expected_version="1.1.0"
+expected_version="1.1.1"
 
 src_dir=$(realpath "$(pwd)/../../main/fenrir")
 props="${src_dir}/cli/fenrir.properties"
@@ -20,7 +20,18 @@ while IFS='=' read -r key value; do
     esac
 done < "$props"
 
-loki-prog "Version is up to date"
+loki-prog "Version is up to date with branch"
+
+branch_version=$(git branch --show-current | grep -oP "\\d+\\.\\d+\\.\\d+")
+if (( $? != 0 )); then
+    loki-log warn "Non-version branch: $(git branch --show-current)"
+else
+    loki-assert-eq "${branch_version}" "${expected_version}"
+fi
+
+loki-gorp
+
+loki-prog "fenrir.properties"
 
 loki-assert-eq "$expected_version" "$version"
 

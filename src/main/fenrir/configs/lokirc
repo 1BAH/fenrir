@@ -5,3 +5,6 @@ FENRIR_EDITOR="less"
 #FENRIR_EDITOR='batcat --map-syntax="*:Bourne Again Shell (bash)"'
 
 FENRIR_HOME=""
+
+# Uncomment to preserve local repo from removal when updating fenrir
+#FENRIR_KEEP_LOCAL_REPO="YES"
