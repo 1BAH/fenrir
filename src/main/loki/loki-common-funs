@@ -105,6 +105,7 @@ function loki-log {
     loki-wrap "$GRAY" "$LINE"
     cat -- "$ERR_FILE" | sed "s/^/$(loki-wrap "${PURPLE}"  "${stderr_desc}")/"
     loki-wrap "$GRAY" "$LINE"
+    loki-log err "$*" > "$ERR_FILE"
 }
 
 
