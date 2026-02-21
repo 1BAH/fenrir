@@ -37,6 +37,18 @@ fi
 
 ecode=0
 skip=""
+linelen=$(stty size)
+linelen=${linelen#* }
+linelen=$(( linelen - 10 )) # Add right padding
+
+function pretty_print_testname {
+    name=$1
+    descriptor_len=10 # '[ INFO  ] '
+    name_len=${#name}
+    rest=$(( linelen - descriptor_len - name_len - 2 )) # Do not forget about (, )
+
+    loki-log info "$(loki-dup '-' $(( rest / 2 )))($name)$(loki-dup '-' $(( rest - rest / 2 )))"
+}
 
 function finalise {
     # Print score
@@ -59,6 +71,8 @@ function save_error_report {
 }
 
 function switch_solution {
+    pretty_print_testname "switch-solution"
+
     if lokiw cd "$destination"; then
         loki-log succ "Inside solution's directory"
     else
@@ -106,7 +120,7 @@ echo "  <testsuite name=\"${task}\">" >> "${REPORT_FILE}"
 for script in $pre; do
     echo "    <testcase name=\"${script}\">" >> "${REPORT_FILE}"
 
-    loki-log info "--------------------------($script)--------------------------"
+    pretty_print_testname "$script"
 
     if [ -n "$skip" ]; then
         echo "      <skipped>Blocking execution</skipped>" >> "${REPORT_FILE}"
@@ -120,8 +134,6 @@ for script in $pre; do
 
     echo "    </testcase>" >> "${REPORT_FILE}"
 done
-
-loki-log info "--------------------------(switch-solution)--------------------------"
 
 switch_solution || {
     finalise "$?"
@@ -146,7 +158,7 @@ for script in $main; do
         if [ "$blocking" -ne 0 ] && [ -n "$skip" ]; then
             echo "      <skipped>Blocking execution</skipped>" >> "${REPORT_FILE}"
         else
-            loki-log info "--------------------------($script)--------------------------"
+            pretty_print_testname "$script"
 
             "$(fenrir-task-path repo)/$script" || {
                 ecode=$?
@@ -159,7 +171,7 @@ for script in $main; do
     echo "    </testcase>" >> "${REPORT_FILE}"
 done
 
-loki-log info "-----------------------------------------------------------"
+loki-log info "$(loki-dup '-' $(( linelen - 10 )))"
 
 
 echo "  </testsuite>" >> "${REPORT_FILE}"

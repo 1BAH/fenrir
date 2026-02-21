@@ -90,7 +90,12 @@ function loki-log {
         return
     fi
 
-    local LINE="***----------------------------------------------------------------------------------***"
+    local linelen
+    linelen=$(stty size)
+    linelen=${linelen#* }
+    linelen=$(( linelen - 10 )) # Add right padding
+
+    local LINE="***$(loki-dup '-' $(( linelen - 6 )))***" # 6 is stars
 
     loki-log err "$*"
     loki-wrap "$GRAY" "$LINE"
