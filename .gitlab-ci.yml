@@ -15,7 +15,7 @@ variables:
 tests:
   stage: test
   before_script:
-    - apt-get update && apt-get install -y wget
+    - apt-get update && apt-get install -y wget git
     - cd src/test/runtime
   script: ./run_tests.sh
   variables:
