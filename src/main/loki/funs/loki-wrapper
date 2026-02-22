@@ -90,10 +90,10 @@ function lokiw {
 
     local ecode
     if [[ -n "$unsafe" ]]; then
-        eval "$*" > "$OUT_FILE" 2> "$ERR_FILE"
+        eval "0>&0 $*" > "$OUT_FILE" 2> "$ERR_FILE"
         ecode=$?
     else
-        "$@" > "$OUT_FILE" 2> "$ERR_FILE"
+        0>&0 "$@" > "$OUT_FILE" 2> "$ERR_FILE"
         ecode=$?
     fi
 
