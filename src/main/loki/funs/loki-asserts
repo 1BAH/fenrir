@@ -13,12 +13,8 @@ function loki-assert-cb {
 # Exits with code 99 on failure
 ##
 function loki-assert-eq {
-    if (( $# < 2 )); then
-        loki-log err "Expected <2> arguments but received <$#>"
-        loki-log err "Args: <$*>"
-    fi
-    local exp=${1}
-    local real=${2}
+    local exp=${1?"loki-assert-eq: Missing the first argument"}
+    local real=${2?"loki-assert-eq: Missing the second argument"}
     local msg=$3
 
     if [[ "$exp" != "$real" ]]; then
@@ -46,12 +42,8 @@ function loki-assert-eq {
 # Exits with code 99 on failure
 ##
 function loki-assert-neq {
-    if (( $# < 2 )); then
-        loki-log err "Expected <2> arguments but received <$#>"
-        loki-log err "Args: <$*>"
-    fi
-    local exp=${1}
-    local real=${2}
+    local exp=${1?"loki-assert-eq: Missing the first argument"}
+    local real=${2?"loki-assert-eq: Missing the second argument"}
     local msg=$3
 
     if [[ "$exp" == "$real" ]]; then
@@ -79,12 +71,8 @@ function loki-assert-neq {
 # Exits with code 99 on failure
 ##
 function loki-assert-regeq {
-    if (( $# < 2 )); then
-        loki-log err "Expected <2> arguments but received <$#>"
-        loki-log err "Args: <$*>"
-    fi
-    local exp=${1}
-    local real=${2}
+    local exp=${1?"loki-assert-eq: Missing the first argument"}
+    local real=${2?"loki-assert-eq: Missing the second argument"}
     local msg=$3
 
     if ! [[ $real =~ $regexp ]]; then
