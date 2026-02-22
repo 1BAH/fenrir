@@ -56,26 +56,8 @@ CMD_FILE="$FENRIR_TMP_DIR/cmd"
 LOKI_LOG_PREFIX=${LOKI_LOG_PREFIX:-""}
 
 ############################################
-#>                Colours                 <#
+#>                 Logo                   <#
 ############################################
-ESC=$'\e'
-
-BOLD="${ESC}[1m"
-
-DARK_GREEN="${BOLD}${ESC}[38;5;28m"
-MAGENTA="${BOLD}${ESC}[38;5;197m"
-PEACH="${BOLD}${ESC}[38;5;209m"
-PURPLE="${BOLD}${ESC}[38;5;129m"
-EMERALD="${BOLD}${ESC}[38;5;30m"
-GRAY="${BOLD}${ESC}[38;5;249m"
-SKY="${BOLD}${ESC}[38;5;33m"
-GREEN="${BOLD}${ESC}[38;5;112m"
-BLUE="${BOLD}${ESC}[38;5;4m"
-YELLOW="${BOLD}${ESC}[38;5;214m"
-RED="${BOLD}${ESC}[38;5;196m"
-
-ENDC="${ESC}[0m"
-
 
 IFS= read -r -d '' FENRIR_LOGO << 'LOGO'
   _____               _
