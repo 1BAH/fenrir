@@ -22,8 +22,8 @@ done < "$props"
 
 loki-prog "Version is up to date with branch"
 
-branch_version=$(git branch --show-current | grep -oP "\\d+\\.\\d+\\.\\d+")
-branch_version=${CI_COMMIT_BRANCH:-$branch_version}
+branch_version=${CI_COMMIT_BRANCH:-$(git branch --show-current)}
+branch_version=$(echo "$branch_version" | grep -oP "\\d+\\.\\d+\\.\\d+")
 if (( $? != 0 )); then
     loki-log warn "Non-version branch: $(git branch --show-current)"
 else
