@@ -201,13 +201,6 @@ if [ -d "${FENRIR_CONF_DIR}" ]; then
     done
 fi
 
-# DEPRECATED: to be removed in fenrir 1.2.0 (TODO)
-# For those who used fenrir 0.x.x
-if [ -d "/var/fenrir" ]; then
-    out loki-log warn "Removing '/var/fenrir/': deprecated for removal"
-    rm -fr /var/fenrir
-fi
-
 out loki-gorp
 out loki-prog "Previous installations..."
 
