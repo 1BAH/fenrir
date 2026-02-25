@@ -76,15 +76,17 @@ succ "Done"
 
 #################################################################
 
-info "Removing '/etc/fenrir'.."
+if [ -z "${update}" ]; then
+    info "Removing '/etc/fenrir'.."
 
-if [ -d "/etc/fenrir" ]; then
-    rm -r /etc/fenrir
-else
-    warn "The directory does not exist!"
+    if [ -d "/etc/fenrir" ]; then
+        rm -r /etc/fenrir
+    else
+        warn "The directory does not exist!"
+    fi
+
+    succ "Done"
 fi
-
-succ "Done"
 
 #################################################################
 
