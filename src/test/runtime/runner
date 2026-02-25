@@ -5,10 +5,12 @@ tests=("$@")
 
 return_code=0
 
+llen=$(( LOKI_COLUMNS - 13 ))
+
 cat <<__HEREDOC
-==================================================================
-                          Running tests
-==================================================================
+$(loki-dup '=' "${LOKI_COLUMNS}")
+$(loki-dup ' ' $(( llen / 2)))Running tests
+$(loki-dup '=' "${LOKI_COLUMNS}")
 __HEREDOC
 
 loki-log info "Run configuration: <${#tests[@]}: ${tests[*]}>"
@@ -21,7 +23,7 @@ if ! { (( ${#tests[@]} == 1 )) && [ "${tests[0]}" = "./runner" ]; }; then
         fi
 
         loki-log info "> Test: $(loki-wrap "${SKY}" "$(basename "$test_file")")"
-        echo "⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅"
+        loki-dup '⋅' "${LOKI_COLUMNS}"
         if ! "$test_file"; then
             loki-log err "Test failed"
             (( return_code++ ))
@@ -29,7 +31,7 @@ if ! { (( ${#tests[@]} == 1 )) && [ "${tests[0]}" = "./runner" ]; }; then
             loki-log succ "Test passed"
         fi
 
-        echo "=================================================================="
+        loki-dup '=' "${LOKI_COLUMNS}"
     done
 else
     for test_file in ../*Tests.sh; do
@@ -38,7 +40,7 @@ else
         fi
 
         loki-log info "> Test: $(loki-wrap "${SKY}" "$(basename "$test_file")")"
-        echo "⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅⋅"
+        loki-dup '⋅' "${LOKI_COLUMNS}"
         if ! "$test_file"; then
             loki-log err "Test failed"
             (( return_code++ ))
@@ -46,7 +48,7 @@ else
             loki-log succ "Test passed"
         fi
 
-        echo "=================================================================="
+        loki-dup '=' "${LOKI_COLUMNS}"
     done
 fi
 
