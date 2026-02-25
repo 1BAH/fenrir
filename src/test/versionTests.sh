@@ -2,7 +2,7 @@
 
 ##########################################################################
 
-expected_version="1.1.1"
+expected_version="1.2.0"
 
 src_dir=$(realpath "$(pwd)/../../main/fenrir")
 props="${src_dir}/cli/fenrir.properties"
@@ -22,7 +22,8 @@ done < "$props"
 
 loki-prog "Version is up to date with branch"
 
-branch_version=$(git branch --show-current | grep -oP "\\d+\\.\\d+\\.\\d+")
+branch_version=${CI_COMMIT_BRANCH:-$(git branch --show-current)}
+branch_version=$(echo "$branch_version" | grep -oP "\\d+\\.\\d+\\.\\d+")
 if (( $? != 0 )); then
     loki-log warn "Non-version branch: $(git branch --show-current)"
 else

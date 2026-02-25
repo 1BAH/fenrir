@@ -15,7 +15,7 @@ variables:
 tests:
   stage: test
   before_script:
-    - apt-get update && apt-get install -y wget
+    - apt-get update && apt-get install -y wget git
     - cd src/test/runtime
   script: ./run_tests.sh
   variables:
@@ -56,7 +56,7 @@ docker-amd:
   needs:
     - tests
   rules:
-    - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_COMMIT_BRANCH
 
 docker-arm:
   stage: docker
@@ -67,7 +67,7 @@ docker-arm:
   needs:
     - tests
   rules:
-    - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_COMMIT_BRANCH
 
 docker-all:
   stage: docker
@@ -87,13 +87,16 @@ docker-version:
   stage: docker
   extends: .docker-default
   script:
-    - docker manifest create   "$CI_REGISTRY_IMAGE/$FENRIR_IMAGE_NAME:$CI_COMMIT_TAG" "$IMAGE_TAG-amd" "$IMAGE_TAG-arm"
-    - docker manifest annotate "$CI_REGISTRY_IMAGE/$FENRIR_IMAGE_NAME:$CI_COMMIT_TAG" "$IMAGE_TAG-amd" --arch amd64
-    - docker manifest annotate "$CI_REGISTRY_IMAGE/$FENRIR_IMAGE_NAME:$CI_COMMIT_TAG" "$IMAGE_TAG-arm" --arch arm64
-    - docker manifest push "$CI_REGISTRY_IMAGE/$FENRIR_IMAGE_NAME:$CI_COMMIT_TAG"
-  needs:
-    - docker-amd
-    - docker-arm
+    - docker buildx build --platform linux/amd64 -t "$IMAGE-amd" -f docker/base.Dockerfile .
+    - docker push "$IMAGE-amd"
+    - docker buildx build --platform linux/arm64 -t "$IMAGE-arm" -f docker/base.Dockerfile .
+    - docker push "$IMAGE-arm"
+    - docker manifest create   "$IMAGE" "$IMAGE-amd" "$IMAGE-arm"
+    - docker manifest annotate "$IMAGE" "$IMAGE-amd" --arch amd64
+    - docker manifest annotate "$IMAGE" "$IMAGE-arm" --arch arm64
+    - docker manifest push "$IMAGE"
+  variables:
+    IMAGE: $CI_REGISTRY_IMAGE/$FENRIR_IMAGE_NAME:$CI_COMMIT_TAG
   rules:
     - if: '$CI_COMMIT_TAG'
 

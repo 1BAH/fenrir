@@ -4,7 +4,13 @@
 source "/etc/fenrir/lokirc" &> /dev/null
 
 set -T
+set +m
 shopt -s extdebug
+shopt -s lastpipe
+
+LOKI_COLUMNS=$(stty size 2> /dev/null || echo "foo 100")
+LOKI_COLUMNS=${LOKI_COLUMNS#* }
+LOKI_COLUMNS=$(( LOKI_COLUMNS - 10 )) # Add right padding
 
 # Alternative TODO:complete docs!
 

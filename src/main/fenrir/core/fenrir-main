@@ -139,6 +139,8 @@ switch_solution || {
     finalise "$?"
 }
 
+linter_failed=0
+
 for script in $main; do
     echo "    <testcase name=\"${script}\">" >> "${REPORT_FILE}"
 
@@ -152,6 +154,7 @@ for script in $main; do
         "${FENRIR_HOME}/shared/walk-inspections" || {
             ecode=$?
             skip=YES
+            linter_failed=1
             save_error_report
         }
     else
@@ -176,5 +179,10 @@ loki-log info "$(loki-dup '-' $(( linelen - 10 )))"
 
 echo "  </testsuite>" >> "${REPORT_FILE}"
 echo "</testsuites>" >> "${REPORT_FILE}"
+
+if (( linter_failed == 1 )); then
+    loki-log warn "Some linter inspections have failed: final score is reset to 0"
+    echo -n 0 > "${SCORE_FILE}"
+fi
 
 finalise
