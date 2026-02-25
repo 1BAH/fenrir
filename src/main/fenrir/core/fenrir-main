@@ -37,15 +37,12 @@ fi
 
 ecode=0
 skip=""
-linelen=$(stty size)
-linelen=${linelen#* }
-linelen=$(( linelen - 10 )) # Add right padding
 
 function pretty_print_testname {
     name=$1
     descriptor_len=10 # '[ INFO  ] '
     name_len=${#name}
-    rest=$(( linelen - descriptor_len - name_len - 2 )) # Do not forget about (, )
+    rest=$(( LOKI_COLUMNS - descriptor_len - name_len - 2 )) # Do not forget about (, )
 
     loki-log info "$(loki-dup '-' $(( rest / 2 )))($name)$(loki-dup '-' $(( rest - rest / 2 )))"
 }
@@ -174,7 +171,7 @@ for script in $main; do
     echo "    </testcase>" >> "${REPORT_FILE}"
 done
 
-loki-log info "$(loki-dup '-' $(( linelen - 10 )))"
+loki-log info "$(loki-dup '-' $(( LOKI_COLUMNS - 10 )))"
 
 
 echo "  </testsuite>" >> "${REPORT_FILE}"
