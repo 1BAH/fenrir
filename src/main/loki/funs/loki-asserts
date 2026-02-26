@@ -70,8 +70,8 @@ function loki-assert-err {
 # Exits with code 99 on failure
 ##
 function loki-assert-neq {
-    local exp=${1?"loki-assert-out: Missing the first argument"}
-    local real=${2?"loki-assert-out: Missing the second argument"}
+    local exp=${1?"loki-assert-neq: Missing the first argument"}
+    local real=${2?"loki-assert-neq: Missing the second argument"}
     local msg=$3
 
     if [[ "$exp" == "$real" ]]; then
@@ -127,8 +127,8 @@ function loki-assert-nerr {
 # Exits with code 99 on failure
 ##
 function loki-assert-regeq {
-    local regexp=${1?"loki-assert-eq: Missing the second argument"}
-    local real=${2?"loki-assert-eq: Missing the first argument"}
+    local regexp=${1?"loki-assert-regeq: Missing the second argument"}
+    local real=${2?"loki-assert-regeq: Missing the first argument"}
     local msg=$3
 
     if ! [[ $real =~ $regexp ]]; then
@@ -141,6 +141,34 @@ function loki-assert-regeq {
             loki-log err "Expected <$real> to match regexp <$regexp>"
         else
             loki-log fail "Expected <$real> to match regexp <$regexp>"
+        fi
+        ${LOKI_ASSERT_CB}
+        exit 99
+    fi
+}
+
+##
+# Usage:
+#   loki-assert-rnegeq <regexp> <real> [MESSAGE]
+#
+# Test the arguments for non-matching a regexp.
+# Exits with code 99 on failure
+##
+function loki-assert-rnegeq {
+    local regexp=${1?"loki-assert-rnegeq: Missing the second argument"}
+    local real=${2?"loki-assert-rnegeq: Missing the first argument"}
+    local msg=$3
+
+    if [[ $real =~ $regexp ]]; then
+        [ -n "$msg" ] && {
+            echo "<error><![CDATA[$msg]]></error>" >> "${REPORT_FILE}"
+            loki-log err "$msg"
+        }
+
+        if [ -n "${FENRIR_TEST_DEBUG}" ]; then
+            loki-log err "Did not expect <$real> to match regexp <$regexp>"
+        else
+            loki-log fail "Did not expect <$real> to match regexp <$regexp>"
         fi
         ${LOKI_ASSERT_CB}
         exit 99
@@ -175,6 +203,33 @@ function loki-assert-rerr {
     loki-assert-regeq "$exp" "$(loki-get-err)" "$msg"
 }
 
+##
+# Usage:
+#   loki-assert-rout <regexp> [MESSAGE]
+#
+# Test the captured stdout ($OUT_FILE) for non-matching a regexp
+# Exits with code 99 on failure
+##
+function loki-assert-rnout {
+    local exp=${1?"loki-assert-rnout: Missing the first argument"}
+    local msg=$2
+
+    loki-assert-rnegeq "$exp" "$(loki-get-out)" "$msg"
+}
+
+##
+# Usage:
+#   loki-assert-rerr <regexp> [MESSAGE]
+#
+# Test the captured stderr ($ERR_FILE) for non-matching a regexp
+# Exits with code 99 on failure
+##
+function loki-assert-rnerr {
+    local exp=${1?"loki-assert-rnerr: Missing the first argument"}
+    local msg=$2
+
+    loki-assert-rnegeq "$exp" "$(loki-get-err)" "$msg"
+}
 
 ##
 # Usage:
@@ -184,8 +239,8 @@ function loki-assert-rerr {
 # Exits with code 99 on failure
 ##
 function loki-assert-feq {
-    local file1=${1?"loki-assert-eq: Missing the first argument"}
-    local file2=${2?"loki-assert-eq: Missing the second argument"}
+    local file1=${1?"loki-assert-feq: Missing the first argument"}
+    local file2=${2?"loki-assert-feq: Missing the second argument"}
     local msg=$3
 
     if ! diff -q "$file1" "$file2" &> /dev/null; then
@@ -215,7 +270,7 @@ function loki-assert-feq {
 # Exits with code 99 on failure
 ##
 function loki-assert-fout {
-    local file=${1?"loki-assert-eq: Missing the first argument"}
+    local file=${1?"loki-assert-fout: Missing the first argument"}
     local msg=$2
 
     loki-assert-feq "$OUT_FILE" "$file" "$msg"
@@ -229,7 +284,7 @@ function loki-assert-fout {
 # Exits with code 99 on failure
 ##
 function loki-assert-ferr {
-    local file=${1?"loki-assert-eq: Missing the first argument"}
+    local file=${1?"loki-assert-ferr: Missing the first argument"}
     local msg=$2
 
     loki-assert-feq "$ERR_FILE" "$file" "$msg"
