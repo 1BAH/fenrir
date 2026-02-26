@@ -1,0 +1,100 @@
+include:
+  - 'docker-ci.yml'
+  - 'base-ci.yml'
+
+##############################################################################################
+##                                       On push                                            ##
+##############################################################################################
+fend-docker-amd:
+  stage: docker
+  extends: .amd
+  variables:
+    IMAGE: $FENRIR_DIND_IMAGE_FULLNAME
+  needs:
+    - tests
+  rules:
+    - if: $CI_COMMIT_BRANCH
+
+fend-docker-arm:
+  stage: docker
+  extends: .arm
+  variables:
+    IMAGE: $FENRIR_DIND_IMAGE_FULLNAME
+  needs:
+    - tests
+  rules:
+    - if: $CI_COMMIT_BRANCH
+
+fend-docker-all:
+  stage: docker
+  extends: .manifest
+  variables:
+    IMAGE: $FENRIR_DIND_IMAGE_FULLNAME
+    COMPONENT_IMAGE: $FENRIR_DIND_IMAGE_FULLNAME
+  needs:
+    - docker-amd
+    - docker-arm
+  rules:
+    - if: $CI_COMMIT_BRANCH
+
+fend-docker-latest-manual:
+  stage: docker
+  extends: .manifest
+  variables:
+    IMAGE: $CI_REGISTRY_IMAGE/$FENRIR_DIND_IMAGE_NAME:latest
+    COMPONENT_IMAGE: $FENRIR_DIND_IMAGE_FULLNAME
+  needs:
+    - docker-amd
+    - docker-arm
+  when: manual
+  rules:
+    - if: $CI_COMMIT_BRANCH
+
+##############################################################################################
+##                                   On tag (version)                                       ##
+##############################################################################################
+
+fend-docker-version-arm:
+  stage: docker
+  extends: .arm
+  before_script:
+    - props=$(cat src/main/fenrir/cli/fenrir.properties)
+    - echo "$props+$CI_COMMIT_SHORT_SHA" > src/main/fenrir/cli/fenrir.properties
+  variables:
+    IMAGE: $CI_REGISTRY_IMAGE/$FENRIR_DIND_IMAGE_NAME:$CI_COMMIT_TAG
+  rules:
+    - if: '$CI_COMMIT_TAG'
+
+fend-docker-version-amd:
+  stage: docker
+  extends: .amd
+  before_script:
+    - props=$(cat src/main/fenrir/cli/fenrir.properties)
+    - echo "$props+$CI_COMMIT_SHORT_SHA" > src/main/fenrir/cli/fenrir.properties
+  variables:
+    IMAGE: $CI_REGISTRY_IMAGE/$FENRIR_DIND_IMAGE_NAME:$CI_COMMIT_TAG
+  rules:
+    - if: '$CI_COMMIT_TAG'
+
+fend-docker-version:
+  stage: docker
+  extends: .manifest
+  variables:
+    IMAGE: $CI_REGISTRY_IMAGE/$FENRIR_DIND_IMAGE_NAME:$CI_COMMIT_TAG
+    COMPONENT_IMAGE: $CI_REGISTRY_IMAGE/$FENRIR_DIND_IMAGE_NAME:$CI_COMMIT_TAG
+  needs:
+    - docker-version-amd
+    - docker-version-arm
+  rules:
+    - if: '$CI_COMMIT_TAG'
+
+fend-docker-latest:
+  stage: docker
+  extends: .manifest
+  variables:
+    COMPONENT_IMAGE: $CI_REGISTRY_IMAGE/$FENRIR_DIND_IMAGE_NAME:$CI_COMMIT_TAG
+    IMAGE: $CI_REGISTRY_IMAGE/$FENRIR_DIND_IMAGE_NAME:latest
+  needs:
+    - docker-version
+  rules:
+    - if: '$CI_COMMIT_TAG'

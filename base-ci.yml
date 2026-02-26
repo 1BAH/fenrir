@@ -1,0 +1,20 @@
+image: ubuntu:latest
+
+cache:
+  paths:
+    - node_modules
+
+variables:
+  FENRIR_IMAGE_NAME: "fenrir-base"
+  FENRIR_DIND_IMAGE_NAME: "fend"
+  FENRIR_IMAGE_FULLNAME: $CI_REGISTRY_IMAGE/$FENRIR_IMAGE_NAME:$CI_COMMIT_SHORT_SHA
+  FENRIR_DIND_IMAGE_FULLNAME: $CI_REGISTRY_IMAGE/$FENRIR_DIND_IMAGE_NAME:$CI_COMMIT_SHORT_SHA
+
+tests:
+  stage: test
+  before_script:
+    - apt-get update && apt-get install -y wget git
+    - cd src/test/runtime
+  script: ./run_tests.sh
+  variables:
+    FENRIR_IN_DOCKER: "-v"
