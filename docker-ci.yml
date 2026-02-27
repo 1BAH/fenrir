@@ -12,6 +12,7 @@
   variables: 
     BUILD_SCRIPT: base
   script:
+    - echo "Building amd64 image from 'docker/$BUILD_SCRIPT.Dockerfile'"
     - docker buildx build --platform linux/amd64 -t "$IMAGE-amd" -f docker/$BUILD_SCRIPT.Dockerfile .
     - docker push "$IMAGE-amd"
 
@@ -20,6 +21,7 @@
   variables:
     BUILD_SCRIPT: base
   script:
+    - echo "Building arm64 image from 'docker/$BUILD_SCRIPT.Dockerfile'"
     - docker buildx build --platform linux/arm64 -t "$IMAGE-arm" -f docker/$BUILD_SCRIPT.Dockerfile .
     - docker push "$IMAGE-arm"
 
