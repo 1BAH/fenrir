@@ -10,7 +10,6 @@ docker-amd:
   extends: .amd
   variables:
     IMAGE: $FENRIR_IMAGE_FULLNAME
-    BUILD_SCRIPT: fend
   needs:
     - tests
   rules:
@@ -21,7 +20,6 @@ docker-arm:
   extends: .arm
   variables:
     IMAGE: $FENRIR_IMAGE_FULLNAME
-    BUILD_SCRIPT: fend
   needs:
     - tests
   rules:
@@ -64,7 +62,6 @@ docker-version-arm:
     - echo "$props+$CI_COMMIT_SHORT_SHA" > src/main/fenrir/cli/fenrir.properties
   variables:
     IMAGE: $CI_REGISTRY_IMAGE/$FENRIR_IMAGE_NAME:$CI_COMMIT_TAG
-    BUILD_SCRIPT: fend
   rules:
     - if: '$CI_COMMIT_TAG'
 
@@ -76,7 +73,6 @@ docker-version-amd:
     - echo "$props+$CI_COMMIT_SHORT_SHA" > src/main/fenrir/cli/fenrir.properties
   variables:
     IMAGE: $CI_REGISTRY_IMAGE/$FENRIR_IMAGE_NAME:$CI_COMMIT_TAG
-    BUILD_SCRIPT: fend
   rules:
     - if: '$CI_COMMIT_TAG'
 
