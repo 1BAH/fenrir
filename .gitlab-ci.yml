@@ -1,8 +1,8 @@
 include:
-  - 'base-ci.yml'
-  - 'docker-ci.yml'
-  - 'fenrir-base.yml'
-  - 'fenrir-dind.yml'
+  - 'ci/base-ci.yml'
+  - 'ci/docker-ci.yml'
+  - 'ci/fenrir-base.yml'
+  - 'ci/fenrir-dind.yml'
 
 
 stages:

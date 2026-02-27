@@ -46,8 +46,8 @@ fend-docker-latest-manual:
     IMAGE: $CI_REGISTRY_IMAGE/$FENRIR_DIND_IMAGE_NAME:latest
     COMPONENT_IMAGE: $FENRIR_DIND_IMAGE_FULLNAME
   needs:
-    - docker-amd
-    - docker-arm
+    - fend-docker-amd
+    - fend-docker-arm
   when: manual
   rules:
     - if: $CI_COMMIT_BRANCH
@@ -87,8 +87,8 @@ fend-docker-version:
     IMAGE: $CI_REGISTRY_IMAGE/$FENRIR_DIND_IMAGE_NAME:$CI_COMMIT_TAG
     COMPONENT_IMAGE: $CI_REGISTRY_IMAGE/$FENRIR_DIND_IMAGE_NAME:$CI_COMMIT_TAG
   needs:
-    - docker-version-amd
-    - docker-version-arm
+    - fend-docker-version-amd
+    - fend-docker-version-arm
   rules:
     - if: '$CI_COMMIT_TAG'
 
@@ -99,6 +99,6 @@ fend-docker-latest:
     COMPONENT_IMAGE: $CI_REGISTRY_IMAGE/$FENRIR_DIND_IMAGE_NAME:$CI_COMMIT_TAG
     IMAGE: $CI_REGISTRY_IMAGE/$FENRIR_DIND_IMAGE_NAME:latest
   needs:
-    - docker-version
+    - fend-docker-version
   rules:
     - if: '$CI_COMMIT_TAG'
