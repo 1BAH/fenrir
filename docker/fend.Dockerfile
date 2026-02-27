@@ -19,9 +19,11 @@ RUN echo -e "breach\nbreach" | adduser -s "$(which bash)" fikus && \
     git config --global user.email "fikus@example.com" && \
     git config --global user.name  "fikus"
 
+WORKDIR /home/fikus
+
 COPY --from=fenrir /usr/local/bin/fenrir* /usr/local/bin/
 COPY --from=fenrir /usr/local/bin/loki /usr/local/bin/
 COPY --from=fenrir --chown=fikus:fikus /etc/fenrir /etc/fenrir
+COPY --from=fenrir --chown=fikus:fikus /home/fikus/.fenrir /home/fikus/.fenrir
 
-WORKDIR /home/fikus
 USER fikus
