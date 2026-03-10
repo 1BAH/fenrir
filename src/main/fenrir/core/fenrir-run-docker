@@ -2,10 +2,11 @@
 
 ##
 # Usage:
-#   fenrir-rund [-d|--debug] [-nl|--no-lint] <SOLUTION DIRECTORY>
+#   fenrir-rund [-d|--debug] [-nl|--no-lint] [-c|--testcase TESTCASE] <SOLUTION DIRECTORY>
 #
 # Starts a container and executes 'fenrir-run' inside.
 # After the execution the container is removed unless the 'debug' flag is set.
+# When TESTCASE is provided, it run only the selected testcase
 #
 # Options:
 #    -d, --debug        Does not stop the container (allows further debug)
@@ -48,6 +49,16 @@ while [ "$#" -ne 0 ]; do
 
         "--debug" | "-d")
             debug="YES"
+        ;;
+
+        "--testcase" | "-c")
+            testcase=${2?"You must select the testcase!"}
+            shift
+        ;;
+
+        -*)
+            loki-log err '(＃°Д°)' Unknown flag: "<$1>"
+            exit 16
         ;;
 
         *)
@@ -142,8 +153,13 @@ lokiw docker exec -u root "$container" chown fikus -R "/tmp/fenrir" || {
     finalise "Unable to change owner" "$?"
 }
 
-docker exec -it "$container" bash -c "cd solution && fenrir run -i ${NO_LINT} ."
-ecode=$?
+if [[ -v testcase ]]; then
+    docker exec -it "$container" bash -c "cd solution && fenrir run -i -c ${testcase} ${NO_LINT} ."
+    ecode=$?
+else
+    docker exec -it "$container" bash -c "cd solution && fenrir run -i ${NO_LINT} ."
+    ecode=$?
+fi
 
 if (( ecode == 0 )); then
     docker stop "$container" &> /dev/null
