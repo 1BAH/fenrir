@@ -2,10 +2,11 @@
 
 ##
 # Usage:
-#   fenrir-run [-i] [-nl|--no-lint] <SOLUTION DIRECTORY>
+#   fenrir-run [-i] [-nl|--no-lint] [-c|--testcase TESTCASE] <SOLUTION DIRECTORY>
 #
 # Test the provided solution. The test must be set beforehand with 'fenrir-task' command.
 # This command is an interface. For the detailed execution pipeline see 'fenrir-main'.
+# When TESTCASE is provided, it run only the selected testcase
 #
 # Options:
 #    -i                 Run test inside the provided directory without cloning it
@@ -47,6 +48,17 @@ while [ "$#" -ne 0 ]; do
 
         "-i")
             INLINE="i"
+        ;;
+
+        "--testcase" | "-c")
+            testcase=${2?"You must select the testcase!"}
+            INLINE="i"
+            shift
+        ;;
+
+        -*)
+            loki-log err '(＃°Д°)' Unknown flag: "<$1>"
+            exit 16
         ;;
 
         *)
@@ -129,4 +141,5 @@ else
     local_clone "$src"
 fi
 
-fenrir-main $NO_LINT
+# shellcheck disable=SC2086
+fenrir-main $NO_LINT $testcase

@@ -2,7 +2,7 @@
 
 ##
 # Usage:
-#   fenrir-main [nl]
+#   fenrir-main [nl] [TESTCASE]
 #
 # Executes task validation pipeline.
 #
@@ -18,12 +18,20 @@ while [ "$#" -ne 0 ]; do
             NL=1
             shift
         ;;
+        *)
+            testcase=$1
+            shift
+        ;;
     esac
 done
 
 
 pre=$(fenrir-read-conf -a pipeline pre)
-main=$(fenrir-read-conf -a pipeline main)
+if [[ -v testcase ]]; then
+    main=$testcase
+else
+    main=$(fenrir-read-conf -a pipeline main)
+fi
 task=$(fenrir-read-conf run task)
 destination=$(fenrir-read-conf run root)
 blocking=$(fenrir-read-conf run blocking)
