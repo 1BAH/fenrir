@@ -58,6 +58,7 @@ docker-version-arm:
   stage: docker
   extends: .arm
   before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
     - props=$(cat src/main/fenrir/cli/fenrir.properties)
     - echo "$props+$CI_COMMIT_SHORT_SHA" > src/main/fenrir/cli/fenrir.properties
   variables:
@@ -69,6 +70,7 @@ docker-version-amd:
   stage: docker
   extends: .amd
   before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
     - props=$(cat src/main/fenrir/cli/fenrir.properties)
     - echo "$props+$CI_COMMIT_SHORT_SHA" > src/main/fenrir/cli/fenrir.properties
   variables:
