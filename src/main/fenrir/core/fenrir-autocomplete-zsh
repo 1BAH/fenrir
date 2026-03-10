@@ -71,41 +71,12 @@ function _fenrir_switch {
         "1:Switch to the latest version:(latest)"
 }
 
-function _fenrir_run {
-    _arguments -C \
-        "-i[Run test inside the provided directory without cloning it]" \
-        "-nl[Skip linting stage (walk-inspections)]" \
-        "--no-lint[Skip linting stage (walk-inspections)]" \
-        "1:Directory with solution:_path_files -/"
-}
-
-function _fenrir_rund {
-    _arguments -C \
-        "-d[Does not stop the container (allows further debug)]" \
-        "--debug[Does not stop the container (allows further debug)]" \
-        "-nl[Skip linting stage (walk-inspections)]" \
-        "--no-lint[Skip linting stage (walk-inspections)]" \
-        "1:Directory with solution:_path_files -/"
-}
-
 function _find_all_tasks {
     dir=$(fenrir-task-path repo 2> /dev/null)
 
-    # Duplication occurs : no idea why...
-    find "$(echo "$dir" | sed 's|\(.*/repo\).*|\1|p' | uniq)" -mindepth 1 -type d -print0 | while IFS= read -r -d '' d; do
-        find "$d" -mindepth 1 -type d -print -quit | grep -q . || echo "$d" | sed 's|.*/repo/\(.*\)|\1|p'
+    find "$(echo "$dir" | sed 's|\(.*/repo\).*|\1|')" -mindepth 1 -type d -print0 | while IFS= read -r -d '' d; do
+        find "$d" -mindepth 1 -type d -print -quit | grep -q . || echo "$d" | sed 's|.*/repo/\(.*\)|\1|'
     done
-}
-
-function _fenrir_task {
-    _arguments -C \
-        "-f[Download tests anyway]" \
-        "--force[Download tests anyway]" \
-        "1:Select task:($(_find_all_tasks | uniq))"
-}
-
-function _fenrir_install {
-    _arguments -C "1:Path to the script:_files"
 }
 
 function _find_all_tests {
@@ -115,11 +86,43 @@ function _find_all_tests {
     fi
 
     find "$dir" -type f -print0 | while IFS= read -r -d '' d; do
-        echo "$d" | grep -vE ".*\.hel" | sed 's|.*/\([^/]*\)|\1|p'
+        echo "$d" | grep -vE ".*\.hel" | sed 's|.*/\([^/]*\)|\1|'
     done
+}
+
+function _fenrir_run {
+    _arguments -C \
+        "-i[Run test inside the provided directory without cloning it]" \
+        "-nl[Skip linting stage (walk-inspections)]" \
+        "--no-lint[Skip linting stage (walk-inspections)]" \
+        "-c[Select the testcase to run]:testcase:($(_find_all_tests))" \
+        "--testcase[Select the testcase to run]:testcase:($(_find_all_tests))" \
+        "1:Directory with solution:_path_files -/"
+}
+
+function _fenrir_rund {
+    _arguments -C \
+        "-d[Does not stop the container (allows further debug)]" \
+        "--debug[Does not stop the container (allows further debug)]" \
+        "-nl[Skip linting stage (walk-inspections)]" \
+        "--no-lint[Skip linting stage (walk-inspections)]" \
+        "-c[Select the testcase to run]:testcase:($(_find_all_tests))" \
+        "--testcase[Select the testcase to run]:testcase:($(_find_all_tests))" \
+        "1:Directory with solution:_path_files -/"
+}
+
+function _fenrir_task {
+    _arguments -C \
+        "-f[Download tests anyway]" \
+        "--force[Download tests anyway]" \
+        "1:Select task:($(_find_all_tasks))"
+}
+
+function _fenrir_install {
+    _arguments -C "1:Path to the script:_files"
 }
 
 function _fenrir_inspect {
     _arguments -C \
-        "1:Select test:($(_find_all_tests | uniq))"
+        "1:Select test:($(_find_all_tests))"
 }
