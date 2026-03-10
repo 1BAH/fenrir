@@ -112,11 +112,39 @@ fi
 
 echo "PROGRESS << DONE"
 
+# Load consts
+source "${CFGS_DIR}/lokirc"
+
+#################################################################
+#                        DETERMINE USER                         #
+#################################################################
+
+[ -n "$SUDO_USER" ] && user=$SUDO_USER || user=$USER
+echo "${BLUE}[ INFO ]${ENDC} Installing ${SKY}fenrir@$VERSION${ENDC} for ${SKY}${user}${ENDC} user.."
+out echo "${BLUE}[ INFO ]${ENDC} Build script is located in '$(realpath "$0")'"
+
+#################################################################
+#                     CREATE INSTALL DIRS                       #
+#################################################################
+
+out echo "[ INFO ] Creating '${FENRIR_CONF_DIR}'.."
+mkdir -p "${FENRIR_CONF_DIR}"
+chown "$user" "${FENRIR_CONF_DIR}"
+
 #################################################################
 #                    INSTALL 'LOKI' MODULE                      #
 #################################################################
 
 echo "[ INFO  ] Installing 'Loki' module.."
+
+if ! [ -f "${FENRIR_CONF_DIR}/lokirc" ]; then
+   out echo "[ INFO  ] Installing default lokirc.."
+
+    if ! cat "$CFGS_DIR/lokirc" > "${FENRIR_CONF_DIR}/lokirc"; then
+        out echo "[ ERROR ] Failed to install. Try again or submit an issue."
+        exit 7
+    fi
+fi
 
 #include <install-loki>
 
@@ -137,14 +165,6 @@ loki-log succ "Loki is installed"
 if [ -n "$IN_DOCKER" ]; then
     loki-log info "Running in a docker container"
 fi
-
-#################################################################
-#                        DETERMINE USER                         #
-#################################################################
-
-[ -n "$SUDO_USER" ] && user=$SUDO_USER || user=$USER
-loki-log info "Installing $(loki-wrap "${SKY}" "fenrir@$VERSION") for $(loki-wrap "${SKY}" "$user") user.."
-out loki-log info "Build script is located in '$(realpath "$0")'"
 
 #################################################################
 #                         DETERMINE OS                          #
@@ -277,15 +297,6 @@ loki-gorp
 
 loki-prog "Installing 'Fenrir'.."
 
-out loki-prog "Creating '${FENRIR_CONF_DIR}'.."
-
-mkdir -p "${FENRIR_CONF_DIR}"
-chown "$user" "${FENRIR_CONF_DIR}"
-
-out loki-gorp
-
-#################################################################
-
 out loki-prog "Installing core.."
 
 for cmd in "$CORE_UTILS_DIR"/*; do
@@ -348,6 +359,7 @@ out loki-prog "Installing 'lokirc'.."
 
 if [ -z "${FENRIR_ENV_FILE}" ] && [ -f "${FENRIR_CONF_DIR}/lokirc" ]; then
     out loki-log info "Found existing lokirc: <${FENRIR_CONF_DIR}/lokirc>"
+    chown "$user" "${FENRIR_CONF_DIR}/lokirc" # Do not forget to chown the installed lokirc (may be default)
 else
     env_file=${FENRIR_ENV_FILE:-"/dev/null"}
     out loki-log info "Using env file <$env_file>"
