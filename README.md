@@ -5,7 +5,7 @@
 [![pipeline status](https://gitlab.com/atpd/fenrir/badges/main/pipeline.svg)](https://gitlab.com/atpd/fenrir/-/commits/main)
 [![Latest Release](https://gitlab.com/atpd/fenrir/-/badges/release.svg)](https://gitlab.com/atpd/fenrir/-/releases)
 
-Latest version is `1.2.0`
+Latest version is `1.2.1`
 
 Available in a docker container: `registry.gitlab.com/atpd/fenrir/fenrir-base:latest`
 
