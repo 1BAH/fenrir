@@ -1,0 +1,50 @@
+name: Doc pages
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  gen-docs:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+  
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+  
+      - name: Install dependencies
+        run: npm install
+  
+      - name: Build
+        run: npx antora antora-playbook.yml
+        
+      - name: Upload site
+        id: docs
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/site
+  
+  deploy:
+    runs-on: ubuntu-latest
+    needs: gen-docs
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.docs.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: docs
+        uses: actions/deploy-pages@v4
