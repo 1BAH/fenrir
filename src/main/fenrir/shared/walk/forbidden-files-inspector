@@ -1,0 +1,21 @@
+#! /usr/bin/env loki
+
+loki-set-log-prefix "FFI: "
+
+loki-log info "Inspecting '$1'"
+
+name=$(basename "$1")
+
+for item in $(fenrir-read-conf -a forbidden files); do
+    if [ "$name" = "$item" ]; then
+        loki-log err "Found a forbidden file: '$1'"
+        exit 3
+    fi
+done
+
+for regex in $(fenrir-read-conf -a forbidden file_patterns); do
+    if [[ $name =~ $regex ]]; then
+        loki-log err "Found a forbidden file: '$1' (matches '$regex')"
+        exit 3
+    fi
+done

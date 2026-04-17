@@ -1,13 +1,15 @@
 
 directories=(
     ".idea"
-    ".DS_Store"
     ".vscode"
     "target"
     "build"
 )
 
-file_patterns=(
+files=(
     ".DS_Store"
-    "*.iml"
+)
+
+file_patterns=(
+    ".*\.iml"
 )
