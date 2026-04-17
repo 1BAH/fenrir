@@ -26,10 +26,24 @@ EXP_ARGC=1
 ##                            FUNCTIONS                             ##
 ######################################################################
 
+function get_url {
+    filename=$1
+    
+    case "${TASK_HOST}" in
+        https://gitlab.com*)
+            echo "${TASK_HOST}/-/raw/main/${task}/${filename}"
+        ;;
+        https://github.com*)
+            url=${TASK_HOST#"https://github.com/"}
+            echo "https://raw.githubusercontent.com/${url}/refs/heads/main/${task}/${filename}"
+        ;;
+    esac
+}
+
 function get_file {
-    url=$1
-    output=$2
-    err_msg=$3
+    url=$(get_url "$1")
+    output="$LOCAL_REPO/${task}/$1"
+    err_msg="Failed to download file '$1'"
 
     if ! lokiw wget --no-check-certificate -o "$ERR_FILE" -O "$output" "$url"; then
         echo "!]" # Terminate processing line
@@ -41,20 +55,14 @@ function get_file {
 }
 
 function get_index {
-    if ! get_file "${TASK_HOST}/-/raw/main/${task}/index.hel" \
-                  "$LOCAL_REPO/${task}/index.hel"             \
-                  "Failed to download task '${task}'"
-    then
+    if ! get_file "index.hel"; then
         return 13
     fi
 }
 
 function get_scripts {
     for script in $(fenrir-read-conf -a "${task}" scripts); do
-        if ! get_file "${TASK_HOST}/-/raw/main/${task}/$script" \
-                      "$LOCAL_REPO/${task}/$script"             \
-                      "Failed to download file '$script'"
-        then
+        if ! get_file "$script"; then
             return 13
         fi
 
@@ -64,20 +72,14 @@ function get_scripts {
 
 function get_cfgs {
     for script in $(fenrir-read-conf -a "${task}" cfgs); do
-        if ! get_file "${TASK_HOST}/-/raw/main/${task}/$script" \
-                      "$LOCAL_CFGS/${task}/$script"             \
-                      "Failed to download file '$script'"
-        then
+        if ! get_file "$script"; then
             return 13
         fi
     done
 }
 
 function get_pipeline {
-    if ! get_file "${TASK_HOST}/-/raw/main/${task}/pipeline.hel" \
-                  "$LOCAL_REPO/${task}/pipeline.hel"             \
-                  "Failed to download testing pipeline"
-    then
+    if ! get_file "pipeline.hel"; then
         return 13
     fi
 }
