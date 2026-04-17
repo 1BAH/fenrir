@@ -6,6 +6,9 @@ on:
 
 jobs:
   build-base-image:
+    permissions:
+      contents: read
+      packages: write
 #    strategy:
 #      matrix:
 #        platforms:
