@@ -2,12 +2,15 @@
 
 > Framework for testing
 
-[![pipeline status](https://gitlab.com/atpd/fenrir/badges/main/pipeline.svg)](https://gitlab.com/atpd/fenrir/-/commits/main)
-[![Latest Release](https://gitlab.com/atpd/fenrir/-/badges/release.svg)](https://gitlab.com/atpd/fenrir/-/releases)
+![status](https://github.com/1bah/fenrir/actions/workflows/pages.yml/badge.svg)
+![status](https://github.com/1bah/fenrir/actions/workflows/docker.yml/badge.svg)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-Latest version is `1.2.1`
+> The project has migrated from [GitLab](https://gitlab.com/atpd/fenrir)
 
-Available in a docker container: `registry.gitlab.com/atpd/fenrir/fenrir-base:latest`
+The latest version is `1.2.2`
+
+Available in a docker container: `ghcr.io/1bah/fenrir/fenrir-base:latest`
 
 ## Install
 
@@ -39,98 +42,41 @@ Run `uninstall-fenrir` in terminal
 
 ## Usage
 
+#### Select custom task repository
 ```
-Possible options:
-fenrir help
-fenrir i
-fenrir info
-
-fenrir gc
-fenrir remote <URL>
-fenrir inspect [task] <TEST ID>
-fenrir task [-f|--force] <TASK ID>
-fenrir switch [--bash|--zsh] <VERSION>
-fenrir run [-i] [-nl|--no-lint] <SOLUTION DIRECTORY>
-fenrir-rund [-d|--debug] [-nl|--no-lint] <SOLUTION DIRECTORY>
-
-fenrir v
-fenrir version
-fenrir versions
-------------------------------------------------------------------
-fenrir help:
-    Info about fenrir util
-    See https://gitlab.com/atpd/fenrir
-
-fenrir i, info:
-    Show the current context of fenrir:
-      - Tasks' remote repo
-      - The task to be tested
-      - Running mode of the task (whether is blocking or not)
-      - Testing pipeline
-
-fenrir remote <URL>:
-    Set remote task repository
-
-fenrir switch [--bash|--zsh] <VERSION>:
-    Automatically updates fenrir up to the selected version.
-    The version is one of the existing tags (see 'fenrir versions').
-    If the version is 'latest', the main branch is used.
-
-    Options:
-       --zsh      Update autocompletion for zsh
-       --bash     Update autocompletion for bash
-
-    If no option is provided, 'complete' param from main.hel is used
-
-fenrir inspect [task] <TEST ID>
-
-    Read the test sources. When no 'task' is provided, the current task is used.
-
-    Options:
-       task               Select the specific task
-
-    Special configs:
-       FENRIR_EDITOR      The application used to show the text
-                          Default: less
-
-fenrir task [-f|--force] <TASK ID>
-    Set the task to be checked and optionally download its tests.
-    The tests are downloaded from 'remote' which is defined in '/etc/fenrir/main.hel'.
-    When the task tests have already been downloaded, the corresponding stages is omitted.
-    Options:
-       none            Download tests only when they are not presented
-       -f, --force     Download tests anyway
-
-fenrir run [-i] [-nl|--no-lint] <SOLUTION DIRECTORY>
-    Test the provided solution. The test must be set beforehand with 'fenrir-task' command.
-    This command is an interface. For the detailed execution pipeline see 'fenrir-main'.
-    Options:
-       -i                 Run test inside the provided directory without cloning it
-                          WARNING! In case of test's impurity it might produce some side-effects
-      -nl, --no-lint      Skip linting stage (walk-inspections)
-
-fenrir-rund [-d|--debug] [-nl|--no-lint] <SOLUTION DIRECTORY>
-    Starts a container and executes 'fenrir-run' inside.
-    After the execution the container is removed unless the 'debug' flag is set.
-    Options:
-       -d, --debug        Does not stop the container (allows further debug)
-      -nl, --no-lint      Skip linting stage (walk-inspections)
-
-fenrir gc [-f|--force]:
-    Removes unused files. Has two modes: SOFT and HARD. The default is 'SOFT'
-    Soft:
-        - temporary files
-    Hard:
-        - temporary files
-        - local repo
-        - local configs
-
-fenrir versions:
-    Get all available versions
-
-fenrir v, version:
-    Print current version
+fenrir-set-conf main remote REPOSITORY
 ```
+
+#### Select task
+```
+fenrir task TASK_ID
+```
+
+Use `-f` flag to force-update task tests
+
+#### Run tests
+```
+fenrir run PATH_TO_SOLUTION_REPO
+```
+
+Available flags:
+- `-i` -> `inline`: do not clone the solution, run tests inside the provided repo
+- `-nl` -> `no linters`: skip all linters
+- `-c TEST_NAME` -> run only the selected test
+
+#### Run tests in a docker container
+```
+fenrir rund TEST_NAME
+```
+Flags `-nl` and `-c` are supported
+
+#### See test sources
+```
+fenrir inspect TEST_NAME
+```
+
+To change the preview app, replace `FENRIR_EDITOR="less"` in `/etc/fenrir/lokirc`
+
 
 ## Updates
 
