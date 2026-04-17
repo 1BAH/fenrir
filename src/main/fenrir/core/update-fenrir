@@ -15,7 +15,7 @@
 # If no option is provided, 'complete' param from main.hel is used
 ##
 
-url="https://gitlab.com/atpd/fenrir.git"
+url="https://github.com/1bah/fenrir.git"
 
 ######################################################################
 ##                         VERIFY ARGUMENTS                         ##

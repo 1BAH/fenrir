@@ -1,0 +1,20 @@
+name: Tests
+on:
+  workflow_call:
+#  push:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: download dependencies
+        run: sudo apt-get update && sudo apt-get install -y wget git
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: fenrir tests
+        run: |
+          export FENRIR_IN_DOCKER="-v"
+          cd src/test/runtime
+          ./run_tests.sh

@@ -2,7 +2,7 @@
 
 ##########################################################################
 
-expected_version="1.2.1"
+expected_version="1.2.2"
 
 src_dir=$(realpath "$(pwd)/../../main/fenrir")
 props="${src_dir}/cli/fenrir.properties"
@@ -46,7 +46,7 @@ loki-gorp
 
 loki-prog "README"
 
-loki-assert-regeq ".*Latest version is \`${version}\`.*" "$(cat "${src_dir}/../../../README.md")"
+loki-assert-regeq ".*latest version is \`${version}\`.*" "$(cat "${src_dir}/../../../README.md")"
 
 loki-gorp
 

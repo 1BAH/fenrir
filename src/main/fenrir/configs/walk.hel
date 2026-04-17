@@ -4,12 +4,12 @@ dirs=(
 )
 
 files=(
+    "forbidden-files-inspector"
     "new-line-inspector"
     "bash-inspector"
+    "header-inspector"
 )
 
 skip=(
-    "."
-    ".."
     ".git"
 )

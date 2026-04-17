@@ -38,10 +38,8 @@ function inspect_dir {
                     terminate
                 fi
             done
-        else
-            if [ -d "$file" ]; then
-                dir_check "$file"
-            fi
+        elif [ -d "$file" ]; then
+            dir_check "$file"
         fi
     done
 }
