@@ -37,4 +37,4 @@ jobs:
           platforms: linux/arm64,linux/amd64
           file: docker/base.Dockerfile
           push: true
-          tags: fenrir-base:v1.2.2-draft
+          tags: ghcr.io/1bah/fenrir-base:v1.2.2-draft
