@@ -1,4 +1,4 @@
-FROM registry.gitlab.com/atpd/fenrir/fenrir-base:latest AS fenrir
+FROM ghcr.io/1bah/fenrir-base:latest AS fenrir
 
 FROM docker:latest
 LABEL authors="_1BAH_, Kalinin Iwan (koefic.cien@gmail.com)"
