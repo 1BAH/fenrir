@@ -115,7 +115,7 @@ allowed=${allowed:-1}
 
 # Check env restrictions
 if [ -z "${FENRIR_IN_DOCKER}" ]; then
-    if (( allowed != 1 )); then
+    if (( allowed != 1 )) && [ -z "$INLINE" ]; then
         loki-log err "This task does not support execution in host system"
         loki-log err "Use 'fenrir rund \"$path\"' instead"
         exit 101
