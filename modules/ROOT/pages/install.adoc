@@ -43,9 +43,3 @@ If you use `zsh` without `Oh My Zsh` then make sure
 == Windows
 
 You cannot use fenrir directly in `Windows` that's why we recommend to use https://learn.microsoft.com/en-us/windows/wsl/install[WSL]. Chose any distro and use <<Linux>> install guide.
-
-[stem]
-++++
-\int_0^\infty e^{-x^2} dx = \frac{\sqrt{\pi}}{2}
-++++
-
