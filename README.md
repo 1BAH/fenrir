@@ -8,7 +8,7 @@
 
 > The project has migrated from [GitLab](https://gitlab.com/atpd/fenrir)
 
-The latest version is `1.2.2`
+The latest version is `1.2.3`
 
 Available in a docker container: `ghcr.io/1bah/fenrir/fenrir-base:latest`
 
@@ -76,11 +76,6 @@ fenrir inspect TEST_NAME
 ```
 
 To change the preview app, replace `FENRIR_EDITOR="less"` in `/etc/fenrir/lokirc`
-
-
-## Updates
-
-All updates are published [here](https://t.me/fenrir_updates)
 
 ---
 
