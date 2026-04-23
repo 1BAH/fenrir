@@ -1,6 +1,9 @@
 name: Validate new version
 on:
   push:
+    branches:
+      - main
+      - 'v*.*.*'
 
 jobs:
   test:
