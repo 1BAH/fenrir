@@ -13,7 +13,7 @@ mkdir -p "${testdir}/.git"
 echo -n HI > "${testdir}/.git/file" # Should trigger NLI but .git is skipped
 
 pushd "${testdir}" &> /dev/null
-"${WI_RUN}"
+LOKI_VERBOSE="" "${WI_RUN}"
 loki-assert-eq 0 $?
 popd &> /dev/null
 
@@ -24,7 +24,7 @@ testdir="${RUN_DIR}/2"
 mkdir -p "${testdir}/build"
 
 pushd "${testdir}" &> /dev/null
-"${WI_RUN}"
+LOKI_VERBOSE="" "${WI_RUN}"
 loki-assert-neq 0 $?
 popd &> /dev/null
 
@@ -35,7 +35,7 @@ testdir="${RUN_DIR}/3"
 mkdir -p "${testdir}/target"
 
 pushd "${testdir}" &> /dev/null
-"${WI_RUN}"
+LOKI_VERBOSE="" "${WI_RUN}"
 loki-assert-neq 0 $?
 popd &> /dev/null
 
@@ -46,7 +46,7 @@ testdir="${RUN_DIR}/4"
 mkdir -p "${testdir}/.idea"
 
 pushd "${testdir}" &> /dev/null
-"${WI_RUN}"
+LOKI_VERBOSE="" "${WI_RUN}"
 loki-assert-neq 0 $?
 popd &> /dev/null
 
@@ -57,7 +57,7 @@ testdir="${RUN_DIR}/5"
 mkdir -p "${testdir}/.vscode"
 
 pushd "${testdir}" &> /dev/null
-"${WI_RUN}"
+LOKI_VERBOSE="" "${WI_RUN}"
 loki-assert-neq 0 $?
 popd &> /dev/null
 
@@ -69,7 +69,7 @@ mkdir "${testdir}"
 touch "${testdir}/.DS_Store"
 
 pushd "${testdir}" &> /dev/null
-"${WI_RUN}"
+LOKI_VERBOSE="" "${WI_RUN}"
 loki-assert-neq 0 $?
 popd &> /dev/null
 
@@ -82,14 +82,14 @@ mkdir "${testdir}"
 touch "${testdir}/a.im"
 
 pushd "${testdir}" &> /dev/null
-"${WI_RUN}"
+LOKI_VERBOSE="" "${WI_RUN}"
 loki-assert-eq 0 $?
 popd &> /dev/null
 
 touch "${testdir}/a.iml"
 
 pushd "${testdir}" &> /dev/null
-"${WI_RUN}"
+LOKI_VERBOSE="" "${WI_RUN}"
 loki-assert-neq 0 $?
 popd &> /dev/null
 
