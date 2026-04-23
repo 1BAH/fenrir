@@ -1,0 +1,7 @@
+name: Validate new version
+on:
+  push:
+
+jobs:
+  test:
+    uses: ./.github/workflows/tests.yml
