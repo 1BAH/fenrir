@@ -4,10 +4,7 @@ site:
 content:
   sources:
     - url: https://github.com/1bah/fenrir
-      tags:
-        - HEAD
-        - v1.1.1
-        - v1.0.0
+      branches: [ main ]
 ui:
   bundle:
     url: https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/HEAD/raw/build/ui-bundle.zip?job=bundle-stable
