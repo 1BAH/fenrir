@@ -9,7 +9,9 @@
 
 LOCAL_REPO="$FENRIR_HOME/repo"
 LOCAL_CFGS="$FENRIR_HOME/cfgs"
-TASK_HOST=$(fenrir-read-conf main remote)
+
+hosts=(  "$(fenrir-read-conf main remote)" )
+hosts+=( $(fenrir-read-conf mirrors mirror) )
 
 task=$1
 
@@ -89,30 +91,42 @@ function get_pipeline {
 ######################################################################
 
 rm   -fr "$LOCAL_REPO/$task" "$LOCAL_CFGS/$task" # Remove old versions
-mkdir -p "$LOCAL_REPO/$task" "$LOCAL_CFGS/$task"
+succeed=0
 
-echo -e -n "$(loki-wrap "${PEACH}" DOWNLOADING) '$task' ["
+for TASK_HOST in "${hosts[@]}"; do
+    mkdir -p "$LOCAL_REPO/$task" "$LOCAL_CFGS/$task"
 
-if ! get_index "$task"; then
-    rm -fr "$LOCAL_REPO/$task" "$LOCAL_CFGS/$task"
-    exit 13
+    loki-log info "Now using repo <${TASK_HOST}>"
+    echo -e -n "$(loki-wrap "${PEACH}" DOWNLOADING) '$task' ["
+
+    if ! get_index "$task"; then
+        rm -fr "$LOCAL_REPO/$task" "$LOCAL_CFGS/$task"
+        continue
+    fi
+
+    if ! get_cfgs "$task"; then
+        rm -fr "$LOCAL_REPO/$task" "$LOCAL_CFGS/$task"
+        continue
+    fi
+
+    if ! get_scripts "$task"; then
+        rm -fr "$LOCAL_REPO/$task" "$LOCAL_CFGS/$task"
+        continue
+    fi
+
+    if ! get_pipeline "$task"; then
+        rm -fr "$LOCAL_REPO/$task" "$LOCAL_CFGS/$task"
+        continue
+    fi
+
+    succeed=1
+    break
+done
+
+if (( succeed == 1 )); then
+    echo "]"
+    loki-log succ '[]~(￣▽￣)~*' "Task '$task' has been downloaded"
+else
+    # shellcheck disable=SC2242
+    exit 1984
 fi
-
-if ! get_cfgs "$task"; then
-    rm -fr "$LOCAL_REPO/$task" "$LOCAL_CFGS/$task"
-    exit 14
-fi
-
-if ! get_scripts "$task"; then
-    rm -fr "$LOCAL_REPO/$task" "$LOCAL_CFGS/$task"
-    exit 15
-fi
-
-if ! get_pipeline "$task"; then
-    rm -fr "$LOCAL_REPO/$task" "$LOCAL_CFGS/$task"
-    exit 16
-fi
-
-echo "]"
-
-loki-log succ '[]~(￣▽￣)~*' "Task '$task' has been downloaded"

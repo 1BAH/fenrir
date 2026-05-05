@@ -47,6 +47,13 @@ case "$1" in
         task=$(fenrir-read-conf run task)
         CONF_FILE="${FENRIR_HOME}/repo/${task}/pipeline.hel"
         ;;
+    mirrors)
+        while read -r line; do # Might be simplified to cat??
+            echo "$line"
+        done < "${CONF_FILE}/mirrors.hel"
+
+        exit 0 # Done
+        ;;
     *)
         CONF_FILE="$FENRIR_HOME/repo/$1"
 
