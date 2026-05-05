@@ -8,7 +8,7 @@
 
 > The project has migrated from [GitLab](https://gitlab.com/atpd/fenrir)
 
-The latest version is `1.2.3`
+The latest version is `1.2.4`
 
 Available in a docker container: `ghcr.io/1bah/fenrir/fenrir-base:latest`
 
@@ -17,7 +17,7 @@ Available in a docker container: `ghcr.io/1bah/fenrir/fenrir-base:latest`
 ### System requirements
 
 * Bash version 5.0.0+
-* `wget`
+* `curl`
 
 ### Installation
 
