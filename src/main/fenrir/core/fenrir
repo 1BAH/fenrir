@@ -72,8 +72,7 @@ case "$cmd" in
     "versions")
         EXP_ARGC=0
         #include <verify-argc>
-
-        if ! wget -o "$ERR_FILE" -O "$OUT_FILE" https://gitlab.com/api/v4/projects/77504275/repository/tags; then
+        if ! curl -k -L -m 10 -o "$OUT_FILE" --stderr "$ERR_FILE" https://gitlab.com/api/v4/projects/77504275/repository/tags; then
             loki-log fail '(っ °Д °;)っ' "Failed to get"
             exit 13
         fi

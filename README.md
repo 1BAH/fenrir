@@ -17,7 +17,7 @@ Available in a docker container: `ghcr.io/1bah/fenrir/fenrir-base:latest`
 ### System requirements
 
 * Bash version 5.0.0+
-* `wget`
+* `curl`
 
 ### Installation
 

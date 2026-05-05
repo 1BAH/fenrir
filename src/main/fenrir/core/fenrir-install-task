@@ -45,7 +45,7 @@ function get_file {
     output="$LOCAL_REPO/${task}/$1"
     err_msg="Failed to download file '$1'"
 
-    if ! lokiw wget --no-check-certificate -o "$ERR_FILE" -O "$output" "$url"; then
+    if ! lokiw curl -k -L -m 10 -o "$output" --stderr "$ERR_FILE" "$url"; then
         echo "!]" # Terminate processing line
         loki-log fail '(っ °Д °;)っ' "$err_msg"
         return 13

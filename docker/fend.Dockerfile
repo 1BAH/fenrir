@@ -11,7 +11,7 @@ RUN apk add --no-cache  \
         ca-certificates \
         shellcheck      \
         sudo            \
-        wget            \
+        curl            \
         bash
 
 RUN echo -e "breach\nbreach" | adduser -s "$(which bash)" fikus && \
