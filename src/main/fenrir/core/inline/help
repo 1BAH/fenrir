@@ -1,0 +1,18 @@
+# >>= START =<<
+
+##
+# Usage:
+#   #include <help>
+#
+# Verifies that current process is not executed in privileged mode.
+# Otherwise interrupts its execution with code 123.
+##
+
+if [ "${1}" = "--help" ]; then
+    cmd=$(basename $LOKI_CURRENT_FILE)
+    loki-log info Current cmd: "<$cmd>"
+    man "$cmd"
+    exit
+fi
+
+# >>= END =<<
