@@ -8,7 +8,7 @@
 
 > The project has migrated from [GitLab](https://gitlab.com/atpd/fenrir)
 
-The latest version is `1.2.4`
+The latest version is `2026.0`
 
 Available in a docker container: `ghcr.io/1bah/fenrir-base:latest`
 
