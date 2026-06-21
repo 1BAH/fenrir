@@ -115,7 +115,7 @@ src=$(realpath "$path")
 image=$(fenrir-read-conf "$task" image)
 image=${image:-"ghcr.io/1bah/fenrir-base:latest"}
 
-lokiw docker pull "$image" || {
+docker pull "$image" || {
     loki-log warn "Cannot update image.. Trying to use a cached one instead.."
 }
 
