@@ -43,7 +43,7 @@ path=""
 while [ "$#" -ne 0 ]; do
     case $1 in
         "--no-lint" | "-nl")
-            NO_LINT="nl"
+            export FENRIR_WI_NL="nl"
         ;;
 
         "-i")
