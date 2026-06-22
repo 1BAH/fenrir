@@ -1,0 +1,131 @@
+#! /usr/bin/env loki
+
+##
+# Usage:
+#   fenrir-env-up [--keep|--safe]
+#
+# TODO
+##
+
+
+function finalise {
+    local message=$1
+    local ecode=${2:-0}
+
+    loki-log fail "$message"
+    loki-log err "Destructing env.."
+    docker rm -f "$container" &> /dev/null
+
+    exit "$ecode"
+}
+
+function exec_cmd {
+    docker exec "$container" "$@"
+}
+
+function cp_file {
+    local dir=$1
+    local dist=$2
+
+    lokiw docker cp "$dir" "$container:$dist" || {
+        finalise "Unable to copy <$dir> to the env" "$?"
+    }
+
+    lokiw docker exec -u root "$container" chown fikus -R "$dist" || {
+        finalise "Unable to change owner inside the env" "$?"
+    }
+}
+
+######################################################################
+##                         VERIFY ARGUMENTS                         ##
+######################################################################
+
+#include <shift-args>
+
+rm_opt="--rm"
+use_safe=""
+
+while [ "$#" -ne 0 ]; do
+    case $1 in
+        --keep)
+            rm_opt=""
+            shift
+        ;;
+        --safe)
+            use_safe="YES"
+            shift
+        ;;
+        *)
+            loki-log err '(＃°Д°)' Unknown parameter: "<$1>"
+            exit 16
+        ;;
+    esac
+done
+
+######################################################################
+##                          Start container                         ##
+######################################################################
+
+task=$(fenrir-read-conf run task)
+sol_dir=$(fenrir-read-conf run "root")
+
+image=$(fenrir-read-conf "$task" image)
+image=${image:-"ghcr.io/1bah/fenrir-base:latest"}
+
+ENV_HOME="/home/fikus"
+
+docker pull "$image" || {
+    loki-log warn "Cannot update image.. Trying to use a cached one instead.."
+}
+
+loki-log info "Starting env.."
+
+######
+#= Mount docker socket ???????
+######
+
+# Use 'top -b' as a running daemon
+if [ -n "$safe_use" ]; then
+    container=$(docker run -e LOKI_VERBOSE $rm_opt -d --entrypoint top "$image" -b 2> "${ERR_FILE}")
+else
+    # Solution is mounted in container
+    container=$(docker run \
+        -e LOKI_VERBOSE \
+        --mount "type=bind,src=${sol_dir},dst=${ENV_HOME}/solution" \
+        $rm_opt -d \
+        --entrypoint top \
+        "$image" \
+        -b 2> "${ERR_FILE}")
+fi
+status=$?
+
+if (( status != 0 )); then
+    loki-log fail "Cannot start docker"
+    exit $status
+fi
+
+# Save container ID
+echo "$container" > "${FENRIR_TMP_DIR}/env"
+
+lokiw exec_cmd fenrir info &> /dev/null || {
+    finalise "Failed to find 'fenrir' in container" "$?"
+}
+
+loki-log info "Env is up"
+loki-log info "Fenrir version:" "$(exec_cmd fenrir v)"
+
+######################################################################
+##                         Set up container                         ##
+######################################################################
+loki-log info "Setting the env up.."
+
+# Fenrir
+cp_file "$FENRIR_HOME" "${ENV_HOME}"
+cp_file "$RUN_CONF_FILE" "/tmp/fenrir/tmp/run-conf.hel"
+
+# Copy solution when safe mode is on
+if [ -n "$use_safe" ]; then
+    cp_file "$sol_dir" "${ENV_HOME}/solution"
+fi
+
+loki-log info "The env is running.."
