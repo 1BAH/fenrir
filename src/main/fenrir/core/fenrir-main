@@ -89,6 +89,7 @@ function switch_solution {
     fi
 }
 ###########################################
+echo "$FENRIR_LOGO"
 
 ecode=0
 
