@@ -34,9 +34,6 @@ function local_clone {
 
 #include <shift-args>
 
-NO_LINT=""
-INLINE=""
-
 hit=0
 path=""
 
@@ -47,10 +44,11 @@ while [ "$#" -ne 0 ]; do
         ;;
 
         "-i")
-            INLINE="i"
+            export FENRIR_RUN_I="i"
         ;;
 
         "--testcase" | "-c")
+            # TODO remove INLINE
             testcase=${2?"You must select the testcase!"}
             INLINE="i"
             shift
@@ -69,7 +67,6 @@ while [ "$#" -ne 0 ]; do
             fi
 
             path=$1
-
             (( hit++ ))
         ;;
     esac
@@ -83,13 +80,11 @@ if [ "$hit" -ne 1 ]; then
     exit 16
 fi
 
-# Docker execution uses inline option by default
-if [ -n "${FENRIR_IN_DOCKER}" ]; then
-    INLINE="i"
-fi
+######################################################################
+##                        VERIFY ENVIRONMEN                         ##
+######################################################################
 
 task=$(fenrir-read-conf run task)
-
 if [ "$task" = "-" ]; then
     loki-log err 'ᕙ( •̀ ᗜ •́ )ᕗ' "The task was not set!"
     exit 89
@@ -101,45 +96,48 @@ if ! [ -d "$(fenrir-task-path repo)" ]; then
     exit 77
 fi
 
-######################################################################
-##                           MAIN PROGRAM                           ##
-######################################################################
 
-echo "$FENRIR_LOGO"
+# FIND is already validated
+if [ -n "${FENRIR_IN_DOCKER}" ]; then
+    # Docker execution uses inline option by default
+    export FENRIR_RUN_I="i"
+else
+    allowed=$(fenrir-read-conf "$task" inhost)
+    allowed=${allowed:-1}
 
-allowed_inline=$(fenrir-read-conf "$task" inline)
-allowed_inline=${allowed_inline:-1}
-
-allowed=$(fenrir-read-conf "$task" inhost)
-allowed=${allowed:-1}
-
-# Check env restrictions
-if [ -z "${FENRIR_IN_DOCKER}" ]; then
-    if (( allowed != 1 )) && [ -z "$INLINE" ]; then
-        loki-log err "This task does not support execution in host system"
-        loki-log err "Use 'fenrir rund \"$path\"' instead"
+    if (( allowed != 1 )) && [ -z "$FENRIR_RUN_I" ]; then
+        loki-log err "This task does not support execution in the host system"
+        loki-log err "Use 'fenrir rund \"$path\"' or add flag '-i' instead"
         exit 101
     fi
 
-    if (( allowed_inline != 1 )) && [ -n "$INLINE" ]; then
+    allowed_inline=$(fenrir-read-conf "$task" inline)
+    allowed_inline=${allowed_inline:-1}
+
+    if (( allowed_inline != 1 )) && [ -n "$FENRIR_RUN_I" ]; then
         loki-log err "This task does not support inline execution"
         loki-log err "Remove '-i' flag"
         exit 102
     fi
 fi
 
+######################################################################
+##                           MAIN PROGRAM                           ##
+######################################################################
+
+# Normalise the path
 src=$(realpath "$path")
 
-[ -n "$INLINE" ] || if ! [ -d "$src/.git" ]; then
+[ -n "$FENRIR_RUN_I" ] || if ! [ -d "$src/.git" ]; then
     loki-log err '(╬▔皿▔)╯' "The provided file is not a project root"
     exit 90
 fi
 
-if [ -n "$INLINE" ]; then
+if [ -n "$FENRIR_RUN_I" ]; then
     fenrir-set-conf run "root" "$src"
 else
     local_clone "$src"
 fi
 
 # shellcheck disable=SC2086
-fenrir-main $NO_LINT $testcase
+fenrir-main $testcase
