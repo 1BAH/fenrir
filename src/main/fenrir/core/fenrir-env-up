@@ -147,16 +147,16 @@ fi
 
 loki-log info "Configuring env (setup file).."
 
+# In case of failed env.up, env.down is copied beforehand
+if [ -x "$(fenrir-task-path repo)/env.down" ]; then
+    cp "$(fenrir-task-path repo)/env.down" "${FENRIR_TMP_DIR}/env.down"
+fi
+
 # Env setup
 if [ -x "$(fenrir-task-path repo)/env.up" ]; then
     "$(fenrir-task-path repo)/env.up" || {
-        exit $?
+        finalise "Failed to execute <env.up> file" $?
     }
-
-fi
-
-if [ -x "$(fenrir-task-path repo)/env.down" ]; then
-    cp "$(fenrir-task-path repo)/env.down" "${FENRIR_TMP_DIR}/env.down"
 fi
 
 loki-log info "Env is ready.."
