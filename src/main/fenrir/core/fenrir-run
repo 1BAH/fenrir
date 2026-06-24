@@ -139,5 +139,21 @@ else
     local_clone "$src"
 fi
 
-# shellcheck disable=SC2086
-fenrir-main $testcase
+(# Run scope
+    # Global set up
+    if [ -x "$(fenrir-task-path repo)/env.up" ]; then
+        source "$(fenrir-task-path repo)/env.up" || {
+            exit $?
+        }
+    fi
+
+    # shellcheck disable=SC2086
+    fenrir-main $testcase # Might be empty: no quotes!
+
+    # Global tear down
+    if [ -x "$(fenrir-task-path repo)/env.down" ]; then
+        source "$(fenrir-task-path repo)/env.down" || {
+            exit $?
+        }
+    fi
+)

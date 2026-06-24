@@ -91,8 +91,6 @@ function switch_solution {
 ###########################################
 echo "$FENRIR_LOGO"
 
-ecode=0
-
 # Initialise score file
 echo -n 0 > "${SCORE_FILE}"
 # Initialise report file
@@ -103,35 +101,42 @@ switch_solution || {
     finalise "$?"
 }
 
-linter_failed=0
+( # Execution scope
+    linter_failed=0
+    ecode=0
 
-for script in $main; do
-    if [ "$script" = "walk-inspections" ]; then
-        fenrir-exec-walk-inspect || {
-            ecode=$?
-            if [ "$blocking" -ne 0 ]; then
-                export FENRIR_TC_SKIP=YES
-            fi
-            linter_failed=1
-        }
-    else
-        fenrir-exec-testcase "$script" || {
-            ecode=$?
-            if [ "$blocking" -ne 0 ]; then
-                export FENRIR_TC_SKIP=YES
-            fi
-        }
+    # Run tests
+    for script in $main; do
+        if [ "$script" = "walk-inspections" ]; then
+            fenrir-exec-walk-inspect || {
+                ecode=$?
+                if [ "$blocking" -ne 0 ]; then
+                    export FENRIR_TC_SKIP=YES
+                fi
+                linter_failed=1
+            }
+        else
+            fenrir-exec-testcase "$script" || {
+                ecode=$?
+                if [ "$blocking" -ne 0 ]; then
+                    export FENRIR_TC_SKIP=YES
+                fi
+            }
+        fi
+    done
+
+    if (( linter_failed == 1 )); then
+        loki-log warn "Some linter inspections have failed: final score is reset to 0"
+        echo -n 0 > "${SCORE_FILE}"
     fi
-done
+
+    exit $ecode
+)
+ecode=$?
 
 loki-log info "$(loki-dup '-' $(( LOKI_COLUMNS - 10 )))"
 
 echo "  </testsuite>" >> "${REPORT_FILE}"
 echo "</testsuites>" >> "${REPORT_FILE}"
-
-if (( linter_failed == 1 )); then
-    loki-log warn "Some linter inspections have failed: final score is reset to 0"
-    echo -n 0 > "${SCORE_FILE}"
-fi
 
 finalise
