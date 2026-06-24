@@ -26,9 +26,13 @@ if [ -x "${FENRIR_TMP_DIR}/env.down" ]; then
     rm "${FENRIR_TMP_DIR}/env.down"
 fi
 
-container=$(< "${FENRIR_TMP_DIR}/env")
 [ -f "${FENRIR_TMP_DIR}/env.conts" ] && while IFS= read -r cont; do
     lokiw docker rm -f "$cont"
 done < "${FENRIR_TMP_DIR}/env.conts"
 
-lokiw docker rm -f "$container"
+if [ -f "${FENRIR_TMP_DIR}/env" ]; then
+    container=$(< "${FENRIR_TMP_DIR}/env")
+    lokiw docker rm -f "$container"
+fi
+
+rm -f "${FENRIR_TMP_DIR}/env" "${FENRIR_TMP_DIR}/env.conts"
