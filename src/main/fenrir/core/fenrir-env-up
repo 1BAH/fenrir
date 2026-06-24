@@ -15,6 +15,7 @@ function finalise {
     loki-log fail "$message"
     loki-log err "Destructing env.."
     docker rm -f "$container" &> /dev/null
+    rm -f "${FENRIR_TMP_DIR}/env"
 
     exit "$ecode"
 }
