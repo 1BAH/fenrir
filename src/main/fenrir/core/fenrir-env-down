@@ -20,5 +20,15 @@ EXP_ARGC=0
 ##                           MAIN PROGRAM                           ##
 ######################################################################
 
+# Env teardown
+if [ -x "${FENRIR_TMP_DIR}/env.down" ]; then
+    "${FENRIR_TMP_DIR}/env.down"
+    rm "${FENRIR_TMP_DIR}/env.down"
+fi
+
 container=$(< "${FENRIR_TMP_DIR}/env")
-lokiw docker stop "$container"
+[ -f "${FENRIR_TMP_DIR}/env.conts" ] && while IFS= read -r cont; do
+    lokiw docker rm -f "$cont"
+done < "${FENRIR_TMP_DIR}/env.conts"
+
+lokiw docker rm -f "$container"

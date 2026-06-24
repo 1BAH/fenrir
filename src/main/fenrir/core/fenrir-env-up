@@ -2,9 +2,9 @@
 
 ##
 # Usage:
-#   fenrir-env-up [--keep|--safe]
+#   fenrir-env-up [--rm|--unsafe|--bind]
 #
-# TODO
+# Starts a container with the selected env
 ##
 
 
@@ -17,10 +17,6 @@ function finalise {
     docker rm -f "$container" &> /dev/null
 
     exit "$ecode"
-}
-
-function exec_cmd {
-    docker exec "$container" "$@"
 }
 
 function cp_file {
@@ -42,17 +38,22 @@ function cp_file {
 
 #include <shift-args>
 
-rm_opt="--rm"
-use_safe=""
+rm_opt=""
+privileged=""
+bind=""
 
 while [ "$#" -ne 0 ]; do
     case $1 in
-        --keep)
-            rm_opt=""
+        --rm)
+            rm_opt="--rm"
             shift
         ;;
-        --safe)
-            use_safe="YES"
+        --unsafe)
+            privileged="--privileged"
+            shift
+        ;;
+        --bind)
+            bind="YES"
             shift
         ;;
         *)
@@ -78,24 +79,23 @@ docker pull "$image" || {
     loki-log warn "Cannot update image.. Trying to use a cached one instead.."
 }
 
-loki-log info "Starting env.."
+loki-log info "Initialising env.."
 
 ######
 #= Mount docker socket ???????
 ######
 
-# Use 'top -b' as a running daemon
-if [ -n "$safe_use" ]; then
-    container=$(docker run -e LOKI_VERBOSE $rm_opt -d --entrypoint top "$image" -b 2> "${ERR_FILE}")
+# Testing => safe mode
+if [ -z "$bind" ]; then
+    container=$(docker run $privileged -e LOKI_VERBOSE $rm_opt -d "$image" 2> "${ERR_FILE}")
 else
     # Solution is mounted in container
     container=$(docker run \
+        $privileged \
         -e LOKI_VERBOSE \
         --mount "type=bind,src=${sol_dir},dst=${ENV_HOME}/solution" \
         $rm_opt -d \
-        --entrypoint top \
-        "$image" \
-        -b 2> "${ERR_FILE}")
+        "$image" 2> "${ERR_FILE}")
 fi
 status=$?
 
@@ -107,25 +107,56 @@ fi
 # Save container ID
 echo "$container" > "${FENRIR_TMP_DIR}/env"
 
-lokiw exec_cmd fenrir info &> /dev/null || {
-    finalise "Failed to find 'fenrir' in container" "$?"
-}
-
-loki-log info "Env is up"
-loki-log info "Fenrir version:" "$(exec_cmd fenrir v)"
+loki-log info "Env is created.."
 
 ######################################################################
 ##                         Set up container                         ##
 ######################################################################
-loki-log info "Setting the env up.."
+loki-log info "Configuring env (fenrir).."
 
 # Fenrir
 cp_file "$FENRIR_HOME" "${ENV_HOME}"
-cp_file "$RUN_CONF_FILE" "/tmp/fenrir/tmp/run-conf.hel"
+
+# Install local fenrir into the container
+docker exec -u root "$container" rm -fr /etc/fenrir
+docker exec -u root "$container" sh -c 'rm -fr /usr/local/bin/fenrir* /usr/local/bin/update-fenrir /usr/local/bin/uninstall-fenrir /usr/local/bin/loki /tmp/fenrir'
+
+cp_file "/etc/fenrir" "/etc/fenrir"
+for file in /usr/local/bin/fenrir* /usr/local/bin/update-fenrir /usr/local/bin/uninstall-fenrir /usr/local/bin/loki; do
+    cp_file "$file" "/usr/local/bin"
+done
+
+# Run config
+loki-log info "Fenrir version:" "$(docker exec -u fikus "$container" fenrir v)"
+lokiw docker exec -u fikus "$container" fenrir-set-conf run blocking "$(fenrir-read-conf run blocking)" || {
+    loki-log warn "Fenrir config: <fenrir-set-conf run blocking> has failed!"
+}
+lokiw docker exec -u fikus "$container" fenrir-set-conf run task "$(fenrir-read-conf run task)" || {
+    loki-log warn "Fenrir config: <fenrir-set-conf run task> has failed!"
+}
+lokiw docker exec -u fikus "$container" fenrir-set-conf run root "${ENV_HOME}/solution" || {
+    loki-log warn "Fenrir config: <fenrir-set-conf run root> has failed!"
+}
+
+loki-log info "Configuring env (solution).."
 
 # Copy solution when safe mode is on
 if [ -n "$use_safe" ]; then
     cp_file "$sol_dir" "${ENV_HOME}/solution"
 fi
 
-loki-log info "The env is running.."
+loki-log info "Configuring env (setup file).."
+
+# Env setup
+if [ -x "$(fenrir-task-path repo)/env.up" ]; then
+    "$(fenrir-task-path repo)/env.up" || {
+        exit $?
+    }
+
+fi
+
+if [ -x "$(fenrir-task-path repo)/env.down" ]; then
+    cp "$(fenrir-task-path repo)/env.down" "${FENRIR_TMP_DIR}/env.down"
+fi
+
+loki-log info "Env is ready.."

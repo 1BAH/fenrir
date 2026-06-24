@@ -1,0 +1,158 @@
+#! /usr/bin/env loki
+
+##
+# Usage:
+#   fenrir-env [-c TESTCASE] (up DIR|down)
+#
+# TODO
+##
+
+######################################################################
+##                         VERIFY ARGUMENTS                         ##
+######################################################################
+
+#include <shift-args>
+
+variant=""
+
+while (( $# > 0 )); do
+    case $1 in
+        -c)
+            testcase=${2?"You must select the testcase!"}
+            shift
+        ;;
+        up)
+            variant=up
+            path=${2?"You must provide a directory!"}
+            shift
+        ;;
+        down)
+            variant=down
+        ;;
+        *)
+            loki-log err "Unknown argument: <$1>"
+            loki-log err "Expected <up> or <down>"
+            exit 11
+        ;;
+    esac
+    shift
+done
+
+if [ -z "$variant" ]; then
+    loki-log err "You must choose: <up> or <down>"
+    exit 12
+fi
+
+######################################################################
+##                           DOWN PROGRAM                           ##
+######################################################################
+
+if [ "$variant" = "down" ]; then
+    fenrir-env-down
+    ecode=$?
+
+    rm -f "${FENRIR_TMP_DIR}/env" "${FENRIR_TMP_DIR}/env.conts"
+    loki-log info "Now the env is removed"
+    exit $ecode
+fi
+
+######################################################################
+##                            UP PROGRAM                            ##
+######################################################################
+
+recreate=YES
+
+if [ -f "${FENRIR_TMP_DIR}/env" ]; then
+    loki-log warn "Found an existing environment. Choose the option:"
+    loki-log warn "[R] Reload the previous environment"
+    loki-log warn "[D] Delete the previous environment"
+    loki-log warn "[N] Remove the previous one and start a new one"
+    loki-log warn "[E] Exit"
+
+    read -r op
+    while true; do
+        case $op in
+            R|r)
+                [ -f "${FENRIR_TMP_DIR}/env.conts" ] && while IFS= read -r cont; do
+                    lokiw docker restart "$cont" || {
+                        loki-log fail "An error occurred when restarting the env"
+                        loki-log fault "Remove the previous env and create a new one!"
+                        exit 5
+                    }
+                done < "${FENRIR_TMP_DIR}/env.conts"
+
+                container=$(< "${FENRIR_TMP_DIR}/env")
+                lokiw docker restart "$container" || {
+                    loki-log fail "An error occurred when restarting the env"
+                    loki-log fault "Remove the previous env and create a new one!"
+                    exit 5
+                }
+
+                recreate=""
+                break
+            ;;
+            N|n)
+                fenrir env down
+                break
+            ;;
+            D|d)
+                fenrir env down
+                exit
+            ;;
+            E|e)
+                exit 0
+            ;;
+            *)
+                loki-log err "Unknown option: <$op>. Try again"
+                read -r op
+            ;;
+        esac
+    done
+fi
+
+if [ -n "$recreate" ]; then
+    if ! [ -d "$path" ]; then
+        loki-log err "Invalid path: <$path> is not a directory!"
+        exit 99
+    fi
+    fenrir-set-conf run root "$(realpath "$path")"
+
+    task=$(fenrir-read-conf run task)
+
+    if [ "$task" = "-" ]; then
+        loki-log err 'ᕙ( •̀ ᗜ •́ )ᕗ' "The task was not set!"
+        exit 89
+    fi
+
+    if ! [ -d "$(fenrir-task-path repo)" ]; then
+        loki-log err "Task <$task> is not installed!"
+        loki-log err "Install it via 'fenrir task $task' to be able to enter the environment"
+        exit 77
+    fi
+
+    fenrir-env-up --bind --unsafe || exit $?
+
+    container=$(< "${FENRIR_TMP_DIR}/env")
+fi
+
+# shellcheck disable=SC2086
+docker exec -u fikus -it "$container" fenrir-env-runner $testcase
+
+loki-log info "Suspending env.."
+
+# Stop containers after use
+[ -f "${FENRIR_TMP_DIR}/env.conts" ] && while IFS= read -r cont; do
+    lokiw docker stop "$cont" || {
+        loki-log warn "An error occurred when suspending the env:"
+        loki-get-out
+        loki-get-err
+    }
+done < "${FENRIR_TMP_DIR}/env.conts"
+
+lokiw docker stop "$container" || {
+    loki-log warn "An error occurred when suspending the env:"
+    loki-get-out
+    loki-get-err
+}
+
+loki-log info '(˶ᵔᗜᵔ˶)ﾉﾞ' "Goodbye!"
