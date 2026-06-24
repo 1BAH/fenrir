@@ -94,6 +94,10 @@ case "$cmd" in
         fenrir-gc "$@"
     ;;
 
+    "env")
+        fenrir-env "$@"
+    ;;
+
     *)
         loki-log err '(+_+)?' "Command '$(loki-wrap "${BOLD}" "$cmd")' not found"
         exit 1
