@@ -92,7 +92,7 @@ if (( allowed != 1 )); then
     exit 103
 fi
 
-fenrir-env-up --safe || exit $?
+fenrir-env-up --rm || exit $?
 
 container=$(< "${FENRIR_TMP_DIR}/env")
 if [[ -v testcase ]]; then
