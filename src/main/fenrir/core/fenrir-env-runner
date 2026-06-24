@@ -29,12 +29,12 @@ loki-log info 'ヾ(＾ ∇ ＾).' "Now in env"
 if [[ -v testcase ]] && [ -x "$(fenrir-task-path repo)/$testcase.enter" ]; then
     loki-log info "Testcase setup.."
     source "$(fenrir-task-path repo)/$testcase.enter" || {
-        exit $?
+        loki-log warn "Testcase setup has failed!"
     }
 elif [ -x "$(fenrir-task-path repo)/.enter" ]; then
     loki-log info "Testcase setup.."
     source "$(fenrir-task-path repo)/.enter" || {
-        exit $?
+        loki-log warn "Testcase setup has failed!"
     }
 fi
 
