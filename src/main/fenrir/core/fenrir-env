@@ -51,7 +51,6 @@ if [ "$variant" = "down" ]; then
     fenrir-env-down
     ecode=$?
 
-    rm -f "${FENRIR_TMP_DIR}/env" "${FENRIR_TMP_DIR}/env.conts"
     loki-log info "Now the env is removed"
     exit $ecode
 fi
@@ -130,29 +129,36 @@ if [ -n "$recreate" ]; then
         exit 77
     fi
 
-    fenrir-env-up --bind --unsafe || exit $?
-
-    container=$(< "${FENRIR_TMP_DIR}/env")
+    fenrir-env-up --bind --unsafe
 fi
 
-# shellcheck disable=SC2086
-docker exec -u fikus -it "$container" fenrir-env-runner $testcase
+# Run only when the env is ready
+if [ -f "${FENRIR_TMP_DIR}/env" ]; then
+    container=$(< "${FENRIR_TMP_DIR}/env")
 
-loki-log info "Suspending env.."
+    # shellcheck disable=SC2086
+    docker exec -u fikus -it "$container" fenrir-env-runner $testcase
 
-# Stop containers after use
-[ -f "${FENRIR_TMP_DIR}/env.conts" ] && while IFS= read -r cont; do
-    lokiw docker stop "$cont" || {
+    loki-log info "Suspending env.."
+
+    # Stop containers after use
+    [ -f "${FENRIR_TMP_DIR}/env.conts" ] && while IFS= read -r cont; do
+        lokiw docker stop "$cont" || {
+            loki-log warn "An error occurred when suspending the env:"
+            loki-get-out
+            loki-get-err
+        }
+    done < "${FENRIR_TMP_DIR}/env.conts"
+
+    lokiw docker stop "$container" || {
         loki-log warn "An error occurred when suspending the env:"
         loki-get-out
         loki-get-err
     }
-done < "${FENRIR_TMP_DIR}/env.conts"
 
-lokiw docker stop "$container" || {
-    loki-log warn "An error occurred when suspending the env:"
-    loki-get-out
-    loki-get-err
-}
-
-loki-log info '(˶ᵔᗜᵔ˶)ﾉﾞ' "Goodbye!"
+    loki-log info '(˶ᵔᗜᵔ˶)ﾉﾞ' "Goodbye!"
+else
+    loki-log warn "Found problems when creating env"
+    loki-log warn "Now running <env.down> script.."
+    fenrir env down
+fi
