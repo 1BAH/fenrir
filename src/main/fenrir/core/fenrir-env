@@ -62,11 +62,11 @@ fi
 recreate=YES
 
 if [ -f "${FENRIR_TMP_DIR}/env" ]; then
-    loki-log warn "Found an existing environment. Choose the option:"
-    loki-log warn "[R] Reload the previous environment"
-    loki-log warn "[D] Delete the previous environment"
-    loki-log warn "[N] Remove the previous one and start a new one"
-    loki-log warn "[E] Exit"
+    loki-log warn "Found an existing environment. Choose what to do:"
+    echo "   $(loki-wrap "${BLUE}" "[R]")   $(loki-wrap "${ULINE}" "Reload") the previous environment"
+    echo "   $(loki-wrap "${BLUE}" "[D]")   $(loki-wrap "${ULINE}" "Delete") the previous environment"
+    echo "   $(loki-wrap "${BLUE}" "[N]")   Remove the previous one and start a $(loki-wrap "${ULINE}" "new") one"
+    echo "   $(loki-wrap "${BLUE}" "[E]")   $(loki-wrap "${ULINE}" "Exit")"
 
     read -r op
     while true; do
