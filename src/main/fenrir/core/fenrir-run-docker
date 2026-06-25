@@ -92,7 +92,16 @@ if (( allowed != 1 )); then
     exit 103
 fi
 
-fenrir-env-up --rm || exit $?
+unsafe=$(fenrir-read-conf "$task" unsafe)
+unsafe=${unsafe:-0}
+
+if (( unsafe == 1 )); then
+    unsafe="--unsafe"
+else
+    unsafe=""
+fi
+
+fenrir-env-up --rm $unsafe || exit $?
 
 container=$(< "${FENRIR_TMP_DIR}/env")
 if [[ -v testcase ]]; then
