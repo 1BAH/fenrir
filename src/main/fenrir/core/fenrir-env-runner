@@ -51,6 +51,7 @@ INFO
 echo "$BASHPID" > "$FENRIR_TMP_DIR/env.pid"
 
 # Allow user to run
+cd solution
 bash
 
 loki-log info "Terminating the environment.."
