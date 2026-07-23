@@ -52,6 +52,9 @@ while (( $# > 0 )); do
         env_file=$2
         shift
     ;;
+    -nadoc)
+        export FENRIR_NO_ADOC=True
+    ;;
     esac
 
     shift
