@@ -20,7 +20,7 @@ verbose=""
 sed_cmd="sed"
 out_dir="/usr/local/bin"
 conf_dir="/etc/fenrir"
-man_dir="/usr/share/man"
+man_dir="/usr/local/share/man"
 
 while (( $# > 0 )); do
     case "$1" in
