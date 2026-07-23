@@ -1,0 +1,54 @@
+name: Release
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        required: true
+        description: 'Version to be released'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          apt-get install rpm make
+
+      - name: Create packages
+        run:
+          make -j$(nproc) all
+
+      - name: Create release
+        uses: actions/create-release@v1
+        id: create_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ inputs.version }}
+          release_name: "Fenrir v${{ inputs.version }}"
+
+      - name: Publish deb package
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: /tmp/fenrir-build/fenrir-${{ inputs.version }}.noarch.deb
+          asset_content_type: application/vnd.debian.binary-package
+          asset_name: fenrir-${{ inputs.version }}.noarch.deb
+
+      - name: Publish rpm package
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ~/rpmbuild/RPMS/noarch/fenrir-2026.0-1.noarch.rpm
+          asset_content_type: application/x-rpm
+          asset_name: fenrir-${{ inputs.version }}.noarch.rpm
