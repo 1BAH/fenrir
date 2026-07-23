@@ -1,5 +1,5 @@
 FROM alpine:3
-LABEL authors="_1BAH_, Kalinin Iwan (koefic.cien@gmail.com)"
+LABEL authors="1BAH, Kalinin Iwan <koefic.cien@gmail.com>"
 
 ENV PASS="breach"
 ENV FENRIR_IN_DOCKER=1
