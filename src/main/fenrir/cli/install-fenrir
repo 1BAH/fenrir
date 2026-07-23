@@ -152,14 +152,14 @@ sed --help &> /dev/null || {
 }
 
 export sed_cmd
-eval "echo -e \"+ '\033[1msed\033[0m' exists\" ${out[*]}"
+echo -e "+ '\033[1msed\033[0m' exists"
 
 for req in "${REQUIREMENTS[@]}"; do
     if ! type "$req" &> /dev/null; then
         err_msg "- '\033[1m$req\033[0m' is not installed!"
         exit 140
     else
-        eval "echo -e \"+ '\033[1m$req\033[0m' exists\" ${out[*]}"
+        echo -e "+ '\033[1m$req\033[0m' exists"
     fi
 done
 
@@ -175,7 +175,7 @@ if (( "$(echo "$BASH_VERSION" | cut -d'.' -f1)" < 5 )); then
     fi
 fi
 
-eval "echo -e \"+ '\033[1mbash\033[0m' exists\" ${out[*]}"
+echo -e "+ '\033[1mbash\033[0m' exists"
 
 echo "PROGRESS << DONE"
 
