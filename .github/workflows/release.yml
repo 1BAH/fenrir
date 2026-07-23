@@ -5,12 +5,9 @@ on:
       version:
         required: true
         description: 'Version to be released'
-  push:
-    tags:
-      - 'v*'
 
 env:
-  version: '2026.0' #${{ github.ref_name }}${{ inputs.version }}
+  version: ${{ inputs.version }}
 
 jobs:
   release:
