@@ -24,7 +24,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          apt-get install rpm make
+          sudo apt-get install rpm make
 
       - name: Create packages
         run:
