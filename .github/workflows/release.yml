@@ -38,6 +38,7 @@ jobs:
         with:
           tag_name: ${{ env.version }}
           release_name: "Fenrir ${{ env.version }}"
+          draft: true
 
       - name: Publish deb package
         uses: actions/upload-release-asset@v1
@@ -58,3 +59,9 @@ jobs:
           asset_path: /home/runner/fenrir-${{ env.version }}.noarch.rpm
           asset_content_type: application/x-rpm
           asset_name: fenrir-${{ env.version }}.noarch.rpm
+
+      - name: Finalise release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release edit "${{ env.version }}" --draft=false
