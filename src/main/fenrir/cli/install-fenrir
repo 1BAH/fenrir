@@ -90,7 +90,7 @@ if ! [ -d "${conf_dir}" ]; then
     exit 122
 fi
 
-if ! [ -d "${man_dir}" ]; then
+if ! [ -d "${man_dir}" ] && [ -z "${FENRIR_NO_ADOC}" ]; then
     err_msg "Man pages directory <${man_dir}> does not exist!"
     exit 123
 else
