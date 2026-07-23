@@ -1,4 +1,5 @@
 = Fenrir
+:page-pagination:
 
 image::logo.png[width=50%]
 
