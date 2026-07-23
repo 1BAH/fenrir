@@ -5,8 +5,11 @@ image::logo.png[width=50%]
 
 > A lightweight testing framework
 
-image::https://gitlab.com/atpd/fenrir/badges/main/pipeline.svg[link="https://gitlab.com/atpd/fenrir/-/commits/main"]
-image::https://gitlab.com/atpd/fenrir/-/badges/release.svg[link="https://gitlab.com/atpd/fenrir/-/releases"]
+
+image:https://github.com/1bah/fenrir/actions/workflows/pages.yml/badge.svg[https://github.com/1bah/fenrir/actions/workflows/pages.yml/badge.svg]
+image:https://github.com/1bah/fenrir/actions/workflows/docker.yml/badge.svg[https://github.com/1bah/fenrir/actions/workflows/docker.yml/badge.svg]
+image:https://github.com/1bah/fenrir/actions/workflows/release.yml/badge.svg[https://github.com/1bah/fenrir/actions/workflows/release.yml/badge.svg]
+image:https://img.shields.io/badge/License-Apache%202.0-blue.svg[https://opensource.org/licenses/Apache-2.0]
 
 WARNING: The site is under development!
 
