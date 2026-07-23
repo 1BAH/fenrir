@@ -70,14 +70,8 @@ else
     safe_tag_clone "$tag"
 fi
 
-if [ -n "${FENRIR_IN_DOCKER}" ]; then
-    echo "$PASS" | sudo -S uninstall-fenrir update
-    echo "$PASS" | sudo -S "${clone_dir}/src/main/fenrir/cli/install-fenrir" "$complete"
-else
-    sudo uninstall-fenrir update
-    # shellcheck disable=SC2086
-    sudo "${clone_dir}/src/main/fenrir/cli/install-fenrir" ${LOKI_VERBOSE} "$complete" # Propagate verbosity
-fi
+sudo uninstall-fenrir update
+sudo "${clone_dir}/src/main/fenrir/cli/install-fenrir" "${LOKI_VERBOSE}" "$complete" # Propagate verbosity
 
 rm -fr "${clone_dir}"
 

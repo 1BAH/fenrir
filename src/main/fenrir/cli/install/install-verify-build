@@ -1,0 +1,23 @@
+# Verify BUILD_DIR
+
+echo "PROGRESS >> Validating BUILD_DIR structure.."
+
+if [[ $(basename "$CORE_UTILS_DIR") != "core" ]]; then
+    printf "\033[31m'CORE_UTILS_DIR' does not actually points to 'core'\033[0m\n" >& 2
+    printf "\033[31mCORE_UTILS_DIR=%s\033[0m\n" "$CORE_UTILS_DIR" >& 2
+    exit 15
+fi
+
+if [[ $(basename "$CFGS_DIR") != "configs" ]]; then
+    printf "\033[31m'CFGS_DIR' does not actually points to 'configs'\033[0m\n" >& 2
+    printf "\033[31mCFGS_DIR=%s\033[0m\n" "$CFGS_DIR" >& 2
+    exit 16
+fi
+
+if [[ $(basename "$BASIC_UTILS_DIR") != "shared" ]]; then
+    printf "\033[31m'BASIC_UTILS_DIR' does not actually points to 'shared'\033[0m\n" >& 2
+    printf "\033[31mBASIC_UTILS_DIR=%s\033[0m\n" "$BASIC_UTILS_DIR" >& 2
+    exit 17
+fi
+
+echo "PROGRESS << DONE"

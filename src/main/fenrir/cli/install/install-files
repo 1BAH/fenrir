@@ -1,0 +1,164 @@
+loki-prog "Installing 'Fenrir'.."
+
+loki-prog "Installing core.."
+
+for cmd in "$CORE_UTILS_DIR"/*; do
+    name=$(basename "$cmd")
+
+    if [ "$name" = "fenrir-autocomplete" ]; then
+        [ -n "${FENRIR_INSTALL_BASH}" ] || continue
+
+        mv "$cmd" "/etc/bash_completion.d/"
+    fi
+
+    if [ "$name" = "fenrir-autocomplete-zsh" ]; then
+        [ -n "${FENRIR_INSTALL_ZSH}" ] || continue
+
+        mkdir -p "$os_pref_home/$user/.oh-my-zsh/completions"
+        mv "$cmd" "$os_pref_home/$user/.oh-my-zsh/completions/_fenrir"
+    fi
+
+    if ! [ -f "$cmd" ]; then
+        continue
+    fi
+
+    if ! mv "$cmd" "${FENRIR_INSTALL_DIR}/$name"; then
+        loki-log err "Failed to install. Try again or submit an issue."
+        exit 21
+    fi
+done
+
+loki-gorp
+
+#################################################################
+
+loki-prog "Setting all configs.."
+
+for cfg in "$CFGS_DIR"/*.hel; do
+    name=$(basename "$cfg")
+
+    diff -q "$cfg" "${FENRIR_CONF_DIR}/$name" &> /dev/null && {
+        loki-log info "File <$cfg> has no differences.."
+        continue
+    }
+
+    if ! {
+        mv "$cfg" "${FENRIR_CONF_DIR}/$name" &&
+        chown "$user" "${FENRIR_CONF_DIR}/$name"
+    }; then
+        loki-log err "Failed to install. Try again or submit an issue."
+        exit 22
+    fi
+done
+
+echo "version=\"$VERSION\"" >> "${FENRIR_CONF_DIR}/main.hel"
+
+# Update config location
+${sed_cmd} -i "s|^CONF_FILE=.*$|CONF_FILE=\"${FENRIR_CONF_DIR}\"|" "${FENRIR_INSTALL_DIR}/fenrir-read-conf"
+${sed_cmd} -i "s|^CONF_FILE=.*$|CONF_FILE=\"${FENRIR_CONF_DIR}\"|" "${FENRIR_INSTALL_DIR}/fenrir-set-conf"
+
+
+loki-prog "Installing 'lokirc'.."
+
+if [ -z "${FENRIR_ENV_FILE}" ] && [ -f "${FENRIR_CONF_DIR}/lokirc" ]; then
+    loki-log info "Found existing lokirc: <${FENRIR_CONF_DIR}/lokirc>"
+    chown "$user" "${FENRIR_CONF_DIR}/lokirc" # Do not forget to chown the installed lokirc (may be default)
+else
+    env_file=${FENRIR_ENV_FILE:-"/dev/null"}
+    loki-log info "Using env file <$env_file>"
+
+    if ! { [ -f "$env_file" ] || [ "$env_file" = "/dev/null" ]; }; then
+        loki-log err "The provided env file <$env_file> does not exist!"
+        exit 23
+    fi
+
+    if ! {
+        cat "$CFGS_DIR/lokirc" "$env_file" > "${FENRIR_CONF_DIR}/lokirc" &&
+        chown "$user" "${FENRIR_CONF_DIR}/lokirc"
+    }; then
+        loki-log err "Failed to install. Try again or submit an issue."
+        exit 23
+    fi
+fi
+
+${sed_cmd} -i "s|/etc/fenrir/lokirc|${FENRIR_CONF_DIR}/lokirc|" "${FENRIR_INSTALL_DIR}/loki"
+
+loki-gorp
+loki-gorp
+
+#################################################################
+
+loki-prog "Installing basic utils.."
+
+if ! mkdir -p "$os_pref_home/$user/.fenrir/shared/walk"; then
+    loki-log err "Unable to create a local storage"
+    exit 24
+fi
+
+if ! mkdir -p "$os_pref_home/$user/.fenrir/repo/local"; then
+    loki-log err "Unable to create a local storage"
+    exit 24
+fi
+
+chown -R "$user" "$os_pref_home/$user/.fenrir"
+
+for util in "$BASIC_UTILS_DIR"/* "$BASIC_UTILS_DIR"/**/*; do
+    relative_path=${util#"$BASIC_UTILS_DIR"/}
+
+    if ! [ -f "$util" ]; then
+        continue
+    fi
+
+    case "$(basename "$util")" in
+        "local" | "pipeline.hel" | "index.hel")
+            if ! {
+                mv "$util" "$os_pref_home/$user/.fenrir/repo/local/$relative_path" &&
+                chown "$user" "$os_pref_home/$user/.fenrir/repo/local/$relative_path"
+            }; then
+                loki-log err "Failed to install. Try again or submit an issue."
+                exit 25
+            fi
+          ;;
+        *)
+            if ! {
+                mv "$util" "$os_pref_home/$user/.fenrir/shared/$relative_path" &&
+                chown "$user" "$os_pref_home/$user/.fenrir/shared/$relative_path"
+            }; then
+                loki-log err "Failed to install. Try again or submit an issue."
+                exit 25
+            fi
+          ;;
+    esac
+done
+
+loki-gorp
+
+###################################################################
+
+loki-prog "Installing autocompletion.."
+
+if [ -n "${FENRIR_INSTALL_BASH}" ]; then
+    fenrir-set-conf main complete bash
+    loki-log warn "Run 'source ~/.bashrc' or reload terminal to apply the autocompletion"
+elif [ -n "${FENRIR_INSTALL_ZSH}" ]; then
+    fenrir-set-conf main complete zsh
+    loki-log warn "If you use 'Oh My Zsh' then reload your terminal, otherwise read the docs to set up the autocompletion"
+fi
+
+loki-gorp
+
+###################################################################
+
+loki-prog "Installing uninstaller.."
+
+if ! {
+    mv "${BUILD_DIR}/fenrir/cli/uninstall-fenrir" "${FENRIR_INSTALL_DIR}/uninstall-fenrir" &&
+    chmod +x "${FENRIR_INSTALL_DIR}/uninstall-fenrir"
+}; then
+    loki-log err "Failed to install. Try again or submit an issue."
+    exit 21
+fi
+
+loki-gorp
+
+loki-gorp
