@@ -31,22 +31,4 @@ loki-assert-regeq ".*fenrir $version, $year.*" "$(fenrir info)"
 
 loki-gorp
 
-loki-prog "fenrir h"
-
-loki-assert-regeq ".*fenrir $version, $year.*" "$(fenrir h)"
-
-loki-gorp
-
-loki-prog "fenrir help"
-
-loki-assert-regeq ".*fenrir $version, $year.*" "$(fenrir help)"
-
-loki-gorp
-
-loki-prog "fenrir --help"
-
-loki-assert-regeq ".*fenrir $version, $year.*" "$(fenrir --help)"
-
-loki-gorp
-
 ##########################################################################

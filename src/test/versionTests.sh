@@ -56,5 +56,12 @@ loki-assert-regeq ".*version: ${version}.*" "$(cat "${src_dir}/../../../antora.y
 
 loki-gorp
 
+loki-prog "Packages"
+
+loki-assert-regeq ".*Version: ${version}.*" "$(cat "${src_dir}/../../../fenrir.control")"
+loki-assert-regeq ".*Version:        ${version}.*" "$(cat "${src_dir}/../../../fenrir.spec")"
+
+loki-gorp
+
 
 ##########################################################################
