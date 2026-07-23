@@ -24,7 +24,7 @@ rpm: archive
 	cp $(BUILD_DIR)/fenrir-$(VERSION).tar.gz ~/rpmbuild/SOURCES/
 	cp fenrir.spec ~/rpmbuild/SPECS/
 	cd ~/rpmbuild/SPECS/ && rpmbuild -ba fenrir.spec
-	mv ~/rpmbuild/RPMS/noarch/fenrir-$(VERSION)* ~/fenrir/-$(VERSION).noarch.rpm
+	mv ~/rpmbuild/RPMS/noarch/fenrir-$(VERSION)* ~/fenrir-$(VERSION).noarch.rpm
 
 deb: install-fenrir
 	cp -r $(INSTALL_ROOT) $(BUILD_DIR)/fenrir-deb
