@@ -1,21 +1,13 @@
 #! /usr/bin/env bash
 
-function out {
-    if [[ "$FENRIR_INSTALL_VERBOSE" == "-v" ]]; then
-        "$@"
-    else
-        eval "$* > /dev/null"
-    fi
-}
+echo "======================= Installing fenrir ======================="
 
 #################################################################
 #                        GLOBAL CONSTS                          #
 #################################################################
 
-out echo "======================= Installing fenrir ======================="
-
-
 CLI_DIR=${CLI_DIR:?"Cannot execute installer: 'CLI_DIR' was not provided"}
+DOC_DIR=${DOC_DIR:?"Cannot execute installer: 'DOC_DIR' was not provided"}
 FENRIR_DIR=$(realpath "${CLI_DIR}/..")
 LOKI_DIR=$(realpath "${FENRIR_DIR}/../loki")
 
@@ -23,27 +15,7 @@ LOKI_DIR=$(realpath "${FENRIR_DIR}/../loki")
 #                         VERIFY DIRS                           #
 #################################################################
 
-echo "PROGRESS >> Verifying the source dir.."
-
-if [[ $(basename "$CLI_DIR") != "cli" ]]; then
-    printf "\033[31m'CLI_DIR' does not actually points to 'cli'\033[0m\n"
-    printf "\033[31mCLI_DIR=%s\033[0m\n" "$CLI_DIR" >& 2
-    exit 3
-fi
-
-if [[ $(basename "$FENRIR_DIR") != "fenrir" ]]; then
-    printf "\033[31m'FENRIR_DIR' does not actually points to 'fenrir'\033[0m\n" >& 2
-    printf "\033[31mFENRIR_DIR=%s\033[0m\n" "$FENRIR_DIR" >& 2
-    exit 3
-fi
-
-if [[ $(basename "$LOKI_DIR") != "loki" ]]; then
-    printf "\033[31m'LOKI_DIR' does not actually points to 'loki'\033[0m\n" >& 2
-    printf "\033[31mLOKI_DIR=%s\033[0m\n" "$LOKI_DIR" >& 2
-    exit 3
-fi
-
-echo "PROGRESS << DONE"
+#include <install-verify-srcs>
 
 #################################################################
 #                       LOAD PROPERTIES                         #
@@ -59,7 +31,7 @@ done < "$CLI_DIR/fenrir.properties"
 
 if [[ $VERSION == "" ]]; then
     printf "\033[31m'VERSION' is not specified in properties! The sources might be broken!\033[0m\n" >& 2
-    exit 3
+    exit 5
 fi
 
 #################################################################
@@ -72,7 +44,7 @@ if [ -d "$BUILD_DIR" ]; then
     rm -fr "$BUILD_DIR"
 fi
 
-mkdir -p "$BUILD_DIR"
+mkdir -p "$BUILD_DIR/docs"
 
 cp -r "$LOKI_DIR" "$BUILD_DIR/loki"
 cp -r "$FENRIR_DIR" "$BUILD_DIR/fenrir"
@@ -80,7 +52,7 @@ cp -r "$FENRIR_DIR" "$BUILD_DIR/fenrir"
 # shellcheck disable=SC2164
 pushd "$BUILD_DIR" &> /dev/null
 
-out echo "[ INFO  ] Now in BUILD_DIR: '$PWD'"
+echo "[ INFO  ] Now in BUILD_DIR: <$PWD>"
 
 CORE_UTILS_DIR=$(realpath "${BUILD_DIR}/fenrir/core")
 CFGS_DIR=$(realpath "${BUILD_DIR}/fenrir/configs")
@@ -90,27 +62,7 @@ BASIC_UTILS_DIR=$(realpath "${BUILD_DIR}/fenrir/shared")
 #                       POST-VERIFY DIRS                        #
 #################################################################
 
-echo "PROGRESS >> Validating BUILD_DIR structure.."
-
-if [[ $(basename "$CORE_UTILS_DIR") != "core" ]]; then
-    printf "\033[31m'CORE_UTILS_DIR' does not actually points to 'core'\033[0m\n" >& 2
-    printf "\033[31mCORE_UTILS_DIR=%s\033[0m\n" "$CORE_UTILS_DIR" >& 2
-    exit 3
-fi
-
-if [[ $(basename "$CFGS_DIR") != "configs" ]]; then
-    printf "\033[31m'CFGS_DIR' does not actually points to 'configs'\033[0m\n" >& 2
-    printf "\033[31mCFGS_DIR=%s\033[0m\n" "$CFGS_DIR" >& 2
-    exit 3
-fi
-
-if [[ $(basename "$BASIC_UTILS_DIR") != "shared" ]]; then
-    printf "\033[31m'BASIC_UTILS_DIR' does not actually points to 'shared'\033[0m\n" >& 2
-    printf "\033[31mBASIC_UTILS_DIR=%s\033[0m\n" "$BASIC_UTILS_DIR" >& 2
-    exit 3
-fi
-
-echo "PROGRESS << DONE"
+#include <install-verify-build>
 
 # Load consts
 source "${CFGS_DIR}/lokirc"
@@ -120,14 +72,14 @@ source "${CFGS_DIR}/lokirc"
 #################################################################
 
 [ -n "$SUDO_USER" ] && user=$SUDO_USER || user=$USER
-echo "${BLUE}[ INFO ]${ENDC} Installing ${SKY}fenrir@$VERSION${ENDC} for ${SKY}${user}${ENDC} user.."
-out echo "${BLUE}[ INFO ]${ENDC} Build script is located in '$(realpath "$0")'"
+echo "${BLUE}[ INFO  ]${ENDC} Installing ${SKY}fenrir@$VERSION${ENDC} for ${SKY}${user}${ENDC} user.."
+echo "${BLUE}[ INFO  ]${ENDC} Build script is located in <$(realpath "$0")>"
 
 #################################################################
 #                     CREATE INSTALL DIRS                       #
 #################################################################
 
-out echo "[ INFO ] Creating '${FENRIR_CONF_DIR}'.."
+echo "[ INFO  ] Creating <${FENRIR_CONF_DIR}>.."
 mkdir -p "${FENRIR_CONF_DIR}"
 chown "$user" "${FENRIR_CONF_DIR}"
 
@@ -138,18 +90,17 @@ chown "$user" "${FENRIR_CONF_DIR}"
 echo "[ INFO  ] Installing 'Loki' module.."
 
 if ! [ -f "${FENRIR_CONF_DIR}/lokirc" ]; then
-   out echo "[ INFO  ] Installing default lokirc.."
+   echo "[ INFO  ] Installing default lokirc.."
 
     if ! cat "$CFGS_DIR/lokirc" > "${FENRIR_CONF_DIR}/lokirc"; then
-        out echo "[ ERROR ] Failed to install. Try again or submit an issue."
-        exit 7
+        echo "[ ERROR ] Failed to install. Try again or submit an issue."
+        exit 20
     fi
 fi
 
 #include <install-loki>
 
 echo "[ INFO  ] Now switching to 'loki-log'.. (Colours might appear)"
-
 loki-log succ "Loki is installed"
 
 #################################################################
@@ -162,6 +113,7 @@ loki-log succ "Loki is installed"
 #                       PARSE ARGUMENTS                         #
 #################################################################
 
+# TODO remove??
 if [ -n "$IN_DOCKER" ]; then
     loki-log info "Running in a docker container"
 fi
@@ -194,12 +146,12 @@ case "$(uname -s)" in
 #    ;;
     *)
         loki-gorp "Unsupported OS: $(loki-wrap "${BOLD}" "$(uname -s)")"
-        loki-log warn "Do you agree to continue? ($(loki-wrap "${BOLD}" Potentially dangerous)) [Y|N]"
+        loki-log warn "Do you agree to continue? ($(loki-wrap "${BOLD}" Potentially dangerous)) [y|N]"
 
         read -r op
         if [ "$op" != "y" ] && [ "$op" != "Y" ]; then
             loki-log err "Terminating.."
-            exit 3
+            exit 6
         fi
     ;;
 esac
@@ -208,22 +160,20 @@ esac
 #                   Check & clean filesystem                    #
 #################################################################
 
-loki-prog "Validating environment.."
+loki-prog "Preparing environment.."
 
-out loki-prog "Working directories.."
-
+loki-prog "Working directories.."
 if [ -d "${FENRIR_CONF_DIR}" ]; then
     find "${FENRIR_CONF_DIR}" -mindepth 1 -not -name "*.hel" | while read -r file; do
         [ "$(basename "$file")" = "lokirc" ] && continue
 
         rm -fr "$file"
-        loki-log warn "File '$file' is removed"
+        loki-log warn "File <$file> is removed"
     done
 fi
+loki-gorp
 
-out loki-gorp
-out loki-prog "Previous installations..."
-
+loki-prog "Previous installations.."
 ( # Variable scope: 'found' array
     [ -n "${FENRIR_TEST_MODE}" ] && exit 0
 
@@ -235,7 +185,6 @@ out loki-prog "Previous installations..."
         fi
 
         name=$(basename "$cmd")
-
         if type "$name" &> /dev/null; then
             found+=("$(type "$name" | cut -d ' ' -f3)")
         fi
@@ -252,7 +201,6 @@ out loki-prog "Previous installations..."
     # Alerts for out-of-docker installation
     loki-log warn "These commands already exist:"
 
-    # shellcheck disable=SC2154
     maxlen=0
     for cmd in "${found[@]}"; do
         thislen=$(basename "$cmd")
@@ -269,196 +217,38 @@ out loki-prog "Previous installations..."
         echo "'$cmd'"
     done | ${sed_cmd} "s/^/$(loki-wrap "${YELLOW}" "[WARNING]")      /"
 
-    loki-log warn "They are to be replaced. Do you want to proceed? ($(loki-wrap "${BOLD}" Potentially dangerous)) [Y|N]"
+    loki-log warn "They are to be replaced. Do you want to proceed? ($(loki-wrap "${BOLD}" Potentially dangerous)) [y|N]"
 
     read -r op
     if [ "$op" != "y" ] && [ "$op" != "Y" ]; then
         loki-log err "Terminating.."
-        exit 3
+        exit 7
     fi
 ) || exit $? # propagate error
+loki-gorp
 
-out loki-prog "Cleaning local repo.."
-
+loki-prog "Cleaning local repo.."
 if [ -n "${FENRIR_KEEP_LOCAL_REPO}" ]; then
-    out loki-log warn "'FENRIR_KEEP_LOCAL_REPO' is on: preserving the local repo"
+    loki-log warn "'FENRIR_KEEP_LOCAL_REPO' is on: preserving the local repo"
 else
     rm -fr "$os_pref_home/$user/.fenrir"
 fi
 
-out loki-gorp
+loki-gorp
 
-out loki-gorp
 loki-gorp
 
 #################################################################
 #                        Install files                          #
 #################################################################
 
-loki-prog "Installing 'Fenrir'.."
-
-out loki-prog "Installing core.."
-
-for cmd in "$CORE_UTILS_DIR"/*; do
-    name=$(basename "$cmd")
-
-    if [ "$name" = "fenrir-autocomplete" ]; then
-        [ -n "${FENRIR_INSTALL_BASH}" ] || continue
-
-        mv "$cmd" "/etc/bash_completion.d/"
-    fi
-
-    if [ "$name" = "fenrir-autocomplete-zsh" ]; then
-        [ -n "${FENRIR_INSTALL_ZSH}" ] || continue
-
-        mkdir -p "$os_pref_home/$user/.oh-my-zsh/completions"
-        mv "$cmd" "$os_pref_home/$user/.oh-my-zsh/completions/_fenrir"
-    fi
-
-    if ! [ -f "$cmd" ]; then
-        continue
-    fi
-
-    if ! mv "$cmd" "${FENRIR_INSTALL_DIR}/$name"; then
-        loki-log err "Failed to install. Try again or submit an issue."
-        exit 6
-    fi
-done
-
-# Update config location
-${sed_cmd} -i "s|^CONF_FILE=.*$|CONF_FILE=\"${FENRIR_CONF_DIR}\"|" "${FENRIR_INSTALL_DIR}/fenrir-read-conf"
-${sed_cmd} -i "s|^CONF_FILE=.*$|CONF_FILE=\"${FENRIR_CONF_DIR}\"|" "${FENRIR_INSTALL_DIR}/fenrir-set-conf"
-
-out loki-gorp
+#include <install-files>
 
 #################################################################
-
-out loki-prog "Setting all configs.."
-
-for cfg in "$CFGS_DIR"/*.hel; do
-    name=$(basename "$cfg")
-
-    diff -q "$cfg" "${FENRIR_CONF_DIR}/$name" &> /dev/null && {
-        out loki-log info "File '$cfg' has no differences.."
-        continue
-    }
-
-    if ! {
-        mv "$cfg" "${FENRIR_CONF_DIR}/$name" &&
-        chown "$user" "${FENRIR_CONF_DIR}/$name"
-    }; then
-        loki-log err "Failed to install. Try again or submit an issue."
-        exit 7
-    fi
-done
-
-echo "version=\"$VERSION\"" >> "${FENRIR_CONF_DIR}/main.hel"
-
-
-out loki-prog "Installing 'lokirc'.."
-
-if [ -z "${FENRIR_ENV_FILE}" ] && [ -f "${FENRIR_CONF_DIR}/lokirc" ]; then
-    out loki-log info "Found existing lokirc: <${FENRIR_CONF_DIR}/lokirc>"
-    chown "$user" "${FENRIR_CONF_DIR}/lokirc" # Do not forget to chown the installed lokirc (may be default)
-else
-    env_file=${FENRIR_ENV_FILE:-"/dev/null"}
-    out loki-log info "Using env file <$env_file>"
-
-    if ! { [ -f "$env_file" ] || [ "$env_file" = "/dev/null" ]; }; then
-        out loki-log err "The provided env file <$env_file> does not exist!"
-        exit 43
-    fi
-
-    if ! {
-        cat "$CFGS_DIR/lokirc" "$env_file" > "${FENRIR_CONF_DIR}/lokirc" &&
-        chown "$user" "${FENRIR_CONF_DIR}/lokirc"
-    }; then
-        loki-log err "Failed to install. Try again or submit an issue."
-        exit 7
-    fi
-fi
-
-${sed_cmd} -i "s|/etc/fenrir/lokirc|${FENRIR_CONF_DIR}/lokirc|" "${FENRIR_INSTALL_DIR}/loki"
-
-out loki-gorp
-out loki-gorp
-
+#                          MAN PAGES                            #
 #################################################################
 
-out loki-prog "Installing basic utils.."
-
-if ! mkdir -p "$os_pref_home/$user/.fenrir/shared/walk"; then
-    loki-log err "Unable to create local storage"
-    exit 189
-fi
-
-if ! mkdir -p "$os_pref_home/$user/.fenrir/repo/local"; then
-    loki-log err "Unable to create local storage"
-    exit 189
-fi
-
-chown -R "$user" "$os_pref_home/$user/.fenrir"
-
-for util in "$BASIC_UTILS_DIR"/* "$BASIC_UTILS_DIR"/**/*; do
-    relative_path=${util#"$BASIC_UTILS_DIR"/}
-
-    if ! [ -f "$util" ]; then
-        continue
-    fi
-
-    case "$(basename "$util")" in
-        "local" | "pipeline.hel" | "index.hel")
-            if ! {
-                mv "$util" "$os_pref_home/$user/.fenrir/repo/local/$relative_path" &&
-                chown "$user" "$os_pref_home/$user/.fenrir/repo/local/$relative_path"
-            }; then
-                loki-log err "Failed to install. Try again or submit an issue."
-                exit 88
-            fi
-          ;;
-        *)
-            if ! {
-                mv "$util" "$os_pref_home/$user/.fenrir/shared/$relative_path" &&
-                chown "$user" "$os_pref_home/$user/.fenrir/shared/$relative_path"
-            }; then
-                loki-log err "Failed to install. Try again or submit an issue."
-                exit 8
-            fi
-          ;;
-    esac
-done
-
-out loki-gorp
-
-###################################################################
-
-out loki-prog "Installing autocompletion.."
-
-if [ -n "${FENRIR_INSTALL_BASH}" ]; then
-    fenrir-set-conf main complete bash
-    out loki-log warn "Run 'source ~/.bashrc' or reload terminal to apply the autocompletion"
-elif [ -n "${FENRIR_INSTALL_ZSH}" ]; then
-    fenrir-set-conf main complete zsh
-    out loki-log warn "If you use 'Oh My Zsh' then reload your terminal, otherwise read the docs to set up the autocompletion"
-fi
-
-out loki-gorp
-
-###################################################################
-
-out loki-prog "Installing uninstaller.."
-
-if ! {
-    mv "${BUILD_DIR}/fenrir/cli/uninstall-fenrir" "${FENRIR_INSTALL_DIR}/uninstall-fenrir" &&
-    chmod +x "${FENRIR_INSTALL_DIR}/uninstall-fenrir"
-}; then
-    loki-log err "Failed to install. Try again or submit an issue."
-    exit 19
-fi
-
-out loki-gorp
-
-loki-gorp
+#include <install-man>
 
 ###################################################################
 #                       Finish installation                       #
@@ -468,4 +258,4 @@ if [ -z "${FENRIR_DEBUG_MODE}" ]; then
     rm -fr ${BUILD_DIR}
 fi
 
-out loki-log succ "Installation has finished!"
+loki-log succ "Installation has finished!"

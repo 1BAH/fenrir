@@ -1,5 +1,5 @@
 FROM alpine:3
-LABEL authors="_1BAH_, Kalinin Iwan (koefic.cien@gmail.com)"
+LABEL authors="1BAH, Kalinin Iwan <koefic.cien@gmail.com>"
 
 ENV PASS="breach"
 ENV FENRIR_IN_DOCKER=1
@@ -14,14 +14,15 @@ RUN apk add --no-cache  \
         bash
 
 RUN echo -e "breach\nbreach" | adduser -s "$(which bash)" fikus && \
-    echo "fikus ALL=(ALL)  ALL" >> "/etc/sudoers"
+    echo "fikus ALL=(ALL)  ALL" >> "/etc/sudoers" && \
+    mkdir /etc/fenrir
 
 WORKDIR /home/fikus
 USER fikus
 
 COPY --chown=fikus:fikus src /home/fikus/fenrir/src
 RUN cd /home/fikus/fenrir/src/main/fenrir/cli && \
-    echo "$PASS" | sudo -S ./install-fenrir -v && \
+    echo "$PASS" | sudo -S ./install-fenrir -nadoc && \
     cd && \
     rm -fr /home/fikus/fenrir && \
     git config --global user.email "fikus@example.com" && \

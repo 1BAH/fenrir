@@ -1,66 +1,36 @@
-#! /usr/bin/env bash
+#! /usr/bin/env loki
 
-[ -n "$SUDO_USER" ] && user=$SUDO_USER || user=$USER
+# Uninstalls from the default locations
+
+INSTALL_ROOT="/usr/local/bin"
+MAN_ROOT="/usr/local/share/man"
+CONFIG_ROOT="/etc/fenrir"
 
 if [[ "$1" == update ]]; then
     update="YES"
 fi
 
-###################################################################
-
-GREEN="\033[38;5;112m"
-BLUE="\033[38;5;4m"
-YELLOW="\033[38;5;214m"
-RED="\033[38;5;196m"
-ENDC="\033[0m"
-
-
-function info {
-    [ -n "${FENRIR_IN_DOCKER}" ] || echo -e "${BLUE}[ INFO  ]${ENDC} $*"
-}
-
-function warn {
-    [ -n "${FENRIR_IN_DOCKER}" ] || echo -e "${YELLOW}[WARNING]${ENDC} $*"
-}
-
-function err {
-    [ -n "${FENRIR_IN_DOCKER}" ] || echo -e "${RED}[ ERROR ]${ENDC} $*"
-}
-
-function succ {
-    [ -n "${FENRIR_IN_DOCKER}" ] || echo -e "${GREEN}[SUCCESS]${ENDC} $*"
-}
-
-FENRIR_TMP_DIR=${FENRIR_TMP_DIR:-"/tmp/fenrir/tmp"}
-FENRIR_HOME=${FENRIR_HOME:-"/home/$user/.fenrir"}
-FENRIR_KEEP_LOCAL_REPO=$(loki -c eval 'echo ${FENRIR_KEEP_LOCAL_REPO}')
-
 #################################################################
 
 version=$(fenrir-read-conf main version)
-
-if [ -n "${FENRIR_IN_DOCKER}" ]; then
-    echo "[ INFO  ] Uninstalling fenrir v${version}"
-else
-    info "Uninstalling fenrir v${version}"
-fi
+loki-log info "Uninstalling fenrir v${version}"
 
 #################################################################
 
 if [ "$(id -u)" -ne 0 ]; then
-    err "The script must be run under sudo!"
+    loki-log err "The script must be run in a $(loki-wrap "${BOLD}" "privileged mode") (sudo)!"
     exit 111
 fi
 
 #################################################################
 
-info "Removing working directories.."
+loki-prog "Removing working directories.."
 
 if [ -z "${update}" ]; then
     if [ -d "${FENRIR_TMP_DIR}" ]; then
         rm -r "${FENRIR_TMP_DIR}"
     else
-        warn "fenrir's tmp directory was not found!"
+        loki-log warn "fenrir's tmp directory was not found!"
     fi
 fi
 
@@ -68,71 +38,79 @@ if [ -z "${FENRIR_KEEP_LOCAL_REPO}" ]; then
     if [ -d "${FENRIR_HOME}" ]; then
         rm -r "${FENRIR_HOME}"
     else
-        warn "fenrir's local repository was not found!"
+        loki-log warn "fenrir's local repository was not found!"
     fi
 fi
 
-succ "Done"
+loki-gorp
+
+#################################################################
+
+loki-prog "Removing man pages.."
+
+for cmd in "${MAN_ROOT}"/man1/fenrir-* "${MAN_ROOT}"/man1/loki*; do
+    if [ "$cmd" = "${MAN_ROOT}/man1/fenrir-*" ]; then
+        loki-log warn "No core commands were found!"
+        break
+    fi
+
+    rm -f "$cmd"
+done
+
+loki-gorp
 
 #################################################################
 
 if [ -z "${update}" ]; then
-    info "Removing '/etc/fenrir'.."
+    loki-prog "Removing '${CONFIG_ROOT}'.."
 
-    if [ -d "/etc/fenrir" ]; then
-        rm -r /etc/fenrir
+    if [ -d "${CONFIG_ROOT}" ]; then
+        rm -r "${CONFIG_ROOT}"
     else
-        warn "The directory does not exist!"
+        loki-log warn "The directory does not exist!"
     fi
 
-    succ "Done"
+    loki-gorp
 fi
 
 #################################################################
+loki-prog "Removing Loki.."
 
-info "Removing Loki.."
-
-if [ -f "/usr/local/bin/loki" ]; then
-    rm -fr "/usr/local/bin/loki"
-else
-    warn "'loki' binary was not find"
+if [ -f "${INSTALL_ROOT}/loki" ]; then
+    rm -fr "${INSTALL_ROOT}/loki"
 fi
 
-succ "Done"
-
+loki-gorp
 #################################################################
+loki-prog "Removing core.."
 
-info "Removing core.."
-
-for cmd in /usr/local/bin/fenrir-*; do
-    if [ "$cmd" = "/usr/local/bin/fenrir-*" ]; then
-        warn "No core commands were found!"
+for cmd in "${INSTALL_ROOT}"/fenrir-*; do
+    if [ "$cmd" = "${INSTALL_ROOT}/fenrir-*" ]; then
+        loki-log warn "No core commands were found!"
         break
     fi
 
     if ! rm "$cmd"; then
-        err "Terminating.."
+        loki-log err "Terminating.."
         exit 10
     fi
 done
 
-if [ -f "/usr/local/bin/update-fenrir" ]; then
-    rm "/usr/local/bin/update-fenrir"
+if [ -f "${INSTALL_ROOT}/update-fenrir" ]; then
+    rm "${INSTALL_ROOT}/update-fenrir"
 fi
 
-succ "Done"
-
+loki-gorp
 #################################################################
+loki-prog "Removing cli tool.."
 
-info "Removing cli tool.."
-
-if [ -f "/usr/local/bin/fenrir" ]; then
-    rm "/usr/local/bin/fenrir"
+if [ -f "${INSTALL_ROOT}/fenrir" ]; then
+    rm "${INSTALL_ROOT}/fenrir"
 else
-    warn "fenrir cli is not installed"
+    loki-log warn "fenrir cli is not installed"
 fi
 
-succ "Done"
+loki-gorp
 
 # Remove the script itself
-rm -fr "/usr/local/bin/uninstall-fenrir"
+rm -fr "${INSTALL_ROOT}/uninstall-fenrir"

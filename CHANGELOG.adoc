@@ -1,0 +1,12 @@
+= Fenrir's changelog
+
+== Version 2026.0
+
+* Switched from semver to https://calver.org/[calver]
+* `pre` block in pipeline is removed
+* Supported `env` subcommand (create & manage a dev env)
+* Supported fixtures
+* Added man pages
+* Supported `deb` & `rpm` distribution
+* Updated autocomplete
+* Minor refactoring

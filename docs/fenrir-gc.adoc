@@ -1,0 +1,31 @@
+= fenrir-gc(1)
+Iwan Kalinin
+
+:doctype: manpage
+:man-linkstyle: yellow B "" ""
+:mansource: fenrir
+
+== Name
+
+fenrir-gc - remove unused files.
+
+
+== Synopsis
+*fenrir gc* [-f|--force]
+
+== Description
+Removes unused files. Has two modes: _SOFT_ and _HARD_. The default is *SOFT*.
+
+_Soft_: +
+- temporary files +
+_Hard_: +
+- temporary files +
+- local repo +
+- local configs +
+
+== Options
+*-f,--force*::
+Run in 'HARD' mode.
+
+== See also
+*fenrir-tmp*(1)

@@ -21,6 +21,7 @@
 #include <verify-non-sudo>
 #include <shift-args>
 #include <set-sed>
+#include <help>
 
 cmd=$1
 shift
@@ -38,7 +39,7 @@ case "$cmd" in
     ;;
 
     "--help" | "h" | "help")
-        fenrir-help "$@"
+        fenrir --help
     ;;
 
     "i" | "info")
@@ -72,7 +73,7 @@ case "$cmd" in
     "versions")
         EXP_ARGC=0
         #include <verify-argc>
-        if ! curl -k -L -m 10 -o "$OUT_FILE" --stderr "$ERR_FILE" https://gitlab.com/api/v4/projects/77504275/repository/tags; then
+        if ! curl -f -k -L -m 10 -o "$OUT_FILE" --stderr "$ERR_FILE" 'https://api.github.com/repos/1bah/fenrir/tags'; then
             loki-log fail '(っ °Д °;)っ' "Failed to get"
             exit 13
         fi
@@ -80,7 +81,7 @@ case "$cmd" in
         echo "Available versions:"
 
         # shellcheck disable=SC2154
-        grep -o '"name":"[^"]*"' "$OUT_FILE" | ${sed_cmd} 's|"name":"||' | ${sed_cmd} 's|"||' | ${sed_cmd} 's|^|* |'
+        grep -o '"name":[ ]*"[^"]*"' "$OUT_FILE" | ${sed_cmd} -E 's|"name":[ ]*"([^"]*)"|* \1|'
     ;;
 
     "v" | "version")
@@ -92,6 +93,10 @@ case "$cmd" in
 
     "gc")
         fenrir-gc "$@"
+    ;;
+
+    "env")
+        fenrir-env "$@"
     ;;
 
     *)

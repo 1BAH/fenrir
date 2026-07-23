@@ -1,0 +1,41 @@
+= fenrir(1)
+Iwan Kalinin
+
+:doctype: manpage
+:man-linkstyle: yellow B "" ""
+:mansource: fenrir
+
+== Name
+
+fenrir - cli tool for general purpose testing. Fenrir is based on bash and is not bound to any technology, thus, remaining useful for testing different technologies & languages and, at the same time, lightweight. This command is an only _safe_ interface to run subcommands. Running them directly might be potentially *dangerous*!
+
+== Synopsis
+
+*fenrir* _SUBCOMMAND_ +
+*fenrir* --help
+
+== Options
+
+*--help*::
+Show manual.
+
+
+== Environment
+*FENRIR_TMP_DIR*::
+The directory where fenrir creates its temporary files. +
+The default value is _/tmp/fenrir/tmp_.
+
+*FENRIR_HOME*::
+The directory where fenrir local repository is stored. +
+The default value is _$HOME/.fenrir_.
+
+*LOKI_VERBOSE*::
+Coloured output with extra details. +
+The default value is _-v_.
+
+== Copyright
+The project is distributed under Apache License 2.0 (https://www.apache.org/licenses/LICENSE-2.0[https://www.apache.org/licenses/LICENSE-2.0])
+
+== See also
+// TODO
+*loki*(1), *fenrir-gc*(1)...

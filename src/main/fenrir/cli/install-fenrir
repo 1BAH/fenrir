@@ -8,18 +8,22 @@ function err_msg {
     echo -e "\033[1m\033[38;5;196m[ ERROR ]\033[0m \033[38;5;197mᕙ( •̀ ᗜ •́ )ᕗ\033[0m $*"
 }
 
-out=(">" "/dev/null")
+function info {
+    echo "[ INFO  ] $*"
+}
+
+function warn {
+    echo "[ WARN  ] $*"
+}
+
 verbose=""
 sed_cmd="sed"
 out_dir="/usr/local/bin"
 conf_dir="/etc/fenrir"
+man_dir="/usr/local/share/man"
 
 while (( $# > 0 )); do
     case "$1" in
-    -v)
-        out=()
-        verbose="-v"
-    ;;
     --bash)
         export FENRIR_INSTALL_BASH=1
     ;;
@@ -34,6 +38,10 @@ while (( $# > 0 )); do
         conf_dir="$2"
         shift
     ;;
+    --man-dir)
+        man_dir="$2"
+        shift
+    ;;
     -t)
         test_mode=True
     ;;
@@ -44,12 +52,16 @@ while (( $# > 0 )); do
         env_file=$2
         shift
     ;;
+    -nadoc)
+        export FENRIR_NO_ADOC=True
+    ;;
     esac
 
     shift
 done
 
 CLI_DIR=$(dirname "$(realpath "$0")") # 'cli' directory
+DOC_DIR=$(realpath "$CLI_DIR/../../../../docs") # 'docs' directory
 
 #################################################################
 #                         VERIFY SUDO                           #
@@ -57,37 +69,60 @@ CLI_DIR=$(dirname "$(realpath "$0")") # 'cli' directory
 if [ -n "$test_mode" ]; then
     echo -e "\033[1m\033[38;5;214m[ WARN  ]\033[0m \033[38;5;209m\(˚☐˚)/  \033[0mTest mode is on!"
 
+    # Create dirs for testing
     [ -d "${out_dir}" ]  || mkdir -p "${out_dir}"
     [ -d "${conf_dir}" ] || mkdir -p "${conf_dir}"
 elif ! [ "$(id -u)" -eq 0 ]; then
     err_msg "The script must be run in a \033[1mprivileged mode\033[0m (sudo)!"
     exit 111
-elif ! [ -d "${out_dir}" ]; then
-    err_msg "Install directory <${out_dir}> does not exist!"
-    exit 112
 fi
+
+#################################################################
+#                  CHECK INSTALL DESTINATION                    #
+#################################################################
+if ! [ -d "${out_dir}" ]; then
+    err_msg "Install directory <${out_dir}> does not exist!"
+    exit 121
+fi
+
+if ! [ -d "${conf_dir}" ]; then
+    err_msg "Config directory <${conf_dir}> does not exist!"
+    exit 122
+fi
+
+if ! [ -d "${man_dir}" ] && [ -z "${FENRIR_NO_ADOC}" ]; then
+    err_msg "Man pages directory <${man_dir}> does not exist!"
+    exit 123
+else
+    mkdir -p "${man_dir}/man1" # Make sure man1 subdir exists
+    man_dir="${man_dir}/man1"
+fi
+
+info "Install dir is: <${out_dir}>"
+info "Config dir is: <${conf_dir}>"
+info "Man page dir is: <${man_dir}>"
 
 #################################################################
 #                    CHECK EXISTING CONFIGS                     #
 #################################################################
-
-eval "echo \"[ INFO  ] Install dir is: <${out_dir}>\" ${out[*]}"
-eval "echo \"[ INFO  ] Config dir is: <${conf_dir}>\" ${out[*]}"
-
 if [ -f "${conf_dir}/main.hel" ]; then
-    eval "echo \"[ INFO  ] Using existing configs: <${conf_dir}/main.hel>\" ${out[*]}"
+    info "Using existing configs: <${conf_dir}/main.hel>"
 
-    case "$(grep -oP 'complete="\K[^"]*' "${conf_dir}/main.hel")" in
+    variant=$(grep -oP 'complete="\K[^"]*' "${conf_dir}/main.hel")
+    case "${variant}" in
         bash)
-            eval "echo \"[ INFO  ] Bash autocompletion to be installed\" ${out[*]}"
+            info "Autocomplete: bash"
             export FENRIR_INSTALL_BASH=1
         ;;
         zsh)
-            eval "echo \"[ INFO  ] Zsh autocompletion to be installed\" ${out[*]}"
+            info "Autocomplete: zsh"
             export FENRIR_INSTALL_ZSH=1
         ;;
+        "")
+            true # Ignore: no autocomplete
+        ;;
         *)
-            eval "echo \"[ WARN  ] Autocomplete: Unknown option\" ${out[*]}"
+            warn "Autocomplete: Unknown option (${variant})"
         ;;
     esac
 fi
@@ -95,7 +130,6 @@ fi
 #################################################################
 #                      VERIFY DEPENDENCIES                      #
 #################################################################
-
 while IFS='=' read -r key value; do
     case "$key" in
         requirements)
@@ -113,7 +147,7 @@ sed --help &> /dev/null || {
 
     which gsed &> /dev/null || {
         err_msg "Cannot find <gsed>! Install it: 'brew install gnu-sed'"
-        exit 111
+        exit 130
     }
 
     sed_cmd="gsed"
@@ -121,30 +155,30 @@ sed --help &> /dev/null || {
 }
 
 export sed_cmd
-eval "echo -e \"+ '\033[1msed\033[0m' exists\" ${out[*]}"
+echo -e "+ '\033[1msed\033[0m' exists"
 
 for req in "${REQUIREMENTS[@]}"; do
     if ! type "$req" &> /dev/null; then
         err_msg "- '\033[1m$req\033[0m' is not installed!"
-        exit 5
+        exit 140
     else
-        eval "echo -e \"+ '\033[1m$req\033[0m' exists\" ${out[*]}"
+        echo -e "+ '\033[1m$req\033[0m' exists"
     fi
 done
 
 # Check that bash is 5.0.0 or newer
 if (( "$(echo "$BASH_VERSION" | cut -d'.' -f1)" < 5 )); then
     warn_msg "Bash version is '\033[1m$BASH_VERSION\033[0m'. Fenrir might work incorrectly: bash should be >=5.0.0"
-    warn_msg "Do you agree to continue? (\033[1mPotentially dangerous\033[0m) [Y|N]"
+    warn_msg "Do you agree to continue? (\033[1mPotentially dangerous\033[0m) [y|N]"
 
     read -r op
     if [ "$op" != "y" ] && [ "$op" != "Y" ]; then
         err_msg "Terminating.."
-        exit 3
+        exit 141
     fi
 fi
 
-eval "echo -e \"+ '\033[1mbash\033[0m' exists\" ${out[*]}"
+echo -e "+ '\033[1mbash\033[0m' exists"
 
 echo "PROGRESS << DONE"
 
@@ -157,7 +191,7 @@ echo "PROGRESS >> Assembling the build script.."
 BUILD_SCRIPT="/tmp/FENRIR_BUILD_SCRIPT"
 
 if [ -f "$BUILD_SCRIPT" ]; then
-    eval "echo \"[ INFO  ] Found an old build script: <$BUILD_SCRIPT>\" ${out[*]}"
+    info "Found an old build script: <$BUILD_SCRIPT>"
     rm -fr "$BUILD_SCRIPT" &> /dev/null
 fi
 
@@ -169,7 +203,7 @@ fi
             continue
         fi
 
-        eval "echo \"[ INFO  ] Inlining module <$script>..\" ${out[*]}"
+        info "Inlining module <$script>.."
 
         file=$(basename "$script")
         pattern="#include <$file>"
@@ -185,19 +219,20 @@ fi
 
 chmod +x $BUILD_SCRIPT
 
-eval "echo \"[ INFO  ] The final build script is <$BUILD_SCRIPT>\" ${out[*]}"
+info "The final build script is <$BUILD_SCRIPT>"
 echo "PROGRESS << DONE"
 
 # Running script with env parameters
 CLI_DIR="$CLI_DIR" \
+DOC_DIR="$DOC_DIR" \
 FENRIR_INSTALL_VERBOSE="$verbose" \
-LOKI_VERBOSE="$verbose" \
 FENRIR_INSTALL_DIR="$out_dir" \
 FENRIR_CONF_DIR="$conf_dir" \
+FENRIR_MAN_DIR="$man_dir" \
 FENRIR_TEST_MODE="$test_mode" \
 FENRIR_DEBUG_MODE="$debug_mode" \
 FENRIR_ENV_FILE="$env_file" \
-$BUILD_SCRIPT
+  "$BUILD_SCRIPT"
 
 res=$?
 

@@ -1,0 +1,29 @@
+# Verify sources
+
+echo "PROGRESS >> Verifying the source dir.."
+
+if [[ $(basename "$CLI_DIR") != "cli" ]]; then
+    printf "\033[31m'CLI_DIR' does not actually points to 'cli'\033[0m\n"
+    printf "\033[31mCLI_DIR=%s\033[0m\n" "$CLI_DIR" >& 2
+    exit 11
+fi
+
+if [[ $(basename "$FENRIR_DIR") != "fenrir" ]]; then
+    printf "\033[31m'FENRIR_DIR' does not actually points to 'fenrir'\033[0m\n" >& 2
+    printf "\033[31mFENRIR_DIR=%s\033[0m\n" "$FENRIR_DIR" >& 2
+    exit 12
+fi
+
+if [[ $(basename "$LOKI_DIR") != "loki" ]]; then
+    printf "\033[31m'LOKI_DIR' does not actually points to 'loki'\033[0m\n" >& 2
+    printf "\033[31mLOKI_DIR=%s\033[0m\n" "$LOKI_DIR" >& 2
+    exit 13
+fi
+
+if [[ $(basename "$DOC_DIR") != "docs" ]]; then
+    printf "\033[31m'DOC_DIR' does not actually points to 'docs'\033[0m\n" >& 2
+    printf "\033[31mDOC_DIR=%s\033[0m\n" "$LOKI_DIR" >& 2
+    exit 14
+fi
+
+echo "PROGRESS << DONE"

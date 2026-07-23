@@ -1,12 +1,17 @@
 #! /usr/bin/env loki
 
+##
+# Usage:
+#   fenrir-env-down
+#
+# TODO
+##
+
 ######################################################################
 ##                         VERIFY ARGUMENTS                         ##
 ######################################################################
 
 #include <shift-args>
-
-# TODO Create help pages for all cmds
 
 EXP_ARGC=0
 #include <verify-argc>
@@ -15,16 +20,19 @@ EXP_ARGC=0
 ##                           MAIN PROGRAM                           ##
 ######################################################################
 
-cat <<____HEREDOC
-Fenrir is a lightweight testing framework based on bash.
+# Env teardown
+if [ -x "${FENRIR_TMP_DIR}/env.down" ]; then
+    "${FENRIR_TMP_DIR}/env.down"
+    rm "${FENRIR_TMP_DIR}/env.down"
+fi
 
-Help pages to be done..
+[ -f "${FENRIR_TMP_DIR}/env.conts" ] && while IFS= read -r cont; do
+    lokiw docker rm -f "$cont"
+done < "${FENRIR_TMP_DIR}/env.conts"
 
-------------------------------------------------------------------
-OPTIONS:
-    v, version           Print current version
-    --help, h, help      See help pages
-------------------------------------------------------------------
-fenrir $(fenrir-read-conf main version), 2026
-@_1BAH_
-____HEREDOC
+if [ -f "${FENRIR_TMP_DIR}/env" ]; then
+    container=$(< "${FENRIR_TMP_DIR}/env")
+    lokiw docker rm -f "$container"
+fi
+
+rm -f "${FENRIR_TMP_DIR}/env" "${FENRIR_TMP_DIR}/env.conts"

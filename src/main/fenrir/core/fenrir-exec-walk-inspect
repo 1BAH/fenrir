@@ -1,0 +1,50 @@
+#! /usr/bin/env loki
+
+##
+# Usage:
+#   fenrir-exec-walk-inspect
+#
+# Executes walk inspections
+#
+# ENVS:
+#     FENRIR_WI_NL    no-lint option
+##
+
+#include <shift-args>
+EXP_ARGC=0
+#include <verify-argc>
+
+###########################################
+
+ecode=0
+
+function save_error_report {
+    echo "      <failure><![CDATA[" >> "${REPORT_FILE}"
+    cat "${CMD_FILE}" | sed -E "s/${ESC}\[[0-9;]*[mG]//g" >> "$REPORT_FILE"
+    echo "      ]]></failure>" >> "${REPORT_FILE}"
+
+    echo "      <system-out><![CDATA[" >> "${REPORT_FILE}"
+    cat "${OUT_FILE}" | sed -E "s/${ESC}\[[0-9;]*[mG]//g" >> "$REPORT_FILE"
+    echo "      ]]></system-out>" >> "${REPORT_FILE}"
+
+    echo "      <system-err><![CDATA[" >> "${REPORT_FILE}"
+    cat "${ERR_FILE}" | sed -E "s/${ESC}\[[0-9;]*[mG]//g" >> "$REPORT_FILE"
+    echo "      ]]></system-err>" >> "${REPORT_FILE}"
+}
+
+echo '    <testcase name="walk-inspections">' >> "${REPORT_FILE}"
+
+if [ -n "$FENRIR_WI_NL" ]; then
+    echo "      <skipped>Running with --no-lint option</skipped>" >> "${REPORT_FILE}"
+    loki-log warn "Running with '--no-lint' option"
+else
+    "${FENRIR_HOME}/shared/walk-inspections" || {
+        ecode=$?
+        save_error_report
+    }
+fi
+
+echo "    </testcase>" >> "${REPORT_FILE}"
+
+
+exit $ecode

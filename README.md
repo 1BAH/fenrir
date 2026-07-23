@@ -4,11 +4,12 @@
 
 ![status](https://github.com/1bah/fenrir/actions/workflows/pages.yml/badge.svg)
 ![status](https://github.com/1bah/fenrir/actions/workflows/docker.yml/badge.svg)
+![status](https://github.com/1bah/fenrir/actions/workflows/release.yml/badge.svg)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 > The project has migrated from [GitLab](https://gitlab.com/atpd/fenrir)
 
-The latest version is `1.2.4`
+The latest version is `2026.0`
 
 Available in a docker container: `ghcr.io/1bah/fenrir-base:latest`
 

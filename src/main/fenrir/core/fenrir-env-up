@@ -1,0 +1,163 @@
+#! /usr/bin/env loki
+
+##
+# Usage:
+#   fenrir-env-up [--rm|--unsafe|--bind]
+#
+# Starts a container with the selected env
+##
+
+
+function finalise {
+    local message=$1
+    local ecode=${2:-0}
+
+    loki-log fail "$message"
+    loki-log err "Destructing env.."
+    docker rm -f "$container" &> /dev/null
+    rm -f "${FENRIR_TMP_DIR}/env"
+
+    exit "$ecode"
+}
+
+function cp_file {
+    local dir=$1
+    local dist=$2
+
+    lokiw docker cp "$dir" "$container:$dist" || {
+        finalise "Unable to copy <$dir> to the env" "$?"
+    }
+
+    lokiw docker exec -u root "$container" chown fikus -R "$dist" || {
+        finalise "Unable to change owner inside the env" "$?"
+    }
+}
+
+######################################################################
+##                         VERIFY ARGUMENTS                         ##
+######################################################################
+
+#include <shift-args>
+
+rm_opt=""
+privileged=""
+bind=""
+
+while [ "$#" -ne 0 ]; do
+    case $1 in
+        --rm)
+            rm_opt="--rm"
+            shift
+        ;;
+        --unsafe)
+            privileged="--privileged"
+            shift
+        ;;
+        --bind)
+            bind="YES"
+            shift
+        ;;
+        *)
+            loki-log err '(＃°Д°)' Unknown parameter: "<$1>"
+            exit 16
+        ;;
+    esac
+done
+
+######################################################################
+##                          Start container                         ##
+######################################################################
+
+task=$(fenrir-read-conf run task)
+sol_dir=$(fenrir-read-conf run "root")
+
+image=$(fenrir-read-conf "$task" image)
+image=${image:-"ghcr.io/1bah/fenrir-base:latest"}
+
+ENV_HOME="/home/fikus"
+
+docker pull "$image" || {
+    loki-log warn "Cannot update image.. Trying to use a cached one instead.."
+}
+
+loki-log info "Initialising env.."
+
+######
+#= Mount docker socket ???????
+######
+
+# Testing => safe mode
+if [ -z "$bind" ]; then
+    container=$(docker run $privileged -e LOKI_VERBOSE $rm_opt -d "$image" 2> "${ERR_FILE}")
+else
+    # Solution is mounted in container
+    container=$(docker run \
+        $privileged \
+        -e LOKI_VERBOSE \
+        --mount "type=bind,src=${sol_dir},dst=${ENV_HOME}/solution" \
+        $rm_opt -d \
+        "$image" 2> "${ERR_FILE}")
+fi
+status=$?
+
+if (( status != 0 )); then
+    loki-log fail "Cannot start docker"
+    exit $status
+fi
+
+# Save container ID
+echo "$container" > "${FENRIR_TMP_DIR}/env"
+
+loki-log info "Env is created.."
+
+######################################################################
+##                         Set up container                         ##
+######################################################################
+loki-log info "Configuring env (fenrir).."
+
+# Fenrir
+cp_file "$FENRIR_HOME" "${ENV_HOME}"
+
+# Install local fenrir into the container
+docker exec -u root "$container" rm -fr /etc/fenrir
+docker exec -u root "$container" sh -c 'rm -fr /usr/local/bin/fenrir* /usr/local/bin/update-fenrir /usr/local/bin/uninstall-fenrir /usr/local/bin/loki /tmp/fenrir'
+
+cp_file "/etc/fenrir" "/etc/fenrir"
+for file in /usr/local/bin/fenrir* /usr/local/bin/update-fenrir /usr/local/bin/uninstall-fenrir /usr/local/bin/loki; do
+    cp_file "$file" "/usr/local/bin"
+done
+
+# Run config
+loki-log info "Fenrir version:" "$(docker exec -u fikus "$container" fenrir v)"
+lokiw docker exec -u fikus "$container" fenrir-set-conf run blocking "$(fenrir-read-conf run blocking)" || {
+    loki-log warn "Fenrir config: <fenrir-set-conf run blocking> has failed!"
+}
+lokiw docker exec -u fikus "$container" fenrir-set-conf run task "$(fenrir-read-conf run task)" || {
+    loki-log warn "Fenrir config: <fenrir-set-conf run task> has failed!"
+}
+lokiw docker exec -u fikus "$container" fenrir-set-conf run root "${ENV_HOME}/solution" || {
+    loki-log warn "Fenrir config: <fenrir-set-conf run root> has failed!"
+}
+
+loki-log info "Configuring env (solution).."
+
+# Copy solution when safe mode is on
+if [ -n "$use_safe" ]; then
+    cp_file "$sol_dir" "${ENV_HOME}/solution"
+fi
+
+loki-log info "Configuring env (setup file).."
+
+# In case of failed env.up, env.down is copied beforehand
+if [ -x "$(fenrir-task-path repo)/env.down" ]; then
+    cp "$(fenrir-task-path repo)/env.down" "${FENRIR_TMP_DIR}/env.down"
+fi
+
+# Env setup
+if [ -x "$(fenrir-task-path repo)/env.up" ]; then
+    "$(fenrir-task-path repo)/env.up" || {
+        finalise "Failed to execute <env.up> file" $?
+    }
+fi
+
+loki-log info "Env is ready.."

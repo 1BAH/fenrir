@@ -1,0 +1,40 @@
+#! /usr/bin/env bash
+
+#################################################################
+#                        GLOBAL CONSTS                          #
+#################################################################
+
+loki-prog "Intalling man pages.."
+
+skip_man=0
+
+type asciidoctor &> /dev/null || {
+    if [ -z "${FENRIR_NO_ADOC}" ]; then
+        loki-log warn "Cannot find asciidoctor locally"
+
+        loki-log warn "Do you want to skip man pages generation? [y|N]"
+
+        read -r op
+        if [ "$op" != "y" ] && [ "$op" != "Y" ]; then
+            loki-log err "Terminating.."
+            exit 7
+        fi
+    fi
+
+    skip_man=1
+}
+
+if (( skip_man == 0 )); then
+    for file in "${DOC_DIR}"/*.adoc; do
+        loki-log info "Now compiling: <$file>"
+        asciidoctor -b manpage "$file" -D "$BUILD_DIR/docs" || exit $?
+    done
+
+    for file in "$BUILD_DIR/docs"/*; do
+        cp "$file" "${FENRIR_MAN_DIR}/"
+    done
+
+    [ -n "${FENRIR_TEST_MODE}" ] || mandb -q
+fi
+
+loki-gorp

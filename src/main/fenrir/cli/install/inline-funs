@@ -1,11 +1,11 @@
 
-out loki-prog "Inlining functions..."
+loki-prog "Inlining functions..."
 
 ( # Do not pollute the global scope: to be inlined in install-fenrir
     INLINE_FUNS_DIR="$CORE_UTILS_DIR/inline"
 
     for inline in "$INLINE_FUNS_DIR"/*; do
-        out loki-log info "Inlining module '$inline'.."
+        loki-log info "Inlining module <$inline>.."
 
         for util in "$CORE_UTILS_DIR"/*; do
             if ! [ -f "$util" ]; then
@@ -21,4 +21,4 @@ out loki-prog "Inlining functions..."
     done
 )
 
-out loki-gorp "DONE"
+loki-gorp "DONE"

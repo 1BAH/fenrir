@@ -1,7 +1,3 @@
-pre=(
-
-)
-
 main=(
     "walk-inspections"
     "local"

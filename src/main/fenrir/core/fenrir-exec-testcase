@@ -1,0 +1,95 @@
+#! /usr/bin/env loki
+
+##
+# Usage:
+#   fenrir-exec-testcase TESTCASE
+#
+# Executes testcase
+#
+# ENVS:
+#      FENRIR_TC_SKIP -- prevents execution, logs <skipped />
+##
+
+#include <shift-args>
+EXP_ARGC=1
+#include <verify-argc>
+
+testcase=$1
+
+###########################################
+function pretty_print_testname {
+    name=$1
+    descriptor_len=10 # '[ INFO  ] '
+    name_len=${#name}
+    rest=$(( LOKI_COLUMNS - descriptor_len - name_len - 2 )) # Do not forget about parentheses
+
+    loki-log info "$(loki-dup '-' $(( rest / 2 )))($name)$(loki-dup '-' $(( rest - rest / 2 )))"
+}
+
+function save_error_report {
+    echo "      <failure><![CDATA[" >> "${REPORT_FILE}"
+    cat "${CMD_FILE}" | sed -E "s/${ESC}\[[0-9;]*[mG]//g" >> "$REPORT_FILE"
+    echo "      ]]></failure>" >> "${REPORT_FILE}"
+
+    echo "      <system-out><![CDATA[" >> "${REPORT_FILE}"
+    cat "${OUT_FILE}" | sed -E "s/${ESC}\[[0-9;]*[mG]//g" >> "$REPORT_FILE"
+    echo "      ]]></system-out>" >> "${REPORT_FILE}"
+
+    echo "      <system-err><![CDATA[" >> "${REPORT_FILE}"
+    cat "${ERR_FILE}" | sed -E "s/${ESC}\[[0-9;]*[mG]//g" >> "$REPORT_FILE"
+    echo "      ]]></system-err>" >> "${REPORT_FILE}"
+}
+###########################################
+
+echo "    <testcase name=\"${testcase}\">" >> "${REPORT_FILE}"
+if [ -n "$FENRIR_TC_SKIP" ]; then
+    echo "      <skipped>Blocking execution</skipped>" >> "${REPORT_FILE}"
+else
+    pretty_print_testname "${testcase}"
+
+    ( # Running in a subshell => Cannot change file scope
+        ecode=0
+
+        # Set up: *.enter is sourced (current scope)
+        if [ -x "$(fenrir-task-path repo)/$testcase.enter" ]; then
+            source "$(fenrir-task-path repo)/$testcase.enter" || {
+                ecode=$?
+                save_error_report
+            }
+        elif [ -x "$(fenrir-task-path repo)/.enter" ]; then
+             source "$(fenrir-task-path repo)/.enter" || {
+                 ecode=$?
+                 save_error_report
+             }
+        fi
+
+        if (( ecode != 0 )); then
+            loki-log warn "Cannot start the testcase environment: tests are not executed!"
+        else
+            # Run test: fork (child scope)
+            "$(fenrir-task-path repo)/$testcase" || {
+                ecode=$?
+                save_error_report
+            }
+        fi
+
+        # Tear down: *.exit is sourced (current scope)
+        if [ -x "$(fenrir-task-path repo)/$testcase.exit" ]; then
+            source "$(fenrir-task-path repo)/$testcase.exit" || {
+                ecode=$?
+                save_error_report
+            }
+        elif [ -x "$(fenrir-task-path repo)/.exit" ]; then
+             source "$(fenrir-task-path repo)/.exit" || {
+                 ecode=$?
+                 save_error_report
+             }
+        fi
+
+        exit $ecode
+    )
+    ecode=$?
+fi
+echo "    </testcase>" >> "${REPORT_FILE}"
+
+exit "$ecode"

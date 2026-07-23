@@ -13,22 +13,6 @@
 #   -nl, --no-lint      Skip linting stage (walk-inspections)
 ##
 
-function finalise {
-    local message=$1
-    local ecode=${2:-0}
-
-    loki-log fail "$message"
-
-    if [ -n "$debug" ]; then
-        loki-log err "Container exited with non-zero code: <$ecode>"
-        loki-log warn "Do not forget to stop the container: 'docker stop $container'"
-    else
-        docker stop "$container" &> /dev/null
-    fi
-
-    exit "$ecode"
-}
-
 ######################################################################
 ##                         VERIFY ARGUMENTS                         ##
 ######################################################################
@@ -39,7 +23,6 @@ NO_LINT=""
 debug=""
 
 hit=0
-path=""
 
 while [ "$#" -ne 0 ]; do
     case $1 in
@@ -68,8 +51,7 @@ while [ "$#" -ne 0 ]; do
                 exit 15
             fi
 
-            path=$1
-
+            fenrir-set-conf run root "$1"
             (( hit++ ))
         ;;
     esac
@@ -110,65 +92,26 @@ if (( allowed != 1 )); then
     exit 103
 fi
 
-src=$(realpath "$path")
+unsafe=$(fenrir-read-conf "$task" unsafe)
+unsafe=${unsafe:-0}
 
-image=$(fenrir-read-conf "$task" image)
-image=${image:-"ghcr.io/1bah/fenrir-base:latest"}
-
-lokiw docker pull "$image" || {
-    loki-log warn "Cannot update image.. Trying to use a cached one instead.."
-}
-
-container=$(docker run -e LOKI_VERBOSE --rm -d "$image" 2> "${ERR_FILE}")
-status=$?
-
-if (( status != 0 )); then
-    loki-log fail "Cannot start docker"
-    exit $status
+if (( unsafe == 1 )); then
+    unsafe="--unsafe"
+else
+    unsafe=""
 fi
 
-loki-log info "Running on: " "$(docker exec -it "$container" fenrir v)"
+fenrir-env-up --rm $unsafe || exit $?
 
-lokiw docker exec -it "$container" fenrir info || {
-    finalise "Failed to find 'fenrir' in container" "$?"
-}
-
-lokiw docker cp "$src" "$container:/home/fikus/solution" || {
-    finalise "Unable to copy solution into container" "$?"
-}
-
-lokiw docker cp "$FENRIR_HOME" "$container:/home/fikus" || {
-    finalise "Unable to copy local repo into container" "$?"
-}
-
-lokiw docker exec -u root "$container" chown fikus -R "/home/fikus" || {
-    finalise "Unable to change owner" "$?"
-}
-
-lokiw docker cp "$RUN_CONF_FILE" "$container:/tmp/fenrir/tmp/run-conf.hel" || {
-    finalise "Unable to copy run-conf into container" "$?"
-}
-
-lokiw docker exec -u root "$container" chown fikus -R "/tmp/fenrir" || {
-    finalise "Unable to change owner" "$?"
-}
-
+container=$(< "${FENRIR_TMP_DIR}/env")
 if [[ -v testcase ]]; then
-    docker exec -it "$container" bash -c "cd solution && fenrir run -i -c ${testcase} ${NO_LINT} ."
+    docker exec -it "$container" sh -c "fenrir run -i -c ${testcase} ${NO_LINT} /home/fikus/solution"
     ecode=$?
 else
-    docker exec -it "$container" bash -c "cd solution && fenrir run -i ${NO_LINT} ."
+    docker exec -it "$container" sh -c "fenrir run -i ${NO_LINT} /home/fikus/solution"
     ecode=$?
 fi
 
-if (( ecode == 0 )); then
-    docker stop "$container" &> /dev/null
-elif [ -n "$debug" ]; then
-    loki-log err "Container exited with non-zero code: <$ecode>"
-    loki-log warn "Do not forget to stop the container: 'docker stop $container'"
-else
-    loki-log err "Container exited with non-zero code: <$ecode>"
-    docker stop "$container" &> /dev/null
-fi
+fenrir-env-down
 
 exit "$ecode"

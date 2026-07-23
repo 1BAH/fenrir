@@ -1,7 +1,7 @@
 FROM ghcr.io/1bah/fenrir-base:latest AS fenrir
 
 FROM docker:latest
-LABEL authors="_1BAH_, Kalinin Iwan (koefic.cien@gmail.com)"
+LABEL authors="1BAH, Kalinin Iwan <koefic.cien@gmail.com>"
 
 ENV FENRIR_IN_DOCKER=1
 

@@ -17,7 +17,7 @@
 #                       The default value is 21
 #
 #    FNR_TMP_MAX_NUM    The maximum index in fenrir's tmp directory. Each invocation increments the inner counter.
-#                       When the counter reaches this constant, an alert will be shown.
+#                       When the counter reaches this constant, an alert is shown.
 #                       The default value is 1000
 ##
 
@@ -29,6 +29,7 @@ FNR_TMP_MAX_NUM=${FNR_TMP_MAX_NUM:-1000}
 ######################################################################
 
 #include <shift-args>
+#include <help>
 
 MAX_ARGC=1
 #include <verify-argc>

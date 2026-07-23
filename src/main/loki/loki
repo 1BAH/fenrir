@@ -91,6 +91,7 @@ if (( $# != 0 )); then
     }
 
     file=$(realpath "$1")
+    export LOKI_CURRENT_FILE=$file
     other=("$@")
     other=("${other[@]:1}")
 

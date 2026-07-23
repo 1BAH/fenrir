@@ -1,0 +1,66 @@
+#! /usr/bin/env loki
+
+##
+# Usage:
+#   fenrir-env-runner [TESTCASE]
+#
+# TODO
+##
+
+######################################################################
+##                         VERIFY ARGUMENTS                         ##
+######################################################################
+
+#include <shift-args>
+
+MAX_ARGC=1
+#include <verify-argc>
+
+if (( $# == 1 )); then
+    testcase=$1
+fi
+
+######################################################################
+##                           MAIN PROGRAM                           ##
+######################################################################
+loki-log info 'ヾ(＾ ∇ ＾).' "Now in env"
+
+# Testcase setup
+if [[ -v testcase ]] && [ -x "$(fenrir-task-path repo)/$testcase.enter" ]; then
+    loki-log info "Testcase setup.."
+    source "$(fenrir-task-path repo)/$testcase.enter" || {
+        loki-log warn "Testcase setup has failed!"
+    }
+elif [ -x "$(fenrir-task-path repo)/.enter" ]; then
+    loki-log info "Testcase setup.."
+    source "$(fenrir-task-path repo)/.enter" || {
+        loki-log warn "Testcase setup has failed!"
+    }
+fi
+
+cat <<- INFO
+$(loki-log info "$(loki-dup '-' $(( LOKI_COLUMNS - 10 )))")
+$FENRIR_LOGO
+User:     fikus
+Password: breach
+System:   $(cat /etc/os-release | grep 'PRETTY_NAME' | sed -E 's|PRETTY_NAME="(.*)"|\1|')
+Task ID:  $(fenrir-read-conf run task)
+$(loki-log info "$(loki-dup '-' $(( LOKI_COLUMNS - 10 )))")
+INFO
+
+echo "$BASHPID" > "$FENRIR_TMP_DIR/env.pid"
+
+# Allow user to run
+cd solution
+bash
+
+loki-log info "Terminating the environment.."
+
+# Testcase teardown
+if [[ -v testcase ]] && [ -x "$(fenrir-task-path repo)/$testcase.exit" ]; then
+    loki-log info "Testcase teardown.."
+    source "$(fenrir-task-path repo)/$testcase.exit"
+elif [ -x "$(fenrir-task-path repo)/.exit" ]; then
+    loki-log info "Testcase teardown.."
+    source "$(fenrir-task-path repo)/.exit"
+fi

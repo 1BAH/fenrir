@@ -1,0 +1,21 @@
+= fenrir-info(1)
+Iwan Kalinin
+
+:doctype: manpage
+:man-linkstyle: yellow B "" ""
+:mansource: fenrir
+
+== Name
+
+fenrir-info - show the current context of fenrir.
+
+== Synopsis
+*fenrir-info*
+
+== Description
+The command displays:
+
+- Tasks' remote repo
+- The task to be tested
+- Running mode of the task (whether is blocking or not)
+- Testing pipeline
