@@ -37,7 +37,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ env.version }}
-          release_name: "Fenrir v${{ env.version }}"
+          release_name: "Fenrir ${{ env.version }}"
 
       - name: Publish deb package
         uses: actions/upload-release-asset@v1
@@ -45,7 +45,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: /tmp/fenrir-build/fenrir-${{ env.version }}.noarch.deb
+          asset_path: /home/runner/fenrir-${{ env.version }}.noarch.deb
           asset_content_type: application/vnd.debian.binary-package
           asset_name: fenrir-${{ env.version }}.noarch.deb
 
@@ -55,6 +55,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ~/rpmbuild/RPMS/noarch/fenrir-2026.0-1.noarch.rpm
+          asset_path: /home/runner/fenrir-${{ env.version }}.noarch.rpm
           asset_content_type: application/x-rpm
           asset_name: fenrir-${{ env.version }}.noarch.rpm
