@@ -7,7 +7,7 @@ Iwan Kalinin
 
 == Name
 
-*fenrir-gc* - remove unused files.
+fenrir-gc - remove unused files.
 
 
 == Synopsis

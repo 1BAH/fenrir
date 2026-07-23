@@ -7,7 +7,7 @@ Iwan Kalinin
 
 == Name
 
-*loki* - interpreter used in fenrir
+loki - interpreter used in fenrir
 
 == Synopsis
 

@@ -7,7 +7,7 @@ Iwan Kalinin
 
 == Name
 
-*fenrir-tmp* - create a new temporary file in _FENRIR_TMP_DIR_.
+fenrir-tmp - create a new temporary file in _FENRIR_TMP_DIR_.
 
 == Synopsis
 *fenrir tmp* [-d | -p]

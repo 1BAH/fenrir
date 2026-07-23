@@ -7,7 +7,7 @@ Iwan Kalinin
 
 == Name
 
-*fenrir-inspect* - show test sources.
+fenrir-inspect - show test sources.
 
 == Synopsis
 *fenrir-inspect* [_TASK_] _TestID_ +

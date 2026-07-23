@@ -7,7 +7,7 @@ Iwan Kalinin
 
 == Name
 
-*fenrir-info* - show the current context of fenrir.
+fenrir-info - show the current context of fenrir.
 
 == Synopsis
 *fenrir-info*
