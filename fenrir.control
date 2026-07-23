@@ -1,0 +1,6 @@
+Package: fenrir
+Version: 2026.0
+Depends: bash
+Architecture: all
+Maintainer: Iwan Kalinin <koefic.cien@gmail.com>
+Description: Testing system
