@@ -31,7 +31,7 @@ if (( skip_man == 0 )); then
         cp "$file" "${FENRIR_MAN_DIR}/"
     done
 
-    mandb -q
+    [ -n "${FENRIR_TEST_MODE}" ] || mandb -q
 fi
 
 loki-gorp
