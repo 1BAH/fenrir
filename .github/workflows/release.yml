@@ -10,7 +10,7 @@ on:
       - 'v*'
 
 env:
-  version: 2026.0 #${{ github.ref_name }}${{ inputs.version }}
+  version: '2026.0' #${{ github.ref_name }}${{ inputs.version }}
 
 jobs:
   release:
