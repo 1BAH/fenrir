@@ -159,6 +159,10 @@ if ! {
     exit 21
 fi
 
+${sed_cmd} -i "s|^INSTALL_ROOT=.*$|INSTALL_ROOT=\"${FENRIR_INSTALL_DIR}\"|" "${FENRIR_INSTALL_DIR}/uninstall-fenrir"
+${sed_cmd} -i "s|^CONFIG_ROOT=.*$|CONFIG_ROOT=\"${FENRIR_CONF_DIR}\"|" "${FENRIR_INSTALL_DIR}/uninstall-fenrir"
+${sed_cmd} -i "s|^MAN_ROOT=.*$|MAN_ROOT=\"${FENRIR_MAN_DIR}\"|" "${FENRIR_INSTALL_DIR}/uninstall-fenrir"
+
 loki-gorp
 
 loki-gorp

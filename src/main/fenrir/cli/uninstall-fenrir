@@ -3,6 +3,8 @@
 # Uninstalls from the default locations
 
 INSTALL_ROOT="/usr/local/bin"
+MAN_ROOT="/usr/local/share/man"
+CONFIG_ROOT="/etc/fenrir"
 
 if [[ "$1" == update ]]; then
     update="YES"
@@ -46,8 +48,8 @@ loki-gorp
 
 loki-prog "Removing man pages.."
 
-for cmd in /usr/local/share/man/man1/fenrir-* /usr/local/share/man/man1/loki*; do
-    if [ "$cmd" = "/usr/local/share/man/man1/fenrir-*" ]; then
+for cmd in "${MAN_ROOT}"/man1/fenrir-* "${MAN_ROOT}"/man1/loki*; do
+    if [ "$cmd" = "${MAN_ROOT}/man1/fenrir-*" ]; then
         loki-log warn "No core commands were found!"
         break
     fi
@@ -60,10 +62,10 @@ loki-gorp
 #################################################################
 
 if [ -z "${update}" ]; then
-    loki-prog "Removing '/etc/fenrir'.."
+    loki-prog "Removing '${CONFIG_ROOT}'.."
 
-    if [ -d "/etc/fenrir" ]; then
-        rm -r /etc/fenrir
+    if [ -d "${CONFIG_ROOT}" ]; then
+        rm -r "${CONFIG_ROOT}"
     else
         loki-log warn "The directory does not exist!"
     fi
