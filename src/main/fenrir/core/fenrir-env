@@ -2,7 +2,7 @@
 
 ##
 # Usage:
-#   fenrir-env [-c TESTCASE] (up DIR|down)
+#   fenrir-env [-c|--testcase TESTCASE] (up DIR|down)
 #
 # TODO
 ##
@@ -17,7 +17,7 @@ variant=""
 
 while (( $# > 0 )); do
     case $1 in
-        -c)
+        -c|--testcase)
             testcase=${2?"You must select the testcase!"}
             shift
         ;;
