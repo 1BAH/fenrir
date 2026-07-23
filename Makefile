@@ -20,8 +20,7 @@ archive: install-fenrir
 	cd $(BUILD_DIR) && tar cvzf fenrir-$(VERSION).tar.gz $(INSTALL_DIR)
 
 rpm: archive
-	mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
-	ls -l ~/rpmbuild
+	mkdir -p ~/rpmbuild/BUILD ~/rpmbuild/RPMS ~/rpmbuild/SOURCES ~/rpmbuild/SPECS ~/rpmbuild/SRPMS
 	cp $(BUILD_DIR)/fenrir-$(VERSION).tar.gz ~/rpmbuild/SOURCES/
 	cp fenrir.spec ~/rpmbuild/SPECS/
 	cd ~/rpmbuild/SPECS/ && rpmbuild -ba fenrir.spec
