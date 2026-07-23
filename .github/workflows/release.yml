@@ -10,7 +10,7 @@ on:
       - 'v*'
 
 env:
-  version: ${{ github.ref_name }}${{ inputs.version }}
+  version: 2026.0 #${{ github.ref_name }}${{ inputs.version }}
 
 jobs:
   release:
@@ -28,7 +28,7 @@ jobs:
 
       - name: Create packages
         run:
-          make -j$(nproc) VERSION=${{ env.version }} all
+          make -j$(nproc) all
 
       - name: Create release
         uses: actions/create-release@v1
