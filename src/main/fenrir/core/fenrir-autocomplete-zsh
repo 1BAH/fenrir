@@ -12,7 +12,8 @@ function _fenrir {
             help\:'Show help information'
             i\:'Show execution context'
             info\:'Show execution context'
-            remote\:'Set task remote repository'
+            remote\:'Set tasks remote repository'
+            v\:'Show current version'
             version\:'Show current version'
             versions\:'Show all supported versions'
             gc\:'Remove unused files'
@@ -20,10 +21,11 @@ function _fenrir {
             run\:'Run tests'
             rund\:'Run tests in a docker container'
             task\:'Set the task to be tested'
-            install\:'Install a script as _local_ task'
             il\:'Install a script as _local_ task'
+            install\:'Install a script as _local_ task'
             in\:'Show test sources'
             inspect\:'Show test sources'
+            env\:'Manage dev environment'
             ))" \
         "*::arg:->args"
     
@@ -54,6 +56,9 @@ function _fenrir {
         ;;
         inspect)
             _fenrir_inspect
+        ;;
+        env)
+            _fenrir_env
         ;;
     esac
 }
@@ -90,6 +95,23 @@ function _find_all_tests {
     done
 }
 
+function _fenrir_env {
+    _arguments -C \
+        "-c[Select the testcase to enter]:testcase:($(_find_all_tests))" \
+        "--testcase[Select the testcase to enter]:testcase:($(_find_all_tests))" \
+        "1:subcommand::((
+            up\:'Enter dev environment'
+            down\:'Destroy current dev environment'
+            ))" \
+        "*::arg:->arfs"
+    
+    case $line[1] in
+        up)
+            _arguments -C "1:Solution directory:_path_files -/"
+        ;;
+    esac
+}
+
 function _fenrir_run {
     _arguments -C \
         "-i[Run test inside the provided directory without cloning it]" \
@@ -97,18 +119,18 @@ function _fenrir_run {
         "--no-lint[Skip linting stage (walk-inspections)]" \
         "-c[Select the testcase to run]:testcase:($(_find_all_tests))" \
         "--testcase[Select the testcase to run]:testcase:($(_find_all_tests))" \
-        "1:Directory with solution:_path_files -/"
+        "1:Solution directory:_path_files -/"
 }
 
 function _fenrir_rund {
     _arguments -C \
-        "-d[Does not stop the container (allows further debug)]" \
-        "--debug[Does not stop the container (allows further debug)]" \
+        "-d[Do not stop the container (allows further debug)]" \
+        "--debug[Do not stop the container (allows further debug)]" \
         "-nl[Skip linting stage (walk-inspections)]" \
         "--no-lint[Skip linting stage (walk-inspections)]" \
         "-c[Select the testcase to run]:testcase:($(_find_all_tests))" \
         "--testcase[Select the testcase to run]:testcase:($(_find_all_tests))" \
-        "1:Directory with solution:_path_files -/"
+        "1:Solution directory:_path_files -/"
 }
 
 function _fenrir_task {

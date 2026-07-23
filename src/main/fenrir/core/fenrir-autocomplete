@@ -3,9 +3,22 @@
 
 _fenrir()
 {
-    find_all_tasks() {
-        find "$HOME/.fenrir/repo" -type d -print0 | while IFS= read -r -d '' d; do
-            find "$d" -mindepth 1 -type d -print -quit | grep -q . || echo "$d" | sed 's|.*/repo/\(.*\)|\1|p'
+    function _find_all_tasks {
+        dir=$(fenrir-task-path repo 2> /dev/null)
+
+        find "$(echo "$dir" | sed 's|\(.*/repo\).*|\1|')" -mindepth 1 -type d -print0 | while IFS= read -r -d '' d; do
+            find "$d" -mindepth 1 -type d -print -quit | grep -q . || echo "$d" | sed 's|.*/repo/\(.*\)|\1|'
+        done
+    }
+
+    function _find_all_tests {
+        dir=$(fenrir-task-path repo 2> /dev/null)
+        if ! [ -d "$dir" ]; then
+            return 0
+        fi
+
+        find "$dir" -type f -print0 | while IFS= read -r -d '' d; do
+            echo "$d" | grep -vE ".*\.hel" | sed 's|.*/\([^/]*\)|\1|'
         done
     }
 
@@ -16,31 +29,35 @@ _fenrir()
     local -A helpmsg
     helpmsg=(
         [help]="Show help information"
+        [info]="Show execution context"
+        [remote]="Set task remote repository"
+        [version]="Show current version"
+        [versions]="Show all supported versions"
         [gc]="Remove unused files"
+        [switch]="Update fenrir"
         [run]="Run tests"
         [rund]="Run tests in a docker container"
         [task]="Set the task to be tested"
-        [info]="Show execution context"
         [install]="Install a script as 'local' task"
-        [switch]="Update fenrir"
-        [versions]="Show all supported versions"
-        [version]="Show current version"
-        [remote]="Set task remote repository"
+        [inspect]="Show test sources"
+        [env]="Manage dev environment"
     )
 
     local -A display_name_map
     display_name_map=(
-        [info]="info, i"
-        [version]="version, v"
         [help]="help, --help, h"
-        [install]="install, il"
+        [info]="info, i"
+        [remote]="remote"
+        [version]="version, v"
+        [versions]="versions"
         [gc]="gc"
+        [switch]="switch"
         [run]="run"
         [rund]="rund"
         [task]="task"
-        [versions]="versions"
-        [switch]="switch"
-        [remote]="remote"
+        [install]="install, il"
+        [inspect]="inspect, in"
+        [env]="env"
     )
 
 ####################################################################################################
@@ -55,6 +72,8 @@ _fenrir()
         CMDS+=("run" "rund")
         CMDS+=("task")
         CMDS+=("install" "il")
+        CMDS+=("inspect" "in")
+        CMDS+=("env")
 
         local output=()
         local raw=()
@@ -68,6 +87,7 @@ _fenrir()
                 h)  long_cmd="help" ;;
                 v)  long_cmd="version" ;;
                 il) long_cmd="install" ;;
+                in) long_cmd="inspect" ;;
             esac
 
             local desc=${helpmsg["$long_cmd"]}
@@ -132,41 +152,81 @@ _fenrir()
                 ;;
 #>>>>>>>>>>>###################################################################################################
             switch)
-                helpmsg=(
-                    [latest]="Switch to the latest version"
-                )
+                if [[ "${COMP_WORDS[2]}" == -*  ]]; then
+                    helpmsg=(
+                        [--bash]="Install autocompletion for bash"
+                        [--zsh]="Install autocompletion for zsh"
+                    )
 
-                display_name_map=(
-                    [latest]="latest"
-                )
+                    display_name_map=(
+                        [--bash]="--bash"
+                        [--zsh]="--zsh"
+                    )
 
-                CMDS=("latest")
-                output=("$(printf "$printfstr" "<VERSION>" "Switch to the specific version (see 'fenrir versions' for available)")")
-                raw=()
+                    CMDS=("--zsh" "--bash")
+                    output=()
+                    raw=()
 
-                for cmd in $(compgen -W "${CMDS[*]}" -- "${COMP_WORDS[2]}"); do
-                    local desc=${helpmsg["$cmd"]}
-                    local display_name="${display_name_map["$cmd"]}"
+                    for cmd in $(compgen -W "${CMDS[*]}" -- "${COMP_WORDS[2]}"); do
+                        local desc=${helpmsg["$cmd"]}
+                        local display_name="${display_name_map["$cmd"]}"
 
-                    output+=("$(printf "$printfstr" "$display_name" "$desc")")
-                    raw+=("$cmd")
-                done
+                        output+=("$(printf "$printfstr" "$display_name" "$desc")")
+                        raw+=("$cmd")
+                    done
 
-                if [ "${#raw[@]}" -eq 0 ]; then
-                    return 0
+                    if [ "${#raw[@]}" -eq 0 ]; then
+                        return 0
+                    fi
+
+                    # When the command is found, there is no need for info message
+                    if [ "${#raw[@]}" -eq 1 ]; then
+                        COMPREPLY=("${raw[0]}")
+                        return 0
+                    fi
+
+                    COMPREPLY=("${output[@]}")
+                else
+                    helpmsg=(
+                        [latest]="Switch to the latest version"
+                    )
+
+                    display_name_map=(
+                        [latest]="latest"
+                    )
+
+                    CMDS=("latest")
+                    output=("$(printf "$printfstr" "<VERSION>" "Switch to the specific version (see 'fenrir versions' for available)")")
+                    raw=()
+
+                    for cmd in $(compgen -W "${CMDS[*]}" -- "${COMP_WORDS[2]}"); do
+                        local desc=${helpmsg["$cmd"]}
+                        local display_name="${display_name_map["$cmd"]}"
+
+                        output+=("$(printf "$printfstr" "$display_name" "$desc")")
+                        raw+=("$cmd")
+                    done
+
+                    if [ "${#raw[@]}" -eq 0 ]; then
+                        return 0
+                    fi
+
+                    # When the command is found, there is no need for info message
+                    if [ "${#raw[@]}" -eq 1 ]; then
+                        COMPREPLY=("${raw[0]}")
+                        return 0
+                    fi
+
+                    COMPREPLY=("${output[@]}")
                 fi
-
-                # When the command is found, there is no need for info message
-                if [ "${#raw[@]}" -eq 1 ]; then
-                    COMPREPLY=("${raw[0]}")
-                    return 0
-                fi
-
-                COMPREPLY=("${output[@]}")
                 ;;
 #>>>>>>>>>>>###################################################################################################
             install|il)
                 COMPREPLY=($(compgen -d -- "${COMP_WORDS[2]}"))
+                ;;
+#>>>>>>>>>>>###################################################################################################
+            inspect|in)
+                COMPREPLY=($(compgen -W "$(_find_all_tests)" -- "${COMP_WORDS[COMP_CWORD]}"))
                 ;;
 #>>>>>>>>>>>###################################################################################################
             task)
@@ -205,8 +265,7 @@ _fenrir()
 
                     COMPREPLY=("${output[@]}")
                 else
-                    mapfile -t CMDS < <(find_all_tasks | uniq)
-                    COMPREPLY=($(compgen -W "${CMDS[*]}" -- "${COMP_WORDS[COMP_CWORD]}"))
+                    COMPREPLY=($(compgen -W "$(_find_all_tasks)" -- "${COMP_WORDS[COMP_CWORD]}"))
                 fi
                 ;;
 #>>>>>>>>>>>###################################################################################################
@@ -216,15 +275,19 @@ _fenrir()
                         [-i]="Run test inside the provided directory without cloning it"
                         [-nl]="Skip linting stage (walk-inspections)"
                         [--no-lint]="Skip linting stage (walk-inspections)"
+                        [-c]="Select the testcase to run"
+                        [--testcase]="Select the testcase to run"
                     )
 
                     display_name_map=(
                         [-i]="-i"
                         [-nl]="-nl, --no-lint"
                         [--no-lint]="-nl, --no-lint"
+                        [-c]="-c, --testcase"
+                        [--testcase]="-c, --testcase"
                     )
 
-                    CMDS=("-i" "-nl" "--no-lint")
+                    CMDS=("-i" "-nl" "--no-lint" "-c" "--testcase")
                     output=("$(printf "$printfstr" "<directory>" "Solution directory")")
                     raw=()
 
@@ -259,6 +322,8 @@ _fenrir()
                         [--debug]="Does not stop the container (allows further debug)"
                         [-nl]="Skip linting stage (walk-inspections)"
                         [--no-lint]="Skip linting stage (walk-inspections)"
+                        [-c]="Select the testcase to run"
+                        [--testcase]="Select the testcase to run"
                     )
 
                     display_name_map=(
@@ -266,9 +331,11 @@ _fenrir()
                         [--debug]="-d, --debug"
                         [-nl]="-nl, --no-lint"
                         [--no-lint]="-nl, --no-lint"
+                        [-c]="-c, --testcase"
+                        [--testcase]="-c, --testcase"
                     )
 
-                    CMDS=("-d" "--debug" "-nl" "--no-lint")
+                    CMDS=("-d" "--debug" "-nl" "--no-lint" "-c" "--testcase")
                     output=("$(printf "$printfstr" "<directory>" "Solution directory")")
                     raw=()
 
@@ -296,6 +363,81 @@ _fenrir()
                 fi
                 ;;
 #>>>>>>>>>>>###################################################################################################
+            env)
+                if [[ "${COMP_WORDS[2]}" == -*  ]]; then
+                    helpmsg=(
+                        [-c]="Select the testcase to enter"
+                        [--testcase]="Select the testcase to enter"
+                    )
+
+                    display_name_map=(
+                        [-c]="-c, --testcase"
+                        [--testcase]="-c, --testcase"
+                    )
+
+                    CMDS=("-c" "--testcase")
+                    output=(
+                        "$(printf "$printfstr" "up <directory>" "Enter dev environment")"
+                        "$(printf "$printfstr" "down" "Destroy current dev environment")"
+                    )
+                    raw=()
+
+                    for cmd in $(compgen -W "${CMDS[*]}" -- "${COMP_WORDS[2]}"); do
+                        local desc=${helpmsg["$cmd"]}
+                        local display_name="${display_name_map["$cmd"]}"
+
+                        output+=("$(printf "$printfstr" "$display_name" "$desc")")
+                        raw+=("$cmd")
+                    done
+
+                    if [ "${#raw[@]}" -eq 0 ]; then
+                        return 0
+                    fi
+
+                    # When the command is found, there is no need for info message
+                    if [ "${#raw[@]}" -eq 1 ]; then
+                        COMPREPLY=("${raw[0]}")
+                        return 0
+                    fi
+
+                    COMPREPLY=("${output[@]}")
+                else
+                    helpmsg=(
+                        [up]="Enter dev environment"
+                        [down]="Destroy current dev environment"
+                    )
+
+                    display_name_map=(
+                        [up]="up"
+                        [down]="down"
+                    )
+
+                    CMDS=("down" "up")
+                    output=()
+                    raw=()
+
+                    for cmd in $(compgen -W "${CMDS[*]}" -- "${COMP_WORDS[2]}"); do
+                        local desc=${helpmsg["$cmd"]}
+                        local display_name="${display_name_map["$cmd"]}"
+
+                        output+=("$(printf "$printfstr" "$display_name" "$desc")")
+                        raw+=("$cmd")
+                    done
+
+                    if [ "${#raw[@]}" -eq 0 ]; then
+                        return 0
+                    fi
+
+                    # When the command is found, there is no need for info message
+                    if [ "${#raw[@]}" -eq 1 ]; then
+                        COMPREPLY=("${raw[0]}")
+                        return 0
+                    fi
+
+                    COMPREPLY=("${output[@]}")
+                fi
+                ;;
+#>>>>>>>>>>>###################################################################################################
             *) # remote: URL
                 ;;
         esac
@@ -304,16 +446,309 @@ _fenrir()
         case "${COMP_WORDS[1]}" in
 #>>>>>>>>>>>###################################################################################################
             task)
-                if ! [[ "${COMP_WORDS[COMP_CWORD]}" == -* ]]; then
-                    return 0
-                fi
-
-                mapfile -t CMDS < <(find_all_tasks | uniq)
-                COMPREPLY=($(compgen -W "${CMDS[*]}" -- "${COMP_WORDS[COMP_CWORD]}"))
+                COMPREPLY=($(compgen -W "$(_find_all_tasks)" -- "${COMP_WORDS[COMP_CWORD]}"))
                 ;;
 #>>>>>>>>>>>###################################################################################################
             run)
-                if [[ "${COMP_WORDS[COMP_CWORD]}" == -*  ]]; then
+                if [[ "${COMP_WORDS[COMP_CWORD - 1]}" == -c ]] || [[ "${COMP_WORDS[COMP_CWORD - 1]}" == --testcase ]]; then
+                    COMPREPLY=($(compgen -W "$(_find_all_tests)" -- "${COMP_WORDS[COMP_CWORD]}"))
+                elif [[ "${COMP_WORDS[COMP_CWORD]}" == -* ]]; then
+                    helpmsg=(
+                        [-i]="Run test inside the provided directory without cloning it"
+                        [-nl]="Skip linting stage (walk-inspections)"
+                        [--no-lint]="Skip linting stage (walk-inspections)"
+                        [-c]="Select the testcase to run"
+                        [--testcase]="Select the testcase to run"
+                    )
+
+                    display_name_map=(
+                        [-i]="-i"
+                        [-nl]="-nl, --no-lint"
+                        [--no-lint]="-nl, --no-lint"
+                        [-c]="-c, --testcase"
+                        [--testcase]="-c, --testcase"
+                    )
+
+                    CMDS=("-i" "-nl" "--no-lint" "-c" "--testcase")
+                    output=("$(printf "$printfstr" "<directory>" "Solution directory")")
+                    raw=()
+
+                    for cmd in $(compgen -W "${CMDS[*]}" -- "${COMP_WORDS[COMP_CWORD]}"); do
+                        local desc=${helpmsg["$cmd"]}
+                        local display_name="${display_name_map["$cmd"]}"
+
+                        output+=("$(printf "$printfstr" "$display_name" "$desc")")
+                        raw+=("$cmd")
+                    done
+
+                    if [ "${#raw[@]}" -eq 0 ]; then
+                        return 0
+                    fi
+
+                    # When the command is found, there is no need for info message
+                    if [ "${#raw[@]}" -eq 1 ]; then
+                        COMPREPLY=("${raw[0]}")
+                        return 0
+                    fi
+
+                    COMPREPLY=("${output[@]}")
+                else
+                    COMPREPLY=($(compgen -d -- "${COMP_WORDS[COMP_CWORD]}"))
+                fi
+                ;;
+#>>>>>>>>>>>###################################################################################################
+            rund)
+                if [[ "${COMP_WORDS[COMP_CWORD - 1]}" == -c ]] || [[ "${COMP_WORDS[COMP_CWORD - 1]}" == --testcase ]]; then
+                    COMPREPLY=($(compgen -W "$(_find_all_tests)" -- "${COMP_WORDS[COMP_CWORD]}"))
+                elif [[ "${COMP_WORDS[COMP_CWORD]}" == -* ]]; then
+                    helpmsg=(
+                        [-d]="Does not stop the container (allows further debug)"
+                        [--debug]="Does not stop the container (allows further debug)"
+                        [-nl]="Skip linting stage (walk-inspections)"
+                        [--no-lint]="Skip linting stage (walk-inspections)"
+                        [-c]="Select the testcase to run"
+                        [--testcase]="Select the testcase to run"
+                    )
+
+                    display_name_map=(
+                        [-d]="-d, --debug"
+                        [--debug]="-d, --debug"
+                        [-nl]="-nl, --no-lint"
+                        [--no-lint]="-nl, --no-lint"
+                        [-c]="-c, --testcase"
+                        [--testcase]="-c, --testcase"
+                    )
+
+                    CMDS=("-d" "--debug" "-nl" "--no-lint" "-c" "--testcase")
+                    output=("$(printf "$printfstr" "<directory>" "Solution directory")")
+                    raw=()
+
+                    for cmd in $(compgen -W "${CMDS[*]}" -- "${COMP_WORDS[COMP_CWORD]}"); do
+                        local desc=${helpmsg["$cmd"]}
+                        local display_name="${display_name_map["$cmd"]}"
+
+                        output+=("$(printf "$printfstr" "$display_name" "$desc")")
+                        raw+=("$cmd")
+                    done
+
+                    if [ "${#raw[@]}" -eq 0 ]; then
+                        return 0
+                    fi
+
+                    # When the command is found, there is no need for info message
+                    if [ "${#raw[@]}" -eq 1 ]; then
+                        COMPREPLY=("${raw[0]}")
+                        return 0
+                    fi
+
+                    COMPREPLY=("${output[@]}")
+                else
+                    COMPREPLY=($(compgen -d -- "${COMP_WORDS[COMP_CWORD]}"))
+                fi
+                ;;
+#>>>>>>>>>>>###################################################################################################
+            switch)
+                helpmsg=(
+                    [latest]="Switch to the latest version"
+                )
+
+                display_name_map=(
+                    [latest]="latest"
+                )
+
+                CMDS=("latest")
+                output=("$(printf "$printfstr" "<VERSION>" "Switch to the specific version (see 'fenrir versions' for available)")")
+                raw=()
+
+                for cmd in $(compgen -W "${CMDS[*]}" -- "${COMP_WORDS[2]}"); do
+                    local desc=${helpmsg["$cmd"]}
+                    local display_name="${display_name_map["$cmd"]}"
+
+                    output+=("$(printf "$printfstr" "$display_name" "$desc")")
+                    raw+=("$cmd")
+                done
+
+                if [ "${#raw[@]}" -eq 0 ]; then
+                    return 0
+                fi
+
+                # When the command is found, there is no need for info message
+                if [ "${#raw[@]}" -eq 1 ]; then
+                    COMPREPLY=("${raw[0]}")
+                    return 0
+                fi
+
+                COMPREPLY=("${output[@]}")
+                ;;
+#>>>>>>>>>>>###################################################################################################
+            env)
+                if [[ "${COMP_WORDS[2]}" == -* ]]; then
+                    COMPREPLY=($(compgen -W "$(_find_all_tests)" -- "${COMP_WORDS[COMP_CWORD]}"))
+                elif [[ "${COMP_WORDS[2]}" == up ]]; then
+                    COMPREPLY=($(compgen -d -- "${COMP_WORDS[COMP_CWORD]}"))
+                fi
+                ;;
+#>>>>>>>>>>>###################################################################################################
+            *)
+                ;;
+        esac
+###############################################################################################################
+    elif (( COMP_CWORD == 4 )); then
+        case "${COMP_WORDS[1]}" in
+#>>>>>>>>>>>###################################################################################################
+            env)
+                if [[ "${COMP_WORDS[2]}" == -* ]]; then
+                    helpmsg=(
+                        [up]="Enter dev environment"
+                        [down]="Destroy current dev environment"
+                    )
+
+                    display_name_map=(
+                        [up]="up"
+                        [down]="down"
+                    )
+
+                    CMDS=("down" "up")
+                    output=()
+                    raw=()
+
+                    for cmd in $(compgen -W "${CMDS[*]}" -- "${COMP_WORDS[2]}"); do
+                        local desc=${helpmsg["$cmd"]}
+                        local display_name="${display_name_map["$cmd"]}"
+
+                        output+=("$(printf "$printfstr" "$display_name" "$desc")")
+                        raw+=("$cmd")
+                    done
+
+                    if [ "${#raw[@]}" -eq 0 ]; then
+                        return 0
+                    fi
+
+                    # When the command is found, there is no need for info message
+                    if [ "${#raw[@]}" -eq 1 ]; then
+                        COMPREPLY=("${raw[0]}")
+                        return 0
+                    fi
+
+                    COMPREPLY=("${output[@]}")
+                fi
+                ;;
+#>>>>>>>>>>>###################################################################################################
+            run)
+                if [[ "${COMP_WORDS[COMP_CWORD - 1]}" == -c ]] || [[ "${COMP_WORDS[COMP_CWORD - 1]}" == --testcase ]]; then
+                    COMPREPLY=($(compgen -W "$(_find_all_tests)" -- "${COMP_WORDS[COMP_CWORD]}"))
+                elif [[ "${COMP_WORDS[COMP_CWORD]}" == -* ]]; then
+                    helpmsg=(
+                        [-i]="Run test inside the provided directory without cloning it"
+                        [-nl]="Skip linting stage (walk-inspections)"
+                        [--no-lint]="Skip linting stage (walk-inspections)"
+                        [-c]="Select the testcase to run"
+                        [--testcase]="Select the testcase to run"
+                    )
+
+                    display_name_map=(
+                        [-i]="-i"
+                        [-nl]="-nl, --no-lint"
+                        [--no-lint]="-nl, --no-lint"
+                        [-c]="-c, --testcase"
+                        [--testcase]="-c, --testcase"
+                    )
+
+                    CMDS=("-i" "-nl" "--no-lint" "-c" "--testcase")
+                    output=("$(printf "$printfstr" "<directory>" "Solution directory")")
+                    raw=()
+
+                    for cmd in $(compgen -W "${CMDS[*]}" -- "${COMP_WORDS[COMP_CWORD]}"); do
+                        local desc=${helpmsg["$cmd"]}
+                        local display_name="${display_name_map["$cmd"]}"
+
+                        output+=("$(printf "$printfstr" "$display_name" "$desc")")
+                        raw+=("$cmd")
+                    done
+
+                    if [ "${#raw[@]}" -eq 0 ]; then
+                        return 0
+                    fi
+
+                    # When the command is found, there is no need for info message
+                    if [ "${#raw[@]}" -eq 1 ]; then
+                        COMPREPLY=("${raw[0]}")
+                        return 0
+                    fi
+
+                    COMPREPLY=("${output[@]}")
+                else
+                    COMPREPLY=($(compgen -d -- "${COMP_WORDS[COMP_CWORD]}"))
+                fi
+                ;;
+#>>>>>>>>>>>###################################################################################################
+            rund)
+                if [[ "${COMP_WORDS[COMP_CWORD - 1]}" == -c ]] || [[ "${COMP_WORDS[COMP_CWORD - 1]}" == --testcase ]]; then
+                    COMPREPLY=($(compgen -W "$(_find_all_tests)" -- "${COMP_WORDS[COMP_CWORD]}"))
+                elif [[ "${COMP_WORDS[COMP_CWORD]}" == -* ]]; then
+                    helpmsg=(
+                        [-d]="Does not stop the container (allows further debug)"
+                        [--debug]="Does not stop the container (allows further debug)"
+                        [-nl]="Skip linting stage (walk-inspections)"
+                        [--no-lint]="Skip linting stage (walk-inspections)"
+                        [-c]="Select the testcase to run"
+                        [--testcase]="Select the testcase to run"
+                    )
+
+                    display_name_map=(
+                        [-d]="-d, --debug"
+                        [--debug]="-d, --debug"
+                        [-nl]="-nl, --no-lint"
+                        [--no-lint]="-nl, --no-lint"
+                        [-c]="-c, --testcase"
+                        [--testcase]="-c, --testcase"
+                    )
+
+                    CMDS=("-d" "--debug" "-nl" "--no-lint" "-c" "--testcase")
+                    output=("$(printf "$printfstr" "<directory>" "Solution directory")")
+                    raw=()
+
+                    for cmd in $(compgen -W "${CMDS[*]}" -- "${COMP_WORDS[COMP_CWORD]}"); do
+                        local desc=${helpmsg["$cmd"]}
+                        local display_name="${display_name_map["$cmd"]}"
+
+                        output+=("$(printf "$printfstr" "$display_name" "$desc")")
+                        raw+=("$cmd")
+                    done
+
+                    if [ "${#raw[@]}" -eq 0 ]; then
+                        return 0
+                    fi
+
+                    # When the command is found, there is no need for info message
+                    if [ "${#raw[@]}" -eq 1 ]; then
+                        COMPREPLY=("${raw[0]}")
+                        return 0
+                    fi
+
+                    COMPREPLY=("${output[@]}")
+                else
+                    COMPREPLY=($(compgen -d -- "${COMP_WORDS[COMP_CWORD]}"))
+                fi
+                ;;
+#>>>>>>>>>>>###################################################################################################
+            *)
+                ;;
+        esac
+###############################################################################################################
+    elif (( COMP_CWORD == 5 )); then
+        case "${COMP_WORDS[1]}" in
+#>>>>>>>>>>>###################################################################################################
+            env)
+                if [[ "${COMP_WORDS[2]}" == -* ]] && [[ "${COMP_WORDS[4]}" == up ]]; then
+                    COMPREPLY=($(compgen -d -- "${COMP_WORDS[COMP_CWORD]}"))
+                fi
+                ;;
+#>>>>>>>>>>>###################################################################################################
+            run)
+                if [[ "${COMP_WORDS[COMP_CWORD - 1]}" == -c ]] || [[ "${COMP_WORDS[COMP_CWORD - 1]}" == --testcase ]]; then
+                    COMPREPLY=($(compgen -W "$(_find_all_tests)" -- "${COMP_WORDS[COMP_CWORD]}"))
+                elif [[ "${COMP_WORDS[COMP_CWORD]}" == -* ]]; then
                     helpmsg=(
                         [-i]="Run test inside the provided directory without cloning it"
                         [-nl]="Skip linting stage (walk-inspections)"
@@ -355,7 +790,9 @@ _fenrir()
                 ;;
 #>>>>>>>>>>>###################################################################################################
             rund)
-                if [[ "${COMP_WORDS[COMP_CWORD]}" == -*  ]]; then
+                if [[ "${COMP_WORDS[COMP_CWORD - 1]}" == -c ]] || [[ "${COMP_WORDS[COMP_CWORD - 1]}" == --testcase ]]; then
+                    COMPREPLY=($(compgen -W "$(_find_all_tests)" -- "${COMP_WORDS[COMP_CWORD]}"))
+                elif [[ "${COMP_WORDS[COMP_CWORD]}" == -* ]]; then
                     helpmsg=(
                         [-d]="Does not stop the container (allows further debug)"
                         [--debug]="Does not stop the container (allows further debug)"
@@ -401,100 +838,16 @@ _fenrir()
             *)
                 ;;
         esac
-    else  # run completion
-        if [[ "${COMP_WORDS[1]}" == run ]]; then
-            if [[ "${COMP_WORDS[COMP_CWORD]}" == -*  ]]; then
-                COMPREPLY=($(compgen -W "-s -nl --no-lint" -- "${COMP_WORDS[COMP_CWORD]}"))
-            else
-                COMPREPLY=($(compgen -d -- "${COMP_WORDS[COMP_CWORD]}"))
-            fi
-        fi
+###############################################################################################################
+    elif (( COMP_CWORD == 6 )); then
         case "${COMP_WORDS[1]}" in
 #>>>>>>>>>>>###################################################################################################
             run)
-                if [[ "${COMP_WORDS[COMP_CWORD]}" == -*  ]]; then
-                    helpmsg=(
-                        [-i]="Run test inside the provided directory without cloning it"
-                        [-nl]="Skip linting stage (walk-inspections)"
-                        [--no-lint]="Skip linting stage (walk-inspections)"
-                    )
-
-                    display_name_map=(
-                        [-i]="-i"
-                        [-nl]="-nl, --no-lint"
-                        [--no-lint]="-nl, --no-lint"
-                    )
-
-                    CMDS=("-i" "-nl" "--no-lint")
-                    output=("$(printf "$printfstr" "<directory>" "Solution directory")")
-                    raw=()
-
-                    for cmd in $(compgen -W "${CMDS[*]}" -- "${COMP_WORDS[COMP_CWORD]}"); do
-                        local desc=${helpmsg["$cmd"]}
-                        local display_name="${display_name_map["$cmd"]}"
-
-                        output+=("$(printf "$printfstr" "$display_name" "$desc")")
-                        raw+=("$cmd")
-                    done
-
-                    if [ "${#raw[@]}" -eq 0 ]; then
-                        return 0
-                    fi
-
-                    # When the command is found, there is no need for info message
-                    if [ "${#raw[@]}" -eq 1 ]; then
-                        COMPREPLY=("${raw[0]}")
-                        return 0
-                    fi
-
-                    COMPREPLY=("${output[@]}")
-                else
-                    COMPREPLY=($(compgen -d -- "${COMP_WORDS[COMP_CWORD]}"))
-                fi
+                COMPREPLY=($(compgen -d -- "${COMP_WORDS[COMP_CWORD]}"))
                 ;;
 #>>>>>>>>>>>###################################################################################################
             rund)
-                if [[ "${COMP_WORDS[COMP_CWORD]}" == -*  ]]; then
-                    helpmsg=(
-                        [-d]="Does not stop the container (allows further debug)"
-                        [--debug]="Does not stop the container (allows further debug)"
-                        [-nl]="Skip linting stage (walk-inspections)"
-                        [--no-lint]="Skip linting stage (walk-inspections)"
-                    )
-
-                    display_name_map=(
-                        [-d]="-d, --debug"
-                        [--debug]="-d, --debug"
-                        [-nl]="-nl, --no-lint"
-                        [--no-lint]="-nl, --no-lint"
-                    )
-
-                    CMDS=("-d" "--debug" "-nl" "--no-lint")
-                    output=("$(printf "$printfstr" "<directory>" "Solution directory")")
-                    raw=()
-
-                    for cmd in $(compgen -W "${CMDS[*]}" -- "${COMP_WORDS[COMP_CWORD]}"); do
-                        local desc=${helpmsg["$cmd"]}
-                        local display_name="${display_name_map["$cmd"]}"
-
-                        output+=("$(printf "$printfstr" "$display_name" "$desc")")
-                        raw+=("$cmd")
-                    done
-
-                    if [ "${#raw[@]}" -eq 0 ]; then
-                        return 0
-                    fi
-
-                    # When the command is found, there is no need for info message
-                    if [ "${#raw[@]}" -eq 1 ]; then
-                        COMPREPLY=("${raw[0]}")
-                        return 0
-                    fi
-
-                    COMPREPLY=("${output[@]}")
-                else
-                    COMPREPLY=($(compgen -d -- "${COMP_WORDS[COMP_CWORD]}"))
-                fi
+                COMPREPLY=($(compgen -d -- "${COMP_WORDS[COMP_CWORD]}"))
                 ;;
 #>>>>>>>>>>>###################################################################################################
             *)
