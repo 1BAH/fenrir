@@ -1,0 +1,47 @@
+= loki(1)
+Iwan Kalinin
+
+:doctype: manpage
+:man-linkstyle: yellow B "" ""
+:mansource: fenrir
+
+== Name
+
+*loki* - interpreter used in fenrir
+
+== Synopsis
+
+*loki* _FILEPATH_ +
+*loki* -c _COMMAND_
+
+== Description
+
+Using bash as a base shell interpreter, loki adds logging and extra functions.
+
+*Wrapping*::
+Use _lokiw CMD_ to track the command stdout & stderr
+
+*Logging*::
+Use _loki-get-err_ and _loki-get-out_ to see the last captured stderr & stdout. +
+Use _loki-log LEVEL MSG_ to pretty print the message. LEVEL is one of: info, warn, err, fault and fail. When fail is used, loki additionally shows stdout & stderr. +
+Use _loki-wrap_ to wrap text with ASCII escape codes. Available constants are listed in the config file.
+
+*Asserts*::
+Use _loki-assert-.._ to test different cases with extended logging.
+
+
+== Environment
+Change */etc/fenrir/lokirc* file to configure loki.
+
+*FENRIR_EDITOR*::
+The app used to preview test sources (fenrir inspect).
+
+*FENRIR_KEEP_LOCAL_REPO*::
+When set, fenrir preserves configs during updates.
+
+
+== Copyright
+The project is distributed under Apache License 2.0 (https://www.apache.org/licenses/LICENSE-2.0[https://www.apache.org/licenses/LICENSE-2.0])
+
+== See also
+*fenrir*(1)

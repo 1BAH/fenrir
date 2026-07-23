@@ -2,7 +2,7 @@
 
 ##
 # Usage:
-#   fenrir-help
+#   fenrir-info
 #
 # Show the current context of fenrir:
 #   - Tasks' remote repo
@@ -16,6 +16,7 @@
 ######################################################################
 
 #include <shift-args>
+#include <help>
 
 EXP_ARGC=0
 #include <verify-argc>

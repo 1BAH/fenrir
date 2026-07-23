@@ -1,0 +1,38 @@
+= fenrir-tmp(1)
+Iwan Kalinin
+
+:doctype: manpage
+:man-linkstyle: yellow B "" ""
+:mansource: fenrir
+
+== Name
+
+*fenrir-tmp* - create a new temporary file in _FENRIR_TMP_DIR_.
+
+== Synopsis
+*fenrir tmp* [-d | -p]
+
+== Description
+Creates a new file with a "random" name. Then prints the name to the stdout.
+
+== Options
+none::
+Creates a regular file
+
+*-d*::
+Creates a directory
+
+*-p*::
+Creates a named pipe
+
+== Environment
+FNR_TMP_MAX_CAP::
+The maximum size of fenrir's tmp directory. It works according to the LRU algorithm. +
+When its size reaches the limits, the oldest file is removed. +
+The default value is _21_.
+
+FNR_TMP_MAX_NUM::
+The maximum index in fenrir's tmp directory. Each invocation increments the inner counter. +
+When the counter reaches this constant, an alert is shown. +
+The default value is _1000_.
+

@@ -21,6 +21,7 @@
 ######################################################################
 
 #include <shift-args>
+#include <help>
 
 task=$(fenrir-read-conf run task)
 

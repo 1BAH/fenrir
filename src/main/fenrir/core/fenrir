@@ -21,6 +21,7 @@
 #include <verify-non-sudo>
 #include <shift-args>
 #include <set-sed>
+#include <help>
 
 cmd=$1
 shift
@@ -38,7 +39,7 @@ case "$cmd" in
     ;;
 
     "--help" | "h" | "help")
-        fenrir-help "$@"
+        fenrir --help
     ;;
 
     "i" | "info")

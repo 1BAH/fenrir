@@ -1,0 +1,27 @@
+= fenrir-inspect(1)
+Iwan Kalinin
+
+:doctype: manpage
+:man-linkstyle: yellow B "" ""
+:mansource: fenrir
+
+== Name
+
+*fenrir-inspect* - show test sources.
+
+== Synopsis
+*fenrir-inspect* [_TASK_] _TestID_ +
+*fenrir-inspect* [_TASK_] (*index*|*pipeline*)
+
+== Description
+Read the test sources. When no *TASK* is provided, the current task is used. +
+When *index* or *pipeline* is selected, the _index.hel_ or _pipeline.hel_ files are shown
+
+== Options
+TASK::
+Select the specific task
+
+== Environment
+FENRIR_EDITOR::
+The application used to show the text. +
+Default: _less_
