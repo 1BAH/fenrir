@@ -24,7 +24,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo apt-get install rpm make
+          sudo apt-get install rpm make asciidoctor
 
       - name: Create packages
         run:
