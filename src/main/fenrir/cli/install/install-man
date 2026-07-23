@@ -19,8 +19,9 @@ type asciidoctor &> /dev/null || {
             loki-log err "Terminating.."
             exit 7
         fi
-        skip_man=1
     fi
+
+    skip_man=1
 }
 
 if (( skip_man == 0 )); then
