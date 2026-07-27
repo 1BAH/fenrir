@@ -48,8 +48,8 @@ loki-gorp
 
 loki-prog "Removing man pages.."
 
-for cmd in "${MAN_ROOT}"/man1/fenrir-* "${MAN_ROOT}"/man1/loki*; do
-    if [ "$cmd" = "${MAN_ROOT}/man1/fenrir-*" ]; then
+for cmd in "${MAN_ROOT}"/fenrir* "${MAN_ROOT}"/loki*; do
+    if [ "$cmd" = "${MAN_ROOT}/fenrir*" ]; then
         loki-log warn "No core commands were found!"
         break
     fi

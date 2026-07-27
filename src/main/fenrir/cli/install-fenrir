@@ -86,8 +86,8 @@ if ! [ -d "${out_dir}" ]; then
 fi
 
 if ! [ -d "${conf_dir}" ]; then
-    err_msg "Config directory <${conf_dir}> does not exist!"
-    exit 122
+    warn_msg "Creating directory <${conf_dir}>.."
+    mkdir -p "${conf_dir}"
 fi
 
 if ! [ -d "${man_dir}" ] && [ -z "${FENRIR_NO_ADOC}" ]; then

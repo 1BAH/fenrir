@@ -68,7 +68,7 @@ When assembling the installation script::
 
 * `111` -- Non-privileged execution without `-t` option
 * `121` -- `install-dir` does not exist
-* `122` -- `conf-dir` does not exist
+// * `122` -- `conf-dir` does not exist
 * `123` -- `man-dir` does not exist
 * `130` -- `gsed` is not install when system `sed` is a BSD version
 * `140` -- unsatisfied requirements

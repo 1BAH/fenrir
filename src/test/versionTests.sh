@@ -1,5 +1,9 @@
 #! /usr/bin/env loki
 
+function normalise_version {
+    echo "${1%+*}"
+}
+
 ##########################################################################
 
 expected_version="2026.0"
@@ -15,7 +19,7 @@ fi
 while IFS='=' read -r key value; do
     case "$key" in
         version)
-            version=$value
+            version=$(normalise_version "$value")
         ;;
     esac
 done < "$props"
@@ -27,7 +31,7 @@ branch_version=$(echo "$branch_version" | grep -oP "\\d+\\.\\d+(\\.\\d+)?")
 if (( $? != 0 )); then
     loki-log warn "Non-version branch: $(git branch --show-current)"
 else
-    loki-assert-eq "${branch_version}" "${expected_version}"
+    loki-assert-eq "$(normalise_version "${branch_version}")" "${expected_version}"
 fi
 
 loki-gorp
