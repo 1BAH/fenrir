@@ -23,6 +23,8 @@ function _fenrir {
             task\:'Set the task to be tested'
             il\:'Install a script as _local_ task'
             install\:'Install a script as _local_ task'
+            ac\:'Install autocompletion'
+            autocomplete\:'Install autocompletion'
             in\:'Show test sources'
             inspect\:'Show test sources'
             env\:'Manage dev environment'
@@ -45,17 +47,14 @@ function _fenrir {
         task)
             _fenrir_task
         ;;
-        il)
+        il | install)
             _fenrir_install
         ;;
-        install)
-            _fenrir_install
-        ;;
-        in)
+        in | inspect)
             _fenrir_inspect
         ;;
-        inspect)
-            _fenrir_inspect
+        ac | autocomplete)
+            _fenrir_auto
         ;;
         env)
             _fenrir_env
@@ -74,6 +73,15 @@ function _fenrir_switch {
         "--zsh[Install autocompletion for zsh]" \
         "--bash[Install autocompletion for bash]" \
         "1:Switch to the latest version:(latest)"
+}
+
+function _fenrir_auto {
+    _arguments -C \
+        "1:language:((
+            bash\:'Bash'
+            zsh\:'Zsh'
+            ))" \
+        "*::arg:->arfs"
 }
 
 function _find_all_tasks {
@@ -99,7 +107,7 @@ function _fenrir_env {
     _arguments -C \
         "-c[Select the testcase to enter]:testcase:($(_find_all_tests))" \
         "--testcase[Select the testcase to enter]:testcase:($(_find_all_tests))" \
-        "1:subcommand::((
+        "1:mode:((
             up\:'Enter dev environment'
             down\:'Destroy current dev environment'
             ))" \
