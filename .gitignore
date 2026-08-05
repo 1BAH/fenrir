@@ -37,3 +37,8 @@ bin/
 
 build/
 node_modules/
+
+# man dev
+build-man/
+install-man
+!src/**/install/install-man
