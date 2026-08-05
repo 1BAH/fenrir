@@ -50,7 +50,7 @@ loki-gorp
 
 loki-prog "README"
 
-loki-assert-regeq ".*latest version is \`${version}\`.*" "$(cat "${src_dir}/../../../README.md")"
+loki-assert-regeq ".*latest version is \`${version}\`.*" "$(cat "${src_dir}/../../../README.adoc")"
 
 loki-gorp
 
