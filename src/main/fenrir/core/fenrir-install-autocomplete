@@ -1,0 +1,54 @@
+#! /usr/bin/env loki
+
+##
+# Usage:
+#   fenrir-install-autocomplete <bash|zsh>
+#
+# Install autocomplete
+##
+
+######################################################################
+##                         VERIFY ARGUMENTS                         ##
+######################################################################
+
+#include <shift-args>
+
+EXP_ARGC=1
+#include <verify-argc>
+
+######################################################################
+##                            FUNCTIONS                             ##
+######################################################################
+
+IFS= read -r -d '' bash_script << 'SCRIPT'
+#include <autocomplete-bash>
+SCRIPT
+
+IFS= read -r -d '' zsh_script << 'SCRIPT'
+#include <autocomplete-zsh>
+SCRIPT
+
+######################################################################
+##                           MAIN PROGRAM                           ##
+######################################################################
+
+case "$1" in
+    bash)
+        rm -f "/etc/bash_completion.d/fenrir-autocomplete"
+        echo "$bash_script" >| "/etc/bash_completion.d/fenrir-autocomplete"
+        loki-log warn "Run 'source ~/.bashrc' or reload terminal to apply the autocompletion"
+    ;;
+    zsh)
+        compdir=$(realpath "/home/$(logname)/.oh-my-zsh/completions")
+        mkdir -p "${compdir}"
+        rm -f "${compdir}/_fenrir"
+        echo "$zsh_script" >| "${compdir}/_fenrir"
+        chown -R "$(logname):$(id -gn "$(logname)")" "/home/$(logname)/.oh-my-zsh"
+        loki-log info "Autocomplete installed to <${compdir}>"
+        loki-log warn "If you use 'Oh My Zsh' then reload your terminal, otherwise read the docs to set up the autocompletion"
+    ;;
+    *)
+        loki-log err "Unknown option: <$1>"
+        exit 5
+    ;;
+esac
