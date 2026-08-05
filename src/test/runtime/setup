@@ -22,10 +22,11 @@ fi
 mkdir -p "${FENRIR_TEST_DIR}/etc"
 mkdir -p "${FENRIR_TEST_DIR}/bin"
 mkdir -p "${FENRIR_TEST_DIR}/man"
+mkdir -p "${FENRIR_TEST_DIR}/home"
 
 echo "Installing fenrir for test env"
 
-"${src_dir}/cli/install-fenrir" -v --install-dir "${FENRIR_TEST_DIR}/bin" --conf-dir "${FENRIR_TEST_DIR}/etc" --man-dir "${FENRIR_TEST_DIR}/man" -t -nadoc
+FENRIR_HOME="${FENRIR_TEST_DIR}/home" "${src_dir}/cli/install-fenrir" -v --install-dir "${FENRIR_TEST_DIR}/bin" --conf-dir "${FENRIR_TEST_DIR}/etc" --man-dir "${FENRIR_TEST_DIR}/man" -t -nadoc
 
 echo "Setting PATH.."
 
@@ -37,6 +38,10 @@ echo "+ New PATH is '$PATH'"
 
 echo "$PATH" > "${FENRIR_TEST_DIR}/PATH_NEW"
 echo "+ New PATH is saved to '${FENRIR_TEST_DIR}/PATH_NEW'"
+
+echo "${FENRIR_TEST_DIR}/home" > "${FENRIR_TEST_DIR}/HOME_DIR"
+echo "+ FENRIR_HOME is '${FENRIR_TEST_DIR}/home'"
+echo "+ FENRIR_HOME is saved to '${FENRIR_TEST_DIR}/HOME_DIR'"
 
 echo "Test environment:"
 echo "+ $(type fenrir)"

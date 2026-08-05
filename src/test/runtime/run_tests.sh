@@ -13,5 +13,8 @@ export FENRIR_TEST_DEBUG
 PATH=$(cat "${FENRIR_TEST_DIR}/PATH_NEW")
 export PATH
 
+FENRIR_HOME=$(cat "${FENRIR_TEST_DIR}/HOME_DIR")
+export FENRIR_HOME
+
 ./runner "$@"
 ./teardown
