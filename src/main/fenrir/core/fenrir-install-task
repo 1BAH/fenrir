@@ -19,6 +19,7 @@ task=$1
 ##                         VERIFY ARGUMENTS                         ##
 ######################################################################
 
+#include <verify-non-sudo>
 #include <shift-args>
 
 EXP_ARGC=1

@@ -17,6 +17,7 @@
 ##                         VERIFY ARGUMENTS                         ##
 ######################################################################
 
+#include <verify-non-sudo>
 #include <shift-args>
 
 NO_LINT=""

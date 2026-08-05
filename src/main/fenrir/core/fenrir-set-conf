@@ -7,6 +7,7 @@
 # Set the value of the provided parameter in one of internal configs.
 ##
 
+#include <verify-non-sudo>
 #include <shift-args>
 #include <set-sed>
 

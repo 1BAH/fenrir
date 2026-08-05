@@ -17,6 +17,7 @@
 ##                         PARSE ARGUMENTS                          ##
 ######################################################################
 
+#include <verify-non-sudo>
 #include <shift-args>
 
 INSTALL=0

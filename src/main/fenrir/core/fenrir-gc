@@ -20,6 +20,7 @@
 ##                         VERIFY ARGUMENTS                         ##
 ######################################################################
 
+#include <verify-non-sudo>
 #include <shift-args>
 #include <help>
 

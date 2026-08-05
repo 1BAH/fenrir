@@ -32,6 +32,7 @@ function local_clone {
 ##                         VERIFY ARGUMENTS                         ##
 ######################################################################
 
+#include <verify-non-sudo>
 #include <shift-args>
 
 hit=0
