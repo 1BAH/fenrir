@@ -1,0 +1,16 @@
+#! /usr/bin/env sh
+
+cuser=$(logname)
+cuser=${cuser:-$(id -un)}
+if [ "$cuser" = "root" ]; then
+    FENRIR_HOME="/$cuser/.fenrir"
+else
+    FENRIR_HOME="/home/$cuser/.fenrir"
+fi
+
+if [ "$1" = "remove" ]; then # Remove (ignore update)
+    echo "Uninstall fenrir work directories.."
+    rm -fr "$FENRIR_HOME"
+    rm -f "/home/$cuser/.oh-my-zsh/completions/_fenrir"
+    rm -f "/etc/bash_completion.d/fenrir-autocomplete"
+fi

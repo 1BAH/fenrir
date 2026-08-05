@@ -1,0 +1,26 @@
+#! /usr/bin/env sh
+
+sed -i "s|^CONF_FILE=.*$|CONF_FILE=\"/etc/fenrir\"|" "/usr/bin/fenrir-read-conf"
+sed -i "s|^CONF_FILE=.*$|CONF_FILE=\"/etc/fenrir\"|" "/usr/bin/fenrir-set-conf"
+sed -i "s|\".*lokirc\"|\"/etc/fenrir/lokirc\"|"      "/usr/bin/loki"
+
+echo "packaged=deb" >> "/etc/fenrir/main.hel"
+
+cuser=$(logname)
+cuser=${cuser:-$(id -un)}
+cgrp=$(id -gn "$cuser")
+if [ "$cuser" = "root" ]; then
+    FENRIR_HOME="/$cuser/.fenrir"
+else
+    FENRIR_HOME="/home/$cuser/.fenrir"
+fi
+
+if [ -d "${FENRIR_HOME}" ]; then # Upgrade
+    rm -fr "$FENRIR_HOME"
+fi
+
+cp -r "/etc/fenrir/fenrir_home" "$FENRIR_HOME"
+
+chown -R "$cuser:$cgrp" "/etc/fenrir"
+chown -R "$cuser:$cgrp" "$FENRIR_HOME"
+echo "Created local repository for <$cuser:$cgrp>.."

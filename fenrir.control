@@ -1,6 +1,6 @@
-Package: fenrir
-Version: 2026.0+1
-Depends: bash
+Package: fenrir-1bah
+Version: 2026.0+2
+Depends: bash (>= 5.0.0), curl
 Architecture: all
 Maintainer: Iwan Kalinin <koefic.cien@gmail.com>
-Description: Testing system
+Description: A lightweight general purpose testing tool
