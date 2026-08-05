@@ -101,6 +101,7 @@ fi
 info "Install dir is: <${out_dir}>"
 info "Config dir is: <${conf_dir}>"
 info "Man page dir is: <${man_dir}>"
+[ -n "${FENRIR_HOME}" ] && info "Local repo dir is: <${FENRIR_HOME}>"
 
 #################################################################
 #                    CHECK EXISTING CONFIGS                     #

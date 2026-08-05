@@ -88,19 +88,23 @@ loki-gorp
 
 #################################################################
 
-loki-prog "Installing basic utils.."
+loki-prog "Installing local repo.."
 
-if ! mkdir -p "$os_pref_home/$user/.fenrir/shared/walk"; then
+loki-log info "FENRIR_HOME is <${FENRIR_HOME}>"
+FENRIR_HOME=${FENRIR_HOME:-"$os_pref_home/$user/.fenrir"}
+loki-log info "FENRIR_HOME is <${FENRIR_HOME}>"
+
+if ! mkdir -p "${FENRIR_HOME}/shared/walk"; then
     loki-log err "Unable to create a local storage"
     exit 24
 fi
 
-if ! mkdir -p "$os_pref_home/$user/.fenrir/repo/local"; then
+if ! mkdir -p "${FENRIR_HOME}/repo/local"; then
     loki-log err "Unable to create a local storage"
     exit 24
 fi
 
-chown -R "$user" "$os_pref_home/$user/.fenrir"
+chown -R "$user" "${FENRIR_HOME}"
 
 for util in "$BASIC_UTILS_DIR"/* "$BASIC_UTILS_DIR"/**/*; do
     relative_path=${util#"$BASIC_UTILS_DIR"/}
@@ -112,8 +116,8 @@ for util in "$BASIC_UTILS_DIR"/* "$BASIC_UTILS_DIR"/**/*; do
     case "$(basename "$util")" in
         "local" | "pipeline.hel" | "index.hel")
             if ! {
-                mv "$util" "$os_pref_home/$user/.fenrir/repo/local/$relative_path" &&
-                chown "$user" "$os_pref_home/$user/.fenrir/repo/local/$relative_path"
+                mv "$util" "${FENRIR_HOME}/repo/local/$relative_path" &&
+                chown "$user" "${FENRIR_HOME}/repo/local/$relative_path"
             }; then
                 loki-log err "Failed to install. Try again or submit an issue."
                 exit 25
@@ -121,8 +125,8 @@ for util in "$BASIC_UTILS_DIR"/* "$BASIC_UTILS_DIR"/**/*; do
           ;;
         *)
             if ! {
-                mv "$util" "$os_pref_home/$user/.fenrir/shared/$relative_path" &&
-                chown "$user" "$os_pref_home/$user/.fenrir/shared/$relative_path"
+                mv "$util" "${FENRIR_HOME}/shared/$relative_path" &&
+                chown "$user" "${FENRIR_HOME}/shared/$relative_path"
             }; then
                 loki-log err "Failed to install. Try again or submit an issue."
                 exit 25
