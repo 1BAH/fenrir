@@ -71,8 +71,8 @@ function tmp_pipe {
 last_idx=$(cat "$TMP_IDX_FILE")
 
 # shellcheck disable=SC2012
-if (( "$last_idx" >= "$FNR_TMP_MAX_CAP" )); then
-    oldest="${FENRIR_TMP_DIR}/$(( last_idx - FNR_TMP_MAX_CAP ))"
+if (( last_idx >= FNR_TMP_MAX_CAP - 1 )); then
+    oldest="${FENRIR_TMP_DIR}/$(( last_idx - FNR_TMP_MAX_CAP + 1 ))"
     rm -fr "$oldest"
 fi
 
