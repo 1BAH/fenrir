@@ -1,0 +1,130 @@
+= Fenrir
+:url-project: https://github.com/1bah/fenrir/actions/workflows
+
+> Framework for testing
+
+image:{url-project}/pages.yml/badge.svg[Docs]
+image:{url-project}/docker.yml/badge.svg[Docker]
+image:{url-project}/release.yml/badge.svg[Release]
+image:https://img.shields.io/badge/License-Apache%202.0-blue.svg[License]
+
+> The project has migrated from [GitLab](https://gitlab.com/atpd/fenrir)
+
+The latest version is `2026.0`
+
+Available in a docker container: `ghcr.io/1bah/fenrir-base:latest`
+
+== Install
+
+=== RPM package
+
+[,console]
+----
+$ cat << 'CONF' | sudo tee /etc/yum.repos.d/1bah.repo
+[1bah-repo]
+name=1BAH package registry
+baseurl=https://1bah.github.io/rpm
+enabled=1
+gpgcheck=1
+gpgkey=https://1bah.github.io/public.key
+CONF
+$ sudo dnf install fenrir
+----
+
+=== DEB package
+
+[,console]
+----
+$ sudo mkdir -p /usr/share/keyrings
+$ curl -fsSL https://1bah.github.io/public.key | sudo gpg --dearmor -o /usr/share/keyrings/1bah.gpg
+$ echo 'deb [signed-by=/usr/share/keyrings/1bah.gpg] https://1bah.github.io/deb stable main' | sudo tee /etc/apt/sources.list.d/1bah.list
+$ sudo apt update && sudo apt install fenrir-1bah
+----
+
+=== Other
+.System requirements
+* Bash version 5.0.0+
+* `curl`
+
+
+[,console]
+----
+$ git clone https://github.com/1BAH/fenrir.git /tmp/frir
+$ cd /tmp/frir/src/main/fenrir/cli
+$ sudo ./install-fenrir
+----
+
+> Install script supports these options:
+> ```text
+> --bash     Install autocompletion for bash
+> --zsh      Install autocompletion for zsh
+> ```
+
+=== Autocomplete
+
+Fenrir provides autocomplete for `zsh` and `bash`. To install it run `sudo fenrir autocomplete <SHELL>`.
+
+[IMPORTANT]
+====
+If you use `zsh` without `Oh My Zsh` then make sure:
+
+. `autoload -U compinit && compinit` is present at `~/.zshrc`
+. `~/.oh-my-zsh/completions` is present at `fpath`
+====
+
+== Uninstall (non-package)
+
+Run `uninstall-fenrir` in terminal
+
+== Usage
+
+=== Select custom task repository
+
+[,console]
+----
+$ fenrir-set-conf main remote REPOSITORY
+----
+
+=== Select task
+
+[,console]
+----
+$ fenrir task TASK_ID
+----
+
+Use `-f` flag to force-update task tests
+
+=== Run tests
+
+[,console]
+----
+$ fenrir run PATH_TO_SOLUTION_REPO
+----
+
+.Available flags
+* `-i` -> `inline`: do not clone the solution, run tests inside the provided repo
+* `-nl` -> `no linters`: skip all linters
+* `-c TEST_NAME` -> run only the selected test
+
+=== Run tests in a docker container
+
+[,console]
+----
+fenrir rund TEST_NAME
+----
+Flags `-nl` and `-c` are supported
+
+=== See test sources
+
+[,console]
+----
+fenrir inspect TEST_NAME
+----
+
+To change the preview app, replace `FENRIR_EDITOR="less"` in `/etc/fenrir/lokirc`
+
+== Copyright
+
+The project is distributed under Apache License 2.0 terms.
+
+(C) 2025-present *Iwan Kalinin* <mailto:koefic.cien@gmail.com[koefic.cien@gmail.com]>
