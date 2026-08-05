@@ -44,16 +44,16 @@ fi
 
 
 cat <<____HEREDOC
-------------------------------------------------------------------
+$(loki-dup '-' "${LOKI_COLUMNS}")
 Current settings:
     * Remote: $(fenrir-read-conf main remote)
     * Current task: ${curr_task}
     * Blocking: $(fenrir-read-conf run blocking)
     * Execution mode: ${inline:-1}${inhost:-1}${indocker:-1} (Inline-Host-Docker)
-------------------------------------------------------------------
+$(loki-dup '-' "${LOKI_COLUMNS}")
 Run settings:
 $([ -n "${pipeline}" ] && loki-wrap "${YELLOW}" "${pipeline}")
-------------------------------------------------------------------
+$(loki-dup '-' "${LOKI_COLUMNS}")
 fenrir $(fenrir-read-conf main version), 2026
 @1BAH
 ____HEREDOC
