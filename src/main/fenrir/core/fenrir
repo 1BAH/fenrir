@@ -69,6 +69,10 @@ case "$cmd" in
         fenrir-inspect "$@"
     ;;
 
+    "ac" | "autocomplete")
+        fenrir-install-autocomplete "$@"
+    ;;
+
     "versions")
         EXP_ARGC=0
         #include <verify-argc>
