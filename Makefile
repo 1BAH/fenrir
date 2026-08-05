@@ -16,7 +16,7 @@ init: clean
 	cp LICENSE $(SHARE_DIR)/doc/fenrir/
 
 clean:
-	rm -r $(BUILD_DIR)
+	rm -rf $(BUILD_DIR)
 
 install-fenrir: init
 	cd src/main/fenrir/cli && \
