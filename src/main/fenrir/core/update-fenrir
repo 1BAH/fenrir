@@ -58,6 +58,13 @@ function safe_clone {
 ##                           MAIN PROGRAM                           ##
 ######################################################################
 
+pack=$(fenrir-read-conf main packaged)
+if [ -n "${pack}" ]; then
+    loki-log warn "Fenrir is distributed by <${pack}> package manager"
+    loki-log warn "Use the package manager to update!"
+    exit 67
+fi
+
 tag=$1
 clone_dir=$(mktemp -d)
 
