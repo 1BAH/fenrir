@@ -121,9 +121,9 @@ cp_file "$FENRIR_HOME" "${ENV_HOME}"
 # Install local fenrir into the container
 docker exec -u root "$container" sh -c 'rm -fr $(fenrir-get-confdir) $(fenrir-get-bindir)/fenrir* $(fenrir-get-bindir)/update-fenrir $(fenrir-get-bindir)/uninstall-fenrir $(fenrir-get-bindir)/loki /tmp/fenrir'
 
-cp_file "$(fenrir-get-confdir)" "$(docker exec -u root "$container" fenrir-get-confdir)"
-for file in $(fenrir-get-bindir)/fenrir* $(fenrir-get-bindir)/update-fenrir $(fenrir-get-bindir)/uninstall-fenrir $(fenrir-get-bindir)/loki; do
-    cp_file "$file" "$(docker exec -u root "$container" fenrir-get-bindir)"
+cp_file "$(fenrir-get-confdir)" "$(fenrir-get-confdir)"
+for file in "$(fenrir-get-bindir)"/fenrir* "$(fenrir-get-bindir)"/update-fenrir "$(fenrir-get-bindir)"/uninstall-fenrir "$(fenrir-get-bindir)"/loki; do
+    cp_file "$file" "$(fenrir-get-bindir)"
 done
 
 # Run config
