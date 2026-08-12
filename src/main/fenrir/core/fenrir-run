@@ -150,6 +150,7 @@ fi
 
     # shellcheck disable=SC2086
     fenrir-main $testcase # Might be empty: no quotes!
+    ecode=$?
 
     # Global tear down
     if [ -x "$(fenrir-task-path repo)/env.down" ]; then
@@ -157,4 +158,8 @@ fi
             exit $?
         }
     fi
+
+    exit $ecode
 )
+
+exit $?
