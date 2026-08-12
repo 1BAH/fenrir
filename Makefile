@@ -9,6 +9,9 @@ SHARE_DIR := $(INSTALL_ROOT)/usr/share
 
 export FENRIR_HOME := $(CONF_DIR)/fenrir_home
 
+RPM_REPO_DIR := ~/1bah.github.io/rpm
+DEB_REPO_DIR := ~/1bah.github.io/deb
+
 default:
 
 init: clean
@@ -51,3 +54,16 @@ deb: install-fenrir deb-clean
 
 
 all: rpm deb
+
+update-repos: all
+	cp ~/fenrir-1bah-$(VERSION).noarch.deb $(DEB_REPO_DIR)/pool/main/fenrir-1bah-$(VERSION)_all.deb
+	cp ~/fenrir-$(VERSION).noarch.rpm $(RPM_REPO_DIR)/fenrir-$(VERSION).noarch.rpm
+	@echo "Updating rpm repo index.."
+	createrepo_c --update $(RPM_REPO_DIR)
+	gpg -ab --batch --yes $(RPM_REPO_DIR)/repodata/repomd.xml
+	@echo "Updating apt repo index.."
+	apt-ftparchive --arch all packages $(DEB_REPO_DIR)/pool/main > $(DEB_REPO_DIR)/dists/stable/main/binary-all/Packages
+	gzip -9fk $(DEB_REPO_DIR)/dists/stable/main/binary-all/Packages
+	apt-ftparchive -c /release.conf release $(DEB_REPO_DIR)/dists/stable > $(DEB_REPO_DIR)/dists/stable/Release
+	gpg --yes --clearsign -o $(DEB_REPO_DIR)/dists/stable/InRelease $(DEB_REPO_DIR)/dists/stable/Release
+	gpg --yes -abs -o $(DEB_REPO_DIR)/dists/stable/Release.gpg $(DEB_REPO_DIR)/dists/stable/Release
