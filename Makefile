@@ -1,4 +1,4 @@
-VERSION      := 2026.0+3
+VERSION      := 2026.1
 BUILD_DIR    := /tmp/fenrir-build
 INSTALL_DIR  := fenrir-$(VERSION)
 INSTALL_ROOT := $(BUILD_DIR)/$(INSTALL_DIR)
@@ -59,6 +59,7 @@ update-repos: all
 	cp ~/fenrir-1bah-$(VERSION).noarch.deb $(DEB_REPO_DIR)/pool/main/fenrir-1bah-$(VERSION)_all.deb
 	cp ~/fenrir-$(VERSION).noarch.rpm $(RPM_REPO_DIR)/fenrir-$(VERSION).noarch.rpm
 	@echo "Updating rpm repo index.."
+	rpmsign --addsign $(RPM_REPO_DIR)/fenrir-$(VERSION).noarch.rpm
 	createrepo_c --update $(RPM_REPO_DIR)
 	gpg -ab --batch --yes $(RPM_REPO_DIR)/repodata/repomd.xml
 	@echo "Updating apt repo index.."

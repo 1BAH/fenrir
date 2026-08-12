@@ -11,7 +11,7 @@
 #include <shift-args>
 #include <set-sed>
 
-CONF_FILE="/etc/fenrir"
+CONF_FILE="$(fenrir-get-confdir)"
 
 EXP_ARGC=3
 #include <verify-argc>

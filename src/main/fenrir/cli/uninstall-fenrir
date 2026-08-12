@@ -2,9 +2,9 @@
 
 # Uninstalls from the default locations
 
-INSTALL_ROOT="/usr/local/bin"
+INSTALL_ROOT="$(fenrir-get-bindir)"
+CONFIG_ROOT="$(fenrir-get-confdir)"
 MAN_ROOT="/usr/local/share/man"
-CONFIG_ROOT="/etc/fenrir"
 
 if [[ "$1" == update ]]; then
     update="YES"

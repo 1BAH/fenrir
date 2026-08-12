@@ -1,6 +1,6 @@
 Name:           fenrir
-Version:        2026.0+3
-Release:        1
+Version:        2026.1
+Release:        2
 Summary:        Testing system 'fenrir'
 
 License:        Apache License 2.0
@@ -29,9 +29,8 @@ cp -r etc/* "%{buildroot}%{_sysconfdir}"
 cp -r usr/bin/* "%{buildroot}%{_bindir}"
 cp -r usr/share/* "%{buildroot}%{_datadir}"
 
-sed -i "s|^CONF_FILE=.*$|CONF_FILE=\"%{_sysconfdir}/fenrir\"|" "%{buildroot}%{_bindir}/fenrir-read-conf"
-sed -i "s|^CONF_FILE=.*$|CONF_FILE=\"%{_sysconfdir}/fenrir\"|" "%{buildroot}%{_bindir}/fenrir-set-conf"
-sed -i "s|\".*lokirc\"|\"%{_sysconfdir}/fenrir/lokirc\"|"      "%{buildroot}%{_bindir}/loki"
+sed -i "s|^echo \".*\"$|echo \"%{_sysconfdir}/fenrir\"|" "%{buildroot}%{_bindir}/fenrir-get-confdir"
+sed -i "s|^echo \".*\"$|echo \"%{_bindir}\"|" "%{buildroot}%{_bindir}/fenrir-get-bindir"
 
 
 %post

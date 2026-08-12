@@ -17,7 +17,7 @@
 
 #include <shift-args>
 
-CONF_FILE="/etc/fenrir"
+CONF_FILE="$(fenrir-get-confdir)"
 
 is_array=0
 

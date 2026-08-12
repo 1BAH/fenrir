@@ -54,9 +54,6 @@ done
 echo "version=\"$VERSION\"" >> "${FENRIR_CONF_DIR}/main.hel"
 
 # Update config location
-${sed_cmd} -i "s|^CONF_FILE=.*$|CONF_FILE=\"${FENRIR_CONF_DIR}\"|" "${FENRIR_INSTALL_DIR}/fenrir-read-conf"
-${sed_cmd} -i "s|^CONF_FILE=.*$|CONF_FILE=\"${FENRIR_CONF_DIR}\"|" "${FENRIR_INSTALL_DIR}/fenrir-set-conf"
-
 
 loki-prog "Installing 'lokirc'.."
 
@@ -81,7 +78,11 @@ else
     fi
 fi
 
-${sed_cmd} -i "s|/etc/fenrir/lokirc|${FENRIR_CONF_DIR}/lokirc|" "${FENRIR_INSTALL_DIR}/loki"
+loki-gorp
+
+loki-prog "Installing path resolvers.."
+echo "echo \"${FENRIR_CONF_DIR}\"" >> "${FENRIR_INSTALL_DIR}/fenrir-get-confdir"
+echo "echo \"${FENRIR_INSTALL_DIR}\"" >> "${FENRIR_INSTALL_DIR}/fenrir-get-bindir"
 
 loki-gorp
 loki-gorp
@@ -163,8 +164,6 @@ if ! {
     exit 21
 fi
 
-${sed_cmd} -i "s|^INSTALL_ROOT=.*$|INSTALL_ROOT=\"${FENRIR_INSTALL_DIR}\"|" "${FENRIR_INSTALL_DIR}/uninstall-fenrir"
-${sed_cmd} -i "s|^CONFIG_ROOT=.*$|CONFIG_ROOT=\"${FENRIR_CONF_DIR}\"|" "${FENRIR_INSTALL_DIR}/uninstall-fenrir"
 ${sed_cmd} -i "s|^MAN_ROOT=.*$|MAN_ROOT=\"${FENRIR_MAN_DIR}\"|" "${FENRIR_INSTALL_DIR}/uninstall-fenrir"
 
 loki-gorp

@@ -119,12 +119,11 @@ loki-log info "Configuring env (fenrir).."
 cp_file "$FENRIR_HOME" "${ENV_HOME}"
 
 # Install local fenrir into the container
-docker exec -u root "$container" rm -fr /etc/fenrir
-docker exec -u root "$container" sh -c 'rm -fr /usr/local/bin/fenrir* /usr/local/bin/update-fenrir /usr/local/bin/uninstall-fenrir /usr/local/bin/loki /tmp/fenrir'
+docker exec -u root "$container" sh -c 'rm -fr $(fenrir-get-confdir) $(fenrir-get-bindir)/fenrir* $(fenrir-get-bindir)/update-fenrir $(fenrir-get-bindir)/uninstall-fenrir $(fenrir-get-bindir)/loki /tmp/fenrir'
 
-cp_file "/etc/fenrir" "/etc/fenrir"
-for file in /usr/local/bin/fenrir* /usr/local/bin/update-fenrir /usr/local/bin/uninstall-fenrir /usr/local/bin/loki; do
-    cp_file "$file" "/usr/local/bin"
+cp_file "$(fenrir-get-confdir)" "$(docker exec -u root "$container" fenrir-get-confdir)"
+for file in $(fenrir-get-bindir)/fenrir* $(fenrir-get-bindir)/update-fenrir $(fenrir-get-bindir)/uninstall-fenrir $(fenrir-get-bindir)/loki; do
+    cp_file "$file" "$(docker exec -u root "$container" fenrir-get-bindir)"
 done
 
 # Run config

@@ -1,8 +1,7 @@
 #! /usr/bin/env sh
 
-sed -i "s|^CONF_FILE=.*$|CONF_FILE=\"/etc/fenrir\"|" "/usr/bin/fenrir-read-conf"
-sed -i "s|^CONF_FILE=.*$|CONF_FILE=\"/etc/fenrir\"|" "/usr/bin/fenrir-set-conf"
-sed -i "s|\".*lokirc\"|\"/etc/fenrir/lokirc\"|"      "/usr/bin/loki"
+sed -i "s|^echo \".*\"$|echo \"/usr/bin\"|" "/usr/bin/fenrir-get-bindir"
+sed -i "s|^echo \".*\"$|echo \"/etc/fenrir\"|" "/usr/bin/fenrir-get-confdir"
 
 echo "packaged=deb" >> "/etc/fenrir/main.hel"
 

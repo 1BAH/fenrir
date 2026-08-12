@@ -1,7 +1,12 @@
 #! /usr/bin/env bash
 
 # Load rc file:
-source "/etc/fenrir/lokirc" &> /dev/null
+if type fenrir-get-confdir &> /dev/null; then
+    source "$(fenrir-get-confdir)/lokirc" &> /dev/null
+else
+    echo -e "\033[1m\033[38;5;214m[ WARN  ]\033[0m \033[38;5;209m(シ. .)シ\033[0m Using lokirc's temporal replacement!"
+    source "${FENRIR_CONF_DIR}/lokirc" &> /dev/null
+fi
 
 set -T
 set +m
@@ -35,7 +40,7 @@ if (( $# != 0 )); then
             return 0
         fi
 
-        if [[ "${BASH_SOURCE[1]}" == "/usr/local/bin/loki" ]]; then
+        if [[ "${BASH_SOURCE[1]}" == "$(fenrir-get-bindir)/loki" ]]; then
             return 0
         fi
 
