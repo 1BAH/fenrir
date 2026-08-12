@@ -1,5 +1,5 @@
 Name:           fenrir
-Version:        2026.0+2
+Version:        2026.0+3
 Release:        1
 Summary:        Testing system 'fenrir'
 
