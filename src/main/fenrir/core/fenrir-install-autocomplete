@@ -34,6 +34,7 @@ SCRIPT
 
 case "$1" in
     bash)
+        mkdir -p "/etc/bash_completion.d"
         rm -f "/etc/bash_completion.d/fenrir-autocomplete"
         echo "$bash_script" >| "/etc/bash_completion.d/fenrir-autocomplete"
         loki-log warn "Run 'source ~/.bashrc' or reload terminal to apply the autocompletion"
