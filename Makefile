@@ -64,6 +64,6 @@ update-repos: all
 	@echo "Updating apt repo index.."
 	apt-ftparchive --arch all packages $(DEB_REPO_DIR)/pool/main > $(DEB_REPO_DIR)/dists/stable/main/binary-all/Packages
 	gzip -9fk $(DEB_REPO_DIR)/dists/stable/main/binary-all/Packages
-	apt-ftparchive -c /release.conf release $(DEB_REPO_DIR)/dists/stable > $(DEB_REPO_DIR)/dists/stable/Release
+	apt-ftparchive -c $(DEB_REPO_DIR)/release.conf release $(DEB_REPO_DIR)/dists/stable > $(DEB_REPO_DIR)/dists/stable/Release
 	gpg --yes --clearsign -o $(DEB_REPO_DIR)/dists/stable/InRelease $(DEB_REPO_DIR)/dists/stable/Release
 	gpg --yes -abs -o $(DEB_REPO_DIR)/dists/stable/Release.gpg $(DEB_REPO_DIR)/dists/stable/Release
