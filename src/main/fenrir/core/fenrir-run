@@ -6,7 +6,7 @@
 #
 # Test the provided solution. The test must be set beforehand with 'fenrir-task' command.
 # This command is an interface. For the detailed execution pipeline see 'fenrir-main'.
-# When TESTCASE is provided, it run only the selected testcase
+# When TESTCASE is provided, it runs only the selected testcase
 #
 # Options:
 #    -i                 Run test inside the provided directory without cloning it

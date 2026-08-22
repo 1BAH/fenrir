@@ -6,7 +6,7 @@
 #
 # Starts a container and executes 'fenrir-run' inside.
 # After the execution the container is removed unless the 'debug' flag is set.
-# When TESTCASE is provided, it run only the selected testcase
+# When TESTCASE is provided, it runs only the selected testcase
 #
 # Options:
 #    -d, --debug        Does not stop the container (allows further debug)
@@ -91,6 +91,11 @@ if (( allowed != 1 )); then
     loki-log err "This task does not support execution in docker"
     loki-log err "Use 'fenrir run $task' instead"
     exit 103
+fi
+
+if ! [ -d "$(fenrir-read-conf run root)/.git" ]; then
+    loki-log err '(╬▔皿▔)╯' "The provided file is not a project root"
+    exit 90
 fi
 
 unsafe=$(fenrir-read-conf "$task" unsafe)
