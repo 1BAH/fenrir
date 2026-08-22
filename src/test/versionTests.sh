@@ -67,5 +67,8 @@ loki-assert-regeq ".*Version:        ${version}.*" "$(cat "${src_dir}/../../../f
 
 loki-gorp
 
+loki-prog "Makefile"
+loki-assert-eq "${version}" "$(cat "${src_dir}/../../../Makefile" | head -n 1 | cut -f2 -d'=' | tr -d "$IFS")"
+loki-gorp
 
 ##########################################################################
