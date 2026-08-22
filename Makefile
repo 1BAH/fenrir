@@ -63,8 +63,8 @@ update-repos: all
 	createrepo_c --update $(RPM_REPO_DIR)
 	gpg -ab --batch --yes $(RPM_REPO_DIR)/repodata/repomd.xml
 	@echo "Updating apt repo index.."
-	apt-ftparchive --arch all packages $(DEB_REPO_DIR)/pool/main > $(DEB_REPO_DIR)/dists/stable/main/binary-all/Packages
-	gzip -9fk $(DEB_REPO_DIR)/dists/stable/main/binary-all/Packages
-	apt-ftparchive -c $(DEB_REPO_DIR)/release.conf release $(DEB_REPO_DIR)/dists/stable > $(DEB_REPO_DIR)/dists/stable/Release
-	gpg --yes --clearsign -o $(DEB_REPO_DIR)/dists/stable/InRelease $(DEB_REPO_DIR)/dists/stable/Release
-	gpg --yes -abs -o $(DEB_REPO_DIR)/dists/stable/Release.gpg $(DEB_REPO_DIR)/dists/stable/Release
+	cd $(DEB_REPO_DIR) && apt-ftparchive --arch all packages pool/main > dists/stable/main/binary-all/Packages
+	cd $(DEB_REPO_DIR) && gzip -9fk dists/stable/main/binary-all/Packages
+	cd $(DEB_REPO_DIR) && apt-ftparchive -c release.conf release dists/stable > dists/stable/Release
+	cd $(DEB_REPO_DIR) && gpg --yes --clearsign -o dists/stable/InRelease dists/stable/Release
+	cd $(DEB_REPO_DIR) && gpg --yes -abs -o dists/stable/Release.gpg dists/stable/Release

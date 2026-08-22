@@ -1,18 +1,44 @@
 = Fenrir
 :url-project: https://github.com/1bah/fenrir/actions/workflows
 
-> Framework for testing
+> A lightweight general purpose CLI-based testing framework
 
 image:{url-project}/pages.yml/badge.svg[Docs]
 image:{url-project}/docker.yml/badge.svg[Docker]
 image:{url-project}/release.yml/badge.svg[Release]
 image:https://img.shields.io/badge/License-Apache%202.0-blue.svg[License]
 
-> The project has migrated from [GitLab](https://gitlab.com/atpd/fenrir)
+> The project has migrated from [GitLab](https://github.com/ygdrasil/fenrir)
 
-The latest version is `2026.1`
+The latest version is `2026.1.1`
 
 Available in a docker container: `ghcr.io/1bah/fenrir-base:latest`
+
+== Why fenrir?
+
+Minimal dependency list::
+The project is written entirely in `bash`, using only `sed` and `curl` utilities.
+
+Multiplatform::
+Since it is written in `bash`, you can run `fenrir` on Linux (amd & arm) or on macOS.
+
+Container oriented::
+The tool is designed to use as less space as possible which makes it perfect for containers.
+
+Not bound to any programming language::
+Single interface which allows you to test different languages, tools (e.g. see https://devtools-course.github.io[DevTools course]).
+
+Shell scripts ass tests::
+Concise syntax when dealing with IO and extra utils, provided by the framework.
+
+Integrated dev environments::
+Having provided a dev environment (container), you can enter it and develop.
+
+Grading::
+When running tests, `fenrir` calculates a score based on the predefined points.
+
+Integrated shell execution tracing::
+All commands are traced and the whole trace is printed when an error occurs.
 
 == Install
 

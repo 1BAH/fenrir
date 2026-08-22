@@ -1,46 +1,68 @@
 = Install
 :page-pagination:
 
-== Linux
+Debian-like Linux::
+[,console]
+----
+$ sudo mkdir -p /usr/share/keyrings
+$ curl -fsSL https://1bah.github.io/public.key | sudo gpg --dearmor -o /usr/share/keyrings/1bah.gpg
+$ echo 'deb [signed-by=/usr/share/keyrings/1bah.gpg] https://1bah.github.io/deb stable main' | sudo tee /etc/apt/sources.list.d/1bah.list
+$ sudo apt update && sudo apt install fenrir-1bah
+----
 
-Currently, we support autocompletion for bash and zsh only. The installation guides are listed below. If you want to use fenrir without autocompletion then verify that `bash` is installed and run the following commands:
+RHEL-like Linux::
+[,console]
+----
+$ cat << 'CONF' | sudo tee /etc/yum.repos.d/1bah.repo
+[1bah-repo]
+name=1BAH package registry
+baseurl=https://1bah.github.io/rpm
+enabled=1
+gpgcheck=1
+gpgkey=https://1bah.github.io/public.key
+CONF
+$ sudo dnf install fenrir
+----
 
-    git clone https://gitlab.com/atpd/fenrir.git /tmp/fenr
-    cd /tmp/fenr/src/main/fenrir/cli
-    ./install-fenrir -v
+[#other]
+Other::
+[,console]
+----
+$ git clone https://github.com/1BAH/fenrir.git /tmp/frir
+$ cd /tmp/frir/src/main/fenrir/cli
+$ sudo ./install-fenrir
+----
 
-=== Bash
-Run the following commands:
+Verify the installation:
+[,console]
+----
+$ fenrir i
+  _____               _
+ |  ___|__ _ __  _ __(_)_ __
+ | |_ / _ \ '_ \| '__| | '__|
+ |  _|  __/ | | | |  | | |
+ |_|  \___|_| |_|_|  |_|_|
 
-    git clone https://gitlab.com/atpd/fenrir.git /tmp/fenr
-    cd /tmp/fenr/src/main/fenrir/cli
-    ./install-fenrir --bash -v
+------------------------------------------------------------------
+Current settings:
+    * Remote: https://github.com/1BAH/fenrir-tests
+    * Current task: -
+    * Blocking: 0
+    * Execution mode: 111 (Inline-Host-Docker)
+------------------------------------------------------------------
+Run settings:
 
-=== Zsh
-. Make sure `bash` is installed (even though the autocompletion for `zsh` is provided, fenrir is based on `bash`)
-. Run the following commands:
+------------------------------------------------------------------
+fenrir 2026.0+1, 2026
+@1BAH
+----
 
-    git clone https://gitlab.com/atpd/fenrir.git /tmp/fenr
-    cd /tmp/fenr/src/main/fenrir/cli
-    ./install-fenrir --zsh -v
-
-If you use `zsh` without `Oh My Zsh` then make sure
-
-. `autoload -U compinit && compinit` is present at `~/.zshrc`
-. `~/.oh-my-zsh/completions` is present at `fpath`
-
-== MacOS
+MacOS::
 
 . Update `bash` with `brew` (must be v5.0+)
 . Install `gsed`
-. Run the following commands from terminal:
+. Follow the <<other, other>> guidelines
 
-    git clone https://gitlab.com/atpd/fenrir.git /tmp/fenr
-    cd /tmp/fenr/src/main/fenrir/cli
-    ./install-fenrir --zsh -v
+Windows::
 
-. Verify the installation with `fenrir i`
-
-== Windows
-
-You cannot use fenrir directly in `Windows` that's why we recommend to use https://learn.microsoft.com/en-us/windows/wsl/install[WSL]. Chose any distro and use <<Linux>> install guide.
+You cannot use fenrir directly in `Windows` that's why we recommend to use https://learn.microsoft.com/en-us/windows/wsl/install[WSL]. Chose any distro and use installs guides above.

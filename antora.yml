@@ -1,5 +1,5 @@
 name: fenrir
-version: 2026.1
+version: 2026.1.1
 title: fenrir
 nav:
   - modules/ROOT/nav.adoc

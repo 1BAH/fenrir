@@ -1,0 +1,55 @@
+= Test execution process
+:page-pagination:
+
+image::fenrir-exec.svg[]
+
+== Special files
+
+`.enter` and `.exit`::
+Default `BeforeEach` and `AfterEach` scripts
+
+`global.init` and `global.destroy`::
+`BeforeAll` and `AfterAll` scripts
+
+`env.up` and `env.down`::
+Config scripts used within `fenrir env` and `fenrir rund`
+
+== Testcase execution
+
+> The process is managed by `fenrir-exec-testcase`.
+
+* A subshell is created for the testcase
+* If `<TESTCASE>.enter` is present, it is sourced. Otherwise, *fenrir* tries sourcing the `.enter` file
+* The `<TESTCASE>` script is executed (*fork!*)
+* The testcase env is closed via `<TESTCASE>.exit` or `.exit`
+
+You can define any variables in `\_.enter` and access them in `_.exit` later. Use `export` to pass the varibles into the script.
+
+== Test pipeline execution
+
+> The process is managed by `fenrir-main`.
+
+* `fenrir run ...` is invoked
+* The solution directory is cloned to `/tmp/fenrir/tmp`. If `-i` option is provided, this step is skipped
+* `global.init` script is sourced
+* `walk-inspections` are run. If `-nl` option is provided, this step is skipped
+* For each script in pipeline `fenrir-exec-testcase <TESTCASE>` is invoked. If `-c <TESTCASE>` option is provided, only the selected testcase is passed.
+* `global.destroy` script is sourced
+
+The pipeline is defined at `pipeline.hel` file:
+
+.Example `pipeline.hel`
+[,bash]
+----
+main=(
+    "png-api"
+    "png-gen"
+    "svg"
+)
+----
+
+== Running in Docker
+
+Fenrir starts a container, copies itself and the solution inside the container. Then `env.up` is run *inside the host system* (e.g. additional containers are created) and `fenrir run -i <SOLUTION>` is executed in the initial container. The created environment is destroyed by `env.down`.
+
+NOTE: If you want fenrir to automatically delete containers, replace `docker run` with `fenrir-cont-run`

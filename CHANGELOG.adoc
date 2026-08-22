@@ -1,5 +1,13 @@
 = Fenrir's changelog
 
+== Version 2026.1.1
+* Extract tracing logic to `jotunheim` file
+* Now support `global.init` & `global.destroy` scripts
+* Add `-y` option for installer
+* Other runtime bugs
+* Renamed `loki-assert-rnegeq` -> `loki-assert-regneq`
+* Add `docker run` wrapper
+
 == Version 2026.1
 * Switch to `fenrir-get-_` path resolvers
 

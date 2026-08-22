@@ -1,4 +1,7 @@
 * xref:usage.adoc[]
 * xref:install.adoc[]
+
+.How does `fenrir` work?
 * xref:install-algorithm.adoc[]
+* xref:exec-proc.adoc[]
 
