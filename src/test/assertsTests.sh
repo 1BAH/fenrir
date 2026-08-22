@@ -55,17 +55,17 @@ loki-prog "regeq"
 
 loki-gorp
 ##########################################################################
-loki-prog "rnegeq"
+loki-prog "regneq"
 
 (
-    loki-assert-rnegeq "^.*er.*$" "qwertyu" &> /dev/null
+    loki-assert-regneq "^.*er.*$" "qwertyu" &> /dev/null
 ) && {
     echo "Error <$?>: qwertyu =~ ^.*er.*$"
     exit 99
 }
 
 (
-    loki-assert-rnegeq "^.*et.*$" "qwertyu" &> /dev/null
+    loki-assert-regneq "^.*et.*$" "qwertyu" &> /dev/null
 ) || {
     echo "Error <$?>: qwertyu !=~ ^.*et.*$"
     exit 99
