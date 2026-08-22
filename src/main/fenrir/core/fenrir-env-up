@@ -108,6 +108,10 @@ fi
 # Save container ID
 echo "$container" > "${FENRIR_TMP_DIR}/env"
 
+if [ -z "$bind" ]; then
+    cp_file "${sol_dir}" "${ENV_HOME}/solution"
+fi
+
 loki-log info "Env is created.."
 
 ######################################################################
