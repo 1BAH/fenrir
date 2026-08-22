@@ -15,6 +15,7 @@ EXP_ARGC=1
 #include <verify-argc>
 
 testcase=$1
+ecode=0
 
 ###########################################
 function pretty_print_testname {
@@ -43,6 +44,7 @@ function save_error_report {
 
 echo "    <testcase name=\"${testcase}\">" >> "${REPORT_FILE}"
 if [ -n "$FENRIR_TC_SKIP" ]; then
+    # TODO skipped when global.init failed
     echo "      <skipped>Blocking execution</skipped>" >> "${REPORT_FILE}"
 else
     pretty_print_testname "${testcase}"
