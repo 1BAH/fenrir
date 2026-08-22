@@ -106,6 +106,13 @@ switch_solution || {
     linter_failed=0
     ecode=0
 
+    if [ -x "$(fenrir-task-path repo)/global.init" ]; then
+         source "$(fenrir-task-path repo)/global.init" || {
+             ecode=$?
+             export FENRIR_TC_SKIP=YES
+         }
+    fi
+
     # Run tests
     for script in $main; do
         if [ "$script" = "walk-inspections" ]; then
@@ -125,6 +132,12 @@ switch_solution || {
             }
         fi
     done
+
+    if [ -x "$(fenrir-task-path repo)/global.destroy" ]; then
+         source "$(fenrir-task-path repo)/global.destroy" || {
+             ecode=$?
+         }
+    fi
 
     if (( linter_failed == 1 )); then
         loki-log warn "Some linter inspections have failed: final score is reset to 0"

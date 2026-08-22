@@ -25,6 +25,13 @@ fi
 ######################################################################
 loki-log info 'ヾ(＾ ∇ ＾).' "Now in env"
 
+if [ -x "$(fenrir-task-path repo)/global.init" ]; then
+    loki-log info "Testcase init.."
+    source "$(fenrir-task-path repo)/global.init" || {
+        loki-log warn "Testcase init has failed!"
+    }
+fi
+
 # Testcase setup
 if [[ -v testcase ]] && [ -x "$(fenrir-task-path repo)/$testcase.enter" ]; then
     loki-log info "Testcase setup.."
@@ -63,4 +70,11 @@ if [[ -v testcase ]] && [ -x "$(fenrir-task-path repo)/$testcase.exit" ]; then
 elif [ -x "$(fenrir-task-path repo)/.exit" ]; then
     loki-log info "Testcase teardown.."
     source "$(fenrir-task-path repo)/.exit"
+fi
+
+if [ -x "$(fenrir-task-path repo)/global.destroy" ]; then
+    loki-log info "Testcase destroy.."
+    source "$(fenrir-task-path repo)/global.destroy" || {
+        loki-log warn "Testcase destroy has failed!"
+    }
 fi
