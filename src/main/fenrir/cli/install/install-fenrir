@@ -219,12 +219,16 @@ loki-prog "Previous installations.."
         echo "'$cmd'"
     done | ${sed_cmd} "s/^/$(loki-wrap "${YELLOW}" "[WARNING]")      /"
 
-    loki-log warn "They are to be replaced. Do you want to proceed? ($(loki-wrap "${BOLD}" Potentially dangerous)) [y|N]"
+    if [ -n "$FENRIR_AGREE" ]; then
+         loki-log warn "These commands are to be replaced. (Passed -y option)"
+    else
+        loki-log warn "They are to be replaced. Do you want to proceed? ($(loki-wrap "${BOLD}" Potentially dangerous)) [y|N]"
 
-    read -r op
-    if [ "$op" != "y" ] && [ "$op" != "Y" ]; then
-        loki-log err "Terminating.."
-        exit 7
+        read -r op
+        if [ "$op" != "y" ] && [ "$op" != "Y" ]; then
+            loki-log err "Terminating.."
+            exit 7
+        fi
     fi
 ) || exit $? # propagate error
 loki-gorp

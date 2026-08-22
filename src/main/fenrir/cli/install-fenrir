@@ -55,6 +55,9 @@ while (( $# > 0 )); do
     -nadoc)
         export FENRIR_NO_ADOC=True
     ;;
+    -y)
+        export FENRIR_AGREE=true
+    ;;
     esac
 
     shift
