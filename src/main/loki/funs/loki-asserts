@@ -149,14 +149,14 @@ function loki-assert-regeq {
 
 ##
 # Usage:
-#   loki-assert-rnegeq <regexp> <real> [MESSAGE]
+#   loki-assert-regneq <regexp> <real> [MESSAGE]
 #
 # Test the arguments for non-matching a regexp.
 # Exits with code 99 on failure
 ##
-function loki-assert-rnegeq {
-    local regexp=${1?"loki-assert-rnegeq: Missing the second argument"}
-    local real=${2?"loki-assert-rnegeq: Missing the first argument"}
+function loki-assert-regneq {
+    local regexp=${1?"loki-assert-regneq: Missing the second argument"}
+    local real=${2?"loki-assert-regneq: Missing the first argument"}
     local msg=$3
 
     if [[ $real =~ $regexp ]]; then
@@ -214,7 +214,7 @@ function loki-assert-rnout {
     local exp=${1?"loki-assert-rnout: Missing the first argument"}
     local msg=$2
 
-    loki-assert-rnegeq "$exp" "$(loki-get-out)" "$msg"
+    loki-assert-regneq "$exp" "$(loki-get-out)" "$msg"
 }
 
 ##
@@ -228,7 +228,7 @@ function loki-assert-rnerr {
     local exp=${1?"loki-assert-rnerr: Missing the first argument"}
     local msg=$2
 
-    loki-assert-rnegeq "$exp" "$(loki-get-err)" "$msg"
+    loki-assert-regneq "$exp" "$(loki-get-err)" "$msg"
 }
 
 ##

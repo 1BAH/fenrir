@@ -2,6 +2,11 @@
 
 LOKI_COMMON_FUNS="LOKI_COMMON_FUNS_ASM"
 
+# Inline JOTUNHEIM
+echo "[ INFO  ] Inlining JOTUNHEIM.."
+${sed_cmd} -i -e "/#include <jotunheim>/r jotunheim" -e "/#include <jotunheim>/d" funs/loki-wrapper
+${sed_cmd} -i -e "/#include <jotunheim>/r jotunheim" -e "/#include <jotunheim>/d" loki
+
 # Build 'common-funs'
 first=1
 for part in funs/*; do
