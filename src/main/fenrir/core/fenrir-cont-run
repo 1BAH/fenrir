@@ -1,0 +1,24 @@
+#! /usr/bin/env bash
+
+##
+# Usage:
+#   fenrir-cont-run OPTS...
+#
+# docker run wrapper
+##
+
+######################################################################
+##                         VERIFY ARGUMENTS                         ##
+######################################################################
+
+#include <shift-args>
+
+cont=$(docker run "$@")
+ecode=$?
+
+if (( ecode != 0 )); then
+    exit $ecode
+fi
+
+tmp_dir=$(loki -c 'eval' 'echo $FENRIR_TMP_DIR')
+echo "$cont" >> "${tmp_dir}/env.conts"
