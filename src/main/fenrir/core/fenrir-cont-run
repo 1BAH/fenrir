@@ -21,4 +21,4 @@ if (( ecode != 0 )); then
 fi
 
 tmp_dir=$(loki -c 'eval' 'echo $FENRIR_TMP_DIR')
-echo "$cont" >> "${tmp_dir}/env.conts"
+echo "$cont" | tee "${tmp_dir}/env.conts"
