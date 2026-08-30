@@ -1,0 +1,15 @@
+#! /usr/bin/env bash
+
+##
+# Usage:
+#   fenrir-main-cont
+#
+# Returns id of main container
+##
+
+######################################################################
+##                         VERIFY ARGUMENTS                         ##
+######################################################################
+
+tmp_dir=$(loki -c 'eval' 'echo $FENRIR_TMP_DIR')
+cat "${tmp_dir}/env"
