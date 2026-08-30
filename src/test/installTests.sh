@@ -7,7 +7,7 @@ function normalise_version {
 ##########################################################################
 
 # DO NOT MAKE IT AUTOLOADABLE!
-version="2026.1.1"
+version="2026.1.2"
 
 year=$(date +%Y)
 

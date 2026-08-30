@@ -6,7 +6,7 @@ function normalise_version {
 
 ##########################################################################
 
-expected_version="2026.1.1"
+expected_version="2026.1.2"
 
 src_dir=$(realpath "$(pwd)/../../main/fenrir")
 props="${src_dir}/cli/fenrir.properties"

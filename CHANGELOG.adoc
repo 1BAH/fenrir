@@ -1,5 +1,9 @@
 = Fenrir's changelog
 
+== Version 2026.1.2
+* `fenrir-cont-run` prints `docker run` output
+* Added `fenrir-main-cont`: prints main container ID
+
 == Version 2026.1.1
 * Extract tracing logic to `jotunheim` file
 * Now support `global.init` & `global.destroy` scripts

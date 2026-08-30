@@ -1,6 +1,6 @@
 Name:           fenrir
-Version:        2026.1.1
-Release:        2
+Version:        2026.1.2
+Release:        1
 Summary:        Testing system 'fenrir'
 
 License:        Apache License 2.0

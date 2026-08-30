@@ -1,4 +1,4 @@
-VERSION      := 2026.1.1
+VERSION      := 2026.1.2
 BUILD_DIR    := /tmp/fenrir-build
 INSTALL_DIR  := fenrir-$(VERSION)
 INSTALL_ROOT := $(BUILD_DIR)/$(INSTALL_DIR)

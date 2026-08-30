@@ -1,5 +1,5 @@
 Package: fenrir-1bah
-Version: 2026.1.1
+Version: 2026.1.2
 Depends: bash (>= 5.0.0), curl
 Architecture: all
 Maintainer: Iwan Kalinin <koefic.cien@gmail.com>
