@@ -100,6 +100,15 @@ fi
 if [ -n "${FENRIR_IN_DOCKER}" ] && [ -z "${FENRIR_IN_ENV}" ]; then
     # Docker execution uses inline option by default
     export FENRIR_RUN_I="i"
+elif [ -z "${FENRIR_IN_ENV}" ]; then
+    allowed_inline=$(fenrir-read-conf "$task" inline)
+    allowed_inline=${allowed_inline:-1}
+
+    if (( allowed_inline != 1 )) && [ -n "$FENRIR_RUN_I" ]; then
+        loki-log err "This task does not support inline execution"
+        loki-log err "Remove '-i' flag"
+        exit 102
+    fi
 else
     allowed=$(fenrir-read-conf "$task" inhost)
     allowed=${allowed:-1}
