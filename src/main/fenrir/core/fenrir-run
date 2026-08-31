@@ -49,9 +49,7 @@ while [ "$#" -ne 0 ]; do
         ;;
 
         "--testcase" | "-c")
-            # TODO remove INLINE
             testcase=${2?"You must select the testcase!"}
-            INLINE="i"
             shift
         ;;
 
@@ -99,7 +97,7 @@ fi
 
 
 # FIND is already validated
-if [ -n "${FENRIR_IN_DOCKER}" ]; then
+if [ -n "${FENRIR_IN_DOCKER}" ] && [ -z "${FENRIR_IN_ENV}" ]; then
     # Docker execution uses inline option by default
     export FENRIR_RUN_I="i"
 else
@@ -142,7 +140,7 @@ fi
 
 (# Run scope
     # Global set up
-    if [ -x "$(fenrir-task-path repo)/env.up" ]; then
+    if [ -z "${FENRIR_IN_ENV}" ] && [ -x "$(fenrir-task-path repo)/env.up" ]; then
         source "$(fenrir-task-path repo)/env.up" || {
             exit $?
         }
@@ -153,7 +151,7 @@ fi
     ecode=$?
 
     # Global tear down
-    if [ -x "$(fenrir-task-path repo)/env.down" ]; then
+    if [ -z "${FENRIR_IN_ENV}" ] && [ -x "$(fenrir-task-path repo)/env.down" ]; then
         source "$(fenrir-task-path repo)/env.down" || {
             exit $?
         }

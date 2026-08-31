@@ -25,6 +25,8 @@ fi
 ######################################################################
 loki-log info 'ヾ(＾ ∇ ＾).' "Now in env"
 
+export FENRIR_IN_ENV=1
+
 if [ -x "$(fenrir-task-path repo)/global.init" ]; then
     loki-log info "Testcase init.."
     source "$(fenrir-task-path repo)/global.init" || {

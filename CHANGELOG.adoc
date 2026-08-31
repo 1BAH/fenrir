@@ -3,6 +3,7 @@
 == Version 2026.1.2
 * `fenrir-cont-run` prints `docker run` output
 * Added `fenrir-main-cont`: prints main container ID
+* When in dev env `FENRIR_IN_ENV` is non-empty
 
 == Version 2026.1.1
 * Extract tracing logic to `jotunheim` file
