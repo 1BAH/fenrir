@@ -7,7 +7,8 @@
 # Shifts the args when it is required (since we use custom interpreter).
 ##
 
-if [[ $1 == "${BASH_SOURCE[0]}" ]]; then
+# Symlinks must be resolved
+if [[ $(realpath "$1") == $(realpath "${BASH_SOURCE[0]}") ]]; then
     shift
 fi
 

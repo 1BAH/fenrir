@@ -1,6 +1,18 @@
 #! /usr/bin/env sh
 
-cuser=$(logname)
+cuser=$(
+  pid=$$
+  while [ -n "$pid" ] && [ "$pid" -gt 1 ] 2>/dev/null; do
+    read -r user ppid < <(ps -o user=,ppid= -p "$pid" 2>/dev/null)
+
+    if [ -n "$user" ] && [ "$user" != "root" ]; then
+      echo "$user"
+      break
+    fi
+
+    pid="$ppid"
+  done
+)
 cuser=${cuser:-$(id -un)}
 if [ "$cuser" = "root" ]; then
     FENRIR_HOME="/$cuser/.fenrir"

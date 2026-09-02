@@ -1,11 +1,23 @@
-#! /usr/bin/env sh
+#! /usr/bin/env bash
 
 sed -i "s|^echo \".*\"$|echo \"/usr/bin\"|" "/usr/bin/fenrir-get-bindir"
 sed -i "s|^echo \".*\"$|echo \"/etc/fenrir\"|" "/usr/bin/fenrir-get-confdir"
 
 echo "packaged=deb" >> "/etc/fenrir/main.hel"
 
-cuser=$(logname)
+cuser=$(
+  pid=$$
+  while [ -n "$pid" ] && [ "$pid" -gt 1 ] 2>/dev/null; do
+    read -r user ppid < <(ps -o user=,ppid= -p "$pid" 2>/dev/null)
+
+    if [ -n "$user" ] && [ "$user" != "root" ]; then
+      echo "$user"
+      break
+    fi
+
+    pid="$ppid"
+  done
+)
 cuser=${cuser:-$(id -un)}
 cgrp=$(id -gn "$cuser")
 if [ "$cuser" = "root" ]; then
