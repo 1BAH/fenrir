@@ -101,10 +101,10 @@ if ! [ -d "${man_dir}" ] && [ -z "${FENRIR_NO_ADOC}" ]; then
         err_msg "Terminating.."
         exit 123
     fi
-else
-    mkdir -p "${man_dir}/man1" # Make sure man1 subdir exists
-    man_dir="${man_dir}/man1"
 fi
+
+mkdir -p "${man_dir}/man1" # Make sure man1 subdir exists
+man_dir="${man_dir}/man1"
 
 info "Install dir is: <${out_dir}>"
 info "Config dir is: <${conf_dir}>"
