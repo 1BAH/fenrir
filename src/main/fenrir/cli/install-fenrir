@@ -94,8 +94,13 @@ if ! [ -d "${conf_dir}" ]; then
 fi
 
 if ! [ -d "${man_dir}" ] && [ -z "${FENRIR_NO_ADOC}" ]; then
-    err_msg "Man pages directory <${man_dir}> does not exist!"
-    exit 123
+    warn_msg "Man pages directory <${man_dir}> does not exist!"
+    warn_msg warn "Do you want to create? [y|N]"
+    read -r op
+    if [ "$op" != "y" ] && [ "$op" != "Y" ]; then
+        err_msg "Terminating.."
+        exit 123
+    fi
 else
     mkdir -p "${man_dir}/man1" # Make sure man1 subdir exists
     man_dir="${man_dir}/man1"
