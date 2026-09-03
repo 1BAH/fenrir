@@ -1,6 +1,6 @@
 Name:           fenrir
 Version:        2026.1.2
-Release:        6
+Release:        7
 Summary:        Testing system 'fenrir'
 
 License:        Apache License 2.0
@@ -39,7 +39,7 @@ echo "packaged=rpm" >> "%{_sysconfdir}/fenrir/main.hel"
 cuser=$(
   pid=$$
   while [ -n "$pid" ] && [ "$pid" -gt 1 ] 2>/dev/null; do
-    read -r user ppid < <(ps -o user=,ppid= -p "$pid" 2>/dev/null)
+    read -r ppid user < <(ps -o ppid=,user= -p "$pid" 2>/dev/null)
 
     if [ -n "$user" ] && [ "$user" != "root" ]; then
       echo "$user"
@@ -73,7 +73,7 @@ echo "Created local repository for <$cuser:$cgrp>.."
 cuser=$(
   pid=$$
   while [ -n "$pid" ] && [ "$pid" -gt 1 ] 2>/dev/null; do
-    read -r user ppid < <(ps -o user=,ppid= -p "$pid" 2>/dev/null)
+    read -r ppid user < <(ps -o ppid=,user= -p "$pid" 2>/dev/null)
 
     if [ -n "$user" ] && [ "$user" != "root" ]; then
       echo "$user"
