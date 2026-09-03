@@ -100,7 +100,7 @@ fi
 if [ -n "${FENRIR_IN_DOCKER}" ] && [ -z "${FENRIR_IN_ENV}" ]; then
     # Docker execution uses inline option by default
     export FENRIR_RUN_I="i"
-elif [ -z "${FENRIR_IN_ENV}" ]; then
+elif [ -n "${FENRIR_IN_ENV}" ]; then
     allowed_inline=$(fenrir-read-conf "$task" inline)
     allowed_inline=${allowed_inline:-1}
 
