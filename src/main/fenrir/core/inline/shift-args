@@ -8,8 +8,10 @@
 ##
 
 # Symlinks must be resolved
-if [[ $(realpath "$1") == $(realpath "${BASH_SOURCE[0]}") ]]; then
-    shift
+if realpath "$1" &> /dev/null; then
+    if [[ $(realpath "$1") == $(realpath "${BASH_SOURCE[0]}") ]]; then
+        shift
+    fi
 fi
 
 # >>= END =<<
