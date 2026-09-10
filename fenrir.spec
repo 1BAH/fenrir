@@ -1,3 +1,5 @@
+%undefine __brp_mangle_shebangs
+
 Name:           fenrir
 Version:        2026.1.2
 Release:        7
