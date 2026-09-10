@@ -1,8 +1,8 @@
 %undefine __brp_mangle_shebangs
 
 Name:           fenrir
-Version:        2026.1.2
-Release:        7
+Version:        2026.1.3
+Release:        1
 Summary:        Testing system 'fenrir'
 
 License:        Apache License 2.0

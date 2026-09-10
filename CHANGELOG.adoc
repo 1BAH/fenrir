@@ -1,5 +1,10 @@
 = Fenrir's changelog
 
+== Version 2026.1.3
+* Finalise API
+* Fix rpm bug (disable shebang mangling)
+* Fix releases in gh
+
 == Version 2026.1.2
 * `fenrir-cont-run` prints `docker run` output
 * Added `fenrir-main-cont`: prints main container ID
