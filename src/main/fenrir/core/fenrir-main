@@ -46,7 +46,7 @@ function pretty_print_testname {
 function finalise {
     ecode=${ecode:-"$1"}
     # Print score
-    echo "Final score: $(cat "${SCORE_FILE}")"
+    loki-log info "Final score: $(cat "${SCORE_FILE}")"
     exit "$ecode"
 }
 

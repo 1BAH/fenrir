@@ -13,7 +13,7 @@ function loki-points {
     case "$op" in
         "+")
             echo -n $(( points + $(cat "$SCORE_FILE") )) > "$SCORE_FILE"
-            loki-log succ '(੭>ᴗ<)੭ ' "PASSED"
+            loki-log succ '(੭>ᴗ<)੭ ' "PASSED: +${points}"
             ;;
         "-")
             echo -n $(( $(cat "$SCORE_FILE") - points )) > "$SCORE_FILE"
