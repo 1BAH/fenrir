@@ -1,4 +1,4 @@
-VERSION      := 2026.1.2
+VERSION      := 2026.1.3
 BUILD_DIR    := /tmp/fenrir-build
 INSTALL_DIR  := fenrir-$(VERSION)
 INSTALL_ROOT := $(BUILD_DIR)/$(INSTALL_DIR)
@@ -15,7 +15,7 @@ DEB_REPO_DIR := ~/1bah.github.io/deb
 default:
 
 init: clean
-	mkdir -p $(BIN_DIR) $(SHARE_DIR){/man,/doc/fenrir} $(FENRIR_HOME)
+	mkdir -p $(BIN_DIR) $(SHARE_DIR)/man $(SHARE_DIR)/doc/fenrir $(FENRIR_HOME)
 	cp LICENSE $(SHARE_DIR)/doc/fenrir/
 
 clean:
@@ -34,6 +34,15 @@ rpm-clean:
 
 deb-clean:
 	rm -fr ~/fenrir-1bah-$(VERSION).noarch.deb
+
+update-version:
+	sed -E -i "s|^Version:.*$$|Version:        $(VERSION)|" fenrir.spec
+	sed -E -i "s|^Version:.*$$|Version: $(VERSION)|" fenrir.control
+	sed -E -i "s|^version:.*$$|version: $(VERSION)|" antora.yml
+	sed -E -i "s|^version=.*$$|version=$(VERSION)|" src/main/fenrir/cli/fenrir.properties
+	sed -E -i "s|^version=.*$$|version=\"$(VERSION)\"|" src/test/installTests.sh
+	sed -E -i "s|^expected_version=.*$$|expected_version=\"$(VERSION)\"|" src/test/versionTests.sh
+	sed -E -i "s|^The latest version is \`.*\`$$|The latest version is \`$(VERSION)\`|" README.adoc
 
 rpm: rpm-clean archive
 	mkdir -p ~/rpmbuild/BUILD ~/rpmbuild/RPMS ~/rpmbuild/SOURCES ~/rpmbuild/SPECS ~/rpmbuild/SRPMS
