@@ -54,6 +54,6 @@ $(loki-dup '-' "${LOKI_COLUMNS}")
 Run settings:
 $([ -n "${pipeline}" ] && loki-wrap "${YELLOW}" "${pipeline}")
 $(loki-dup '-' "${LOKI_COLUMNS}")
-fenrir $(fenrir-read-conf main version), 2026
+fenrir $(fenrir-read-conf main version)$(fenrir-read-conf main "packaged"), 2026
 @1BAH
 ____HEREDOC
