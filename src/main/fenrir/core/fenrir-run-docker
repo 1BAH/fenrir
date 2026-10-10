@@ -124,8 +124,9 @@ else
     ecode=$?
 fi
 
-rm -f "/tmp/fenrir/tmp/fenrir_report.xml"
+rm -f "/tmp/fenrir/tmp/fenrir_report.xml" "/tmp/fenrir/tmp/score"
 docker cp "$(fenrir-main-cont):/tmp/fenrir/tmp/fenrir_report.xml" "/tmp/fenrir/tmp/fenrir_report.xml"
+docker cp "$(fenrir-main-cont):/tmp/fenrir/tmp/score" "/tmp/fenrir/tmp/score"
 
 fenrir-env-down
 
