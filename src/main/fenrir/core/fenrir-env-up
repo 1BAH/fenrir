@@ -83,17 +83,19 @@ docker pull "$image" || {
 loki-log info "Initialising env.."
 
 ######
-#= Mount docker socket ???????
+# == Mount docker socket ???????
+# Privileged mode (default when fenrir env) -> DIND
 ######
 
 # Testing => safe mode
 if [ -z "$bind" ]; then
-    container=$(docker run $privileged -e LOKI_VERBOSE $rm_opt -d "$image" 2> "${ERR_FILE}")
+    container=$(docker run $privileged -e LOKI_VERBOSE -e FENRIR_IN_ENV=1 $rm_opt -d "$image" 2> "${ERR_FILE}")
 else
     # Solution is mounted in container
     container=$(docker run \
         $privileged \
         -e LOKI_VERBOSE \
+        -e FENRIR_IN_ENV=1 \
         --mount "type=bind,src=${sol_dir},dst=${ENV_HOME}/solution" \
         $rm_opt -d \
         "$image" 2> "${ERR_FILE}")
