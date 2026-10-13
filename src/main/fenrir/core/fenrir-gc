@@ -27,7 +27,7 @@
 SOFT="YES"
 
 if [ "$1" = '-f' ] || [ "$1" = '--force' ]; then
-    loki-log warn "Running in 'forced' mode"
+    loki-log warn "$(loki-ej-wtf)" "Running in 'forced' mode"
     SOFT=""
     shift
 fi

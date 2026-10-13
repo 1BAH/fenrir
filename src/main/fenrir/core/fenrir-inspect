@@ -37,7 +37,7 @@ testcase=$1
 taskdir=$(fenrir-task-path repo "$task")
 
 if ! [ -d "$taskdir" ]; then
-    loki-log err "Task <$task> is not installed!"
+    loki-log err "$(loki-ej-fail)" "Task <$task> is not installed!"
     loki-log err "Install it via 'fenrir task $task' to be able to inspect tests"
     exit 77
 fi
@@ -52,7 +52,7 @@ case "$testcase" in
     *)
         testfile="$taskdir/$testcase"
         if ! [ -x "$testfile" ]; then
-            loki-log err "Test <$testcase> does not exist!"
+            loki-log err "$(loki-ej-fail)" "Test <$testcase> does not exist!"
             exit 78
         fi
     ;;

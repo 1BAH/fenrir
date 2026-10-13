@@ -42,14 +42,14 @@ function safe_tag_clone {
     tag=$1
 
     lokiw git clone --depth 1 --branch "$tag" "$url" "${clone_dir}" || {
-        loki-log fail 'ヽ(≧□≦)ノ' "Failed to clone repo"
+        loki-log fail "$(loki-ej-fail)" "Failed to clone repo"
         exit 66
     }
 }
 
 function safe_clone {
     lokiw git clone --depth 1 "$url" "${clone_dir}" || {
-        loki-log fail 'ヽ(≧□≦)ノ' "Failed to clone repo"
+        loki-log fail "$(loki-ej-fail)" "Failed to clone repo"
         exit 66
     }
 }
@@ -60,7 +60,7 @@ function safe_clone {
 
 pack=$(fenrir-read-conf main packaged)
 if [ -n "${pack}" ]; then
-    loki-log warn "Fenrir is distributed by <${pack}> package manager"
+    loki-log warn "$(loki-ej-wtf)" "Fenrir is distributed by <${pack}> package manager"
     loki-log warn "Use the package manager to update!"
     exit 67
 fi
@@ -71,7 +71,7 @@ clone_dir=$(mktemp -d)
 if [ "$tag" = "latest" ]; then
     safe_clone
 elif [ -z "$tag" ]; then
-    loki-log err '(ㆆ_ㆆ)' "Empty version"
+    loki-log err "$(loki-ej-wtf)" "Empty version"
     exit 67
 else
     safe_tag_clone "$tag"
@@ -82,4 +82,4 @@ sudo "${clone_dir}/src/main/fenrir/cli/install-fenrir" "${LOKI_VERBOSE}" "$compl
 
 rm -fr "${clone_dir}"
 
-loki-log succ '♪(^∇^*)' "Successfully switched to $(fenrir version) version"
+loki-log succ "$(loki-ej-success)" "Successfully switched to $(fenrir version) version"

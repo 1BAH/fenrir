@@ -53,7 +53,7 @@ function get_file {
 
     if ! lokiw curl -f -k -L -m 10 -o "$output" --stderr "$ERR_FILE" "$url"; then
         echo "!]" # Terminate processing line
-        loki-log fail '(っ °Д °;)っ' "$err_msg"
+        loki-log fail "$(loki-ej-fail)" "$err_msg"
         return 13
     else
         echo -n "*"
@@ -129,7 +129,7 @@ done
 
 if (( succeed == 1 )); then
     echo "]"
-    loki-log succ '[]~(￣▽￣)~*' "Task '$task' has been downloaded"
+    loki-log succ "$(loki-ej-succ)" "Task '$task' has been downloaded"
 else
     # shellcheck disable=SC2242
     exit 1984

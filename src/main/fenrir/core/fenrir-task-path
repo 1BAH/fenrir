@@ -34,7 +34,7 @@ case "${1}" in
         echo "${LOCAL_CFGS}/${curr_task}"
     ;;
     *)
-        loki-log err '(+_+)?' "Parameter '$(loki-wrap "${BOLD}" "${1}")' is invalid"
+        loki-log err "$(loki-ej-wtf)" "Parameter '$(loki-wrap "${BOLD}" "${1}")' is invalid"
         exit 67
     ;;
 esac

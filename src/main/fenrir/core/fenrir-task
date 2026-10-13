@@ -34,7 +34,7 @@ TASK=$1
 
 if ! [ -d "${FENRIR_HOME}/repo/${TASK}" ]; then
     INSTALL=1
-    loki-log warn "Task '$TASK' has not been installed yet"
+    loki-log warn "$(loki-ej-wtf)" "Task '$TASK' has not been installed yet"
 else
     loki-log info "Task '$TASK' has already been installed"
 fi
@@ -57,4 +57,4 @@ fenrir-set-conf run task "$branch"
 block=$(fenrir-read-conf "${TASK}" blocking)
 fenrir-set-conf run blocking "$block"
 
-loki-log succ '[]~(￣▽￣)~*' "Fenrir is ready to check task '$TASK'"
+loki-log succ "$(loki-ej-success)" "Fenrir is ready to check task '$TASK'"

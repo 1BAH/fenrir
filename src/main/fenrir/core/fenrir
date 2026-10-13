@@ -77,7 +77,7 @@ case "$cmd" in
         EXP_ARGC=0
         #include <verify-argc>
         if ! curl -f -k -L -m 10 -o "$OUT_FILE" --stderr "$ERR_FILE" 'https://api.github.com/repos/1bah/fenrir/tags'; then
-            loki-log fail '(っ °Д °;)っ' "Failed to get"
+            loki-log fail "$(loki-ej-fail)" "Failed to get"
             exit 13
         fi
 
@@ -103,7 +103,7 @@ case "$cmd" in
     ;;
 
     *)
-        loki-log err '(+_+)?' "Command '$(loki-wrap "${BOLD}" "$cmd")' not found"
+        loki-log err "$(loki-ej-wtf)" "Command '$(loki-wrap "${BOLD}" "$cmd")' not found"
         exit 1
     ;;
 esac

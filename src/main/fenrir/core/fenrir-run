@@ -21,7 +21,7 @@ function local_clone {
     loki-log info "Cloning repo to '$to'.."
 
     if ! lokiw git clone "$from" "$to"; then
-        loki-log fail '(シ. .)シ' "Failed to clone locally"
+        loki-log fail "$(loki-ej-fail)" "Failed to clone locally"
         exit 56
     fi
 
@@ -49,18 +49,18 @@ while [ "$#" -ne 0 ]; do
         ;;
 
         "--testcase" | "-c")
-            testcase=${2?"You must select the testcase!"}
+            testcase=${2?"$(loki-ej-fail) You must select the testcase!"}
             shift
         ;;
 
         -*)
-            loki-log err '(＃°Д°)' Unknown flag: "<$1>"
+            loki-log err "$(loki-ej-fail)" Unknown flag: "<$1>"
             exit 16
         ;;
 
         *)
             if [ $hit -ge 1 ]; then
-                loki-log err '(＃°Д°)' Wrong arguments count!
+                loki-log err "$(loki-ej-fail)" Wrong arguments count!
                 loki-log err "Expected <1> but got <$(( $# + hit ))>"
                 exit 15
             fi
@@ -74,7 +74,7 @@ while [ "$#" -ne 0 ]; do
 done
 
 if [ "$hit" -ne 1 ]; then
-    loki-log err '(＃°Д°)' Wrong arguments count!
+    loki-log err "$(loki-ej-fail)" Wrong arguments count!
     loki-log err "Expected <1> but got <$hit>"
     exit 16
 fi
@@ -85,12 +85,12 @@ fi
 
 task=$(fenrir-read-conf run task)
 if [ "$task" = "-" ]; then
-    loki-log err 'ᕙ( •̀ ᗜ •́ )ᕗ' "The task was not set!"
+    loki-log err "$(loki-ej-fail)" "The task was not set!"
     exit 89
 fi
 
 if ! [ -d "$(fenrir-task-path repo)" ]; then
-    loki-log err "Task <$task> is not installed!"
+    loki-log err "$(loki-ej-fail)" "Task <$task> is not installed!"
     loki-log err "Install it via 'fenrir task $task' to be able to run tests"
     exit 77
 fi
@@ -113,7 +113,7 @@ else
     allowed=${allowed:-1}
 
     if (( allowed != 1 )) && [ -z "$FENRIR_RUN_I" ]; then
-        loki-log err "This task does not support execution in the host system"
+        loki-log err "$(loki-ej-fail)" "This task does not support execution in the host system"
         loki-log err "Use 'fenrir rund \"$path\"' or add flag '-i' instead"
         exit 101
     fi
@@ -122,8 +122,8 @@ else
     allowed_inline=${allowed_inline:-1}
 
     if (( allowed_inline != 1 )) && [ -n "$FENRIR_RUN_I" ]; then
-        loki-log err "This task does not support inline execution"
-        loki-log err "Remove '-i' flag"
+        loki-log err "$(loki-ej-fail)" "This task does not support inline execution"
+        loki-log err "Remove '-i' flag or use 'fenrir rund \"$path\"'"
         exit 102
     fi
 fi
@@ -136,7 +136,7 @@ fi
 src=$(realpath "$path")
 
 [ -n "$FENRIR_RUN_I" ] || if ! [ -d "$src/.git" ]; then
-    loki-log err '(╬▔皿▔)╯' "The provided file is not a project root"
+    loki-log err "$(loki-ej-fail)" "The provided file is not a project root"
     exit 90
 fi
 

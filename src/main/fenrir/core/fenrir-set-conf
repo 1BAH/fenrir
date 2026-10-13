@@ -38,7 +38,7 @@ case "$1" in
     ;;
 
     *)
-        loki-log err "Unknown conf file: '$1'"
+        loki-log err "$(loki-ej-fail)" "Unknown conf file: '$1'"
         exit 1
     ;;
 esac

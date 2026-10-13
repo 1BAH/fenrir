@@ -58,7 +58,7 @@ while [ "$#" -ne 0 ]; do
             shift
         ;;
         *)
-            loki-log err '(＃°Д°)' Unknown parameter: "<$1>"
+            loki-log err "$(loki-ej-fail)" Unknown parameter: "<$1>"
             exit 16
         ;;
     esac
@@ -120,7 +120,7 @@ fi
 status=$?
 
 if (( status != 0 )); then
-    loki-log fail "Cannot start docker"
+    loki-log fail "$(loki-ej-fail)" "Cannot start docker"
     exit $status
 fi
 
@@ -182,4 +182,4 @@ if [ -x "$(fenrir-task-path repo)/env.up" ]; then
     }
 fi
 
-loki-log info "Env is ready.."
+loki-log info "$(loki-ej-success)" "Env is ready.."

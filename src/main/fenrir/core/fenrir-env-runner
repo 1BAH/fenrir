@@ -23,7 +23,7 @@ fi
 ######################################################################
 ##                           MAIN PROGRAM                           ##
 ######################################################################
-loki-log info 'ヾ(＾ ∇ ＾).' "Now in env"
+loki-log info "$(loki-ej-success)" "Now in env"
 
 if [ -x "$(fenrir-task-path repo)/global.init" ]; then
     loki-log info "Testcase init.."

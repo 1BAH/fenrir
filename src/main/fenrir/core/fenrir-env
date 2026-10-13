@@ -19,19 +19,19 @@ variant=""
 while (( $# > 0 )); do
     case $1 in
         -c|--testcase)
-            testcase=${2?"You must select the testcase!"}
+            testcase=${2?"$(loki-ej-fail) You must select the testcase!"}
             shift
         ;;
         up)
             variant=up
-            path=${2?"You must provide a directory!"}
+            path=${2?"$(loki-ej-fail) You must provide a directory!"}
             shift
         ;;
         down)
             variant=down
         ;;
         *)
-            loki-log err "Unknown argument: <$1>"
+            loki-log err "$(loki-ej-wtf)" "Unknown argument: <$1>"
             loki-log err "Expected <up> or <down>"
             exit 11
         ;;
@@ -40,7 +40,7 @@ while (( $# > 0 )); do
 done
 
 if [ -z "$variant" ]; then
-    loki-log err "You must choose: <up> or <down>"
+    loki-log err "$(loki-ej-fail)" "You must choose: <up> or <down>"
     exit 12
 fi
 
@@ -63,7 +63,7 @@ fi
 recreate=YES
 
 if [ -f "${FENRIR_TMP_DIR}/env" ]; then
-    loki-log warn "Found an existing environment. Choose what to do:"
+    loki-log warn "$(loki-ej-wtf)" "Found an existing environment. Choose what to do:"
     echo "   $(loki-wrap "${BLUE}" "[R]")   $(loki-wrap "${ULINE}" "Reload") the previous environment"
     echo "   $(loki-wrap "${BLUE}" "[D]")   $(loki-wrap "${ULINE}" "Delete") the previous environment"
     echo "   $(loki-wrap "${BLUE}" "[N]")   Remove the previous one and start a $(loki-wrap "${ULINE}" "new") one"
@@ -75,7 +75,7 @@ if [ -f "${FENRIR_TMP_DIR}/env" ]; then
             R|r)
                 [ -f "${FENRIR_TMP_DIR}/env.conts" ] && while IFS= read -r cont; do
                     lokiw docker restart "$cont" || {
-                        loki-log fail "An error occurred when restarting the env"
+                        loki-log fail "$(loki-ej-fail)" "An error occurred when restarting the env"
                         loki-log fault "Remove the previous env and create a new one!"
                         exit 5
                     }
@@ -83,7 +83,7 @@ if [ -f "${FENRIR_TMP_DIR}/env" ]; then
 
                 container=$(< "${FENRIR_TMP_DIR}/env")
                 lokiw docker restart "$container" || {
-                    loki-log fail "An error occurred when restarting the env"
+                    loki-log fail "$(loki-ej-fail)" "An error occurred when restarting the env"
                     loki-log fault "Remove the previous env and create a new one!"
                     exit 5
                 }
@@ -103,7 +103,7 @@ if [ -f "${FENRIR_TMP_DIR}/env" ]; then
                 exit 0
             ;;
             *)
-                loki-log err "Unknown option: <$op>. Try again"
+                loki-log err "$(loki-ej-wtf)" "Unknown option: <$op>. Try again"
                 read -r op
             ;;
         esac
@@ -120,12 +120,12 @@ if [ -n "$recreate" ]; then
     task=$(fenrir-read-conf run task)
 
     if [ "$task" = "-" ]; then
-        loki-log err 'ᕙ( •̀ ᗜ •́ )ᕗ' "The task was not set!"
+        loki-log err "$(loki-ej-fail)" "The task was not set!"
         exit 89
     fi
 
     if ! [ -d "$(fenrir-task-path repo)" ]; then
-        loki-log err "Task <$task> is not installed!"
+        loki-log err "$(loki-ej-fail)" "Task <$task> is not installed!"
         loki-log err "Install it via 'fenrir task $task' to be able to enter the environment"
         exit 77
     fi
@@ -145,21 +145,21 @@ if [ -f "${FENRIR_TMP_DIR}/env" ]; then
     # Stop containers after use
     [ -f "${FENRIR_TMP_DIR}/env.conts" ] && while IFS= read -r cont; do
         lokiw docker stop "$cont" || {
-            loki-log warn "An error occurred when suspending the env:"
+            loki-log warn "$(loki-ej-wtf)" "An error occurred when suspending the env:"
             loki-get-out
             loki-get-err
         }
     done < "${FENRIR_TMP_DIR}/env.conts"
 
     lokiw docker stop "$container" || {
-        loki-log warn "An error occurred when suspending the env:"
+        loki-log warn "$(loki-ej-wtf)" "An error occurred when suspending the env:"
         loki-get-out
         loki-get-err
     }
 
-    loki-log info '(˶ᵔᗜᵔ˶)ﾉﾞ' "Goodbye!"
+    loki-log info "$(loki-ej-success)" "Goodbye!"
 else
-    loki-log warn "Found problems when creating env"
+    loki-log warn "$(loki-ej-wtf)" "Found problems when creating env"
     loki-log warn "Now running <env.down> script.."
     fenrir env down
 fi

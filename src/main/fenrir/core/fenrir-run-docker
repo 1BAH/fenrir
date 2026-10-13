@@ -36,18 +36,18 @@ while [ "$#" -ne 0 ]; do
         ;;
 
         "--testcase" | "-c")
-            testcase=${2?"You must select the testcase!"}
+            testcase=${2?"$(loki-ej-fail) You must select the testcase!"}
             shift
         ;;
 
         -*)
-            loki-log err '(＃°Д°)' Unknown flag: "<$1>"
+            loki-log err "$(loki-ej-fail)" Unknown flag: "<$1>"
             exit 16
         ;;
 
         *)
             if [ $hit -ge 1 ]; then
-                loki-log err '(＃°Д°)' Wrong arguments count!
+                loki-log err "$(loki-ej-fail)" Wrong arguments count!
                 loki-log err "Expected <1> but got <$(( $# + hit ))>"
                 exit 15
             fi
@@ -61,7 +61,7 @@ while [ "$#" -ne 0 ]; do
 done
 
 if [ "$hit" -ne 1 ]; then
-    loki-log err '(＃°Д°)' Wrong arguments count!
+    loki-log err "$(loki-ej-fail)" Wrong arguments count!
     loki-log err "Expected <1> but got <$hit>"
     exit 16
 fi
@@ -73,12 +73,12 @@ fi
 task=$(fenrir-read-conf run task)
 
 if [ "$task" = "-" ]; then
-    loki-log err 'ᕙ( •̀ ᗜ •́ )ᕗ' "The task was not set!"
+    loki-log err "$(loki-ej-fail)" "The task was not set!"
     exit 89
 fi
 
 if ! [ -d "$(fenrir-task-path repo)" ]; then
-    loki-log err "Task <$task> is not installed!"
+    loki-log err "$(loki-ej-fail)" "Task <$task> is not installed!"
     loki-log err "Install it via 'fenrir task $task' to be able to run tests"
     exit 77
 fi
@@ -88,13 +88,13 @@ allowed=${allowed:-1}
 
 # Check env restrictions
 if (( allowed != 1 )); then
-    loki-log err "This task does not support execution in docker"
+    loki-log err "$(loki-ej-fail)" "This task does not support execution in docker"
     loki-log err "Use 'fenrir run $task' instead"
     exit 103
 fi
 
 if ! [ -d "$(fenrir-read-conf run root)/.git" ]; then
-    loki-log err '(╬▔皿▔)╯' "The provided file is not a project root"
+    loki-log err "$(loki-ej-fail)" "The provided file is not a project root"
     exit 90
 fi
 

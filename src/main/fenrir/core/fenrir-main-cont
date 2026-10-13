@@ -12,4 +12,8 @@
 ######################################################################
 
 tmp_dir=$(loki -c 'eval' 'echo $FENRIR_TMP_DIR')
-cat "${tmp_dir}/env"
+if [ -f "${tmp_dir}/env" ]; then
+	cat "${tmp_dir}/env"
+else
+	exit 13
+fi

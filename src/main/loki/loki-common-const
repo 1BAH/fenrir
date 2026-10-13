@@ -68,5 +68,39 @@ IFS= read -r -d '' FENRIR_LOGO << 'LOGO'
  |_|  \___|_| |_|_|  |_|_|
 LOGO
 
+############################################
+#>                Emojis                  <#
+############################################
+
+function loki-ej-success {
+	if (( (RANDOM % 21) == 1 )); then
+		echo 'awoooo🐺🐾'
+		return
+	fi
+
+	local emojis=('(੭>ᴗ<)੭' '⸜(˃ᵕ˂)⸝' '❀.(*´◡`*)❀' '(˶ᵔᗜᵔ˶)ﾉﾞ' 'ヾ(＾ ∇ ＾).' '[]~(￣▽￣)~*' '♪(^∇^*)' '(ㅅ´ ˘ `)')
+	echo "${emojis[RANDOM % ${#emojis[@]}]}"
+}
+
+function loki-ej-fail {
+	if (( (RANDOM % 42) == 1 )); then
+		echo 'awoooo🐺🐾'
+		return
+	fi
+
+	local emojis=('ᕙ( •̀ ᗜ •́ )ᕗ' '\(”˚☐˚)/' '(੭ ;´ ⌂ `;)੭' '(シ. .)シ' '(╬▔皿▔)╯')
+	echo "${emojis[RANDOM % ${#emojis[@]}]}"
+}
+
+function loki-ej-wtf {
+	if (( (RANDOM % 63) == 1 )); then
+		echo 'awoooo🐺🐾'
+		return
+	fi
+
+	local emojis=('(＃°Д°)' '(ㆆ_ㆆ)' '(≖_≖ )' '(っ °Д °;)っ' '(+_+)?')
+	echo "${emojis[RANDOM % ${#emojis[@]}]}"
+}
+
 # <-----------------------------------------------------------------loki-common-const-< #
 

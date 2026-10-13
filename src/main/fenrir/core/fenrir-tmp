@@ -40,7 +40,7 @@ MAX_ARGC=1
 
 function new_name {
     if (( "$last_idx" > FNR_TMP_MAX_NUM )); then
-        loki-log warn "IT'S STRONGLY RECOMMENDED TO RUN 'fenrir gc'!" > /dev/stderr
+        loki-log warn "$(loki-ej-wtf)" "IT'S STRONGLY RECOMMENDED TO RUN 'fenrir gc'!" > /dev/stderr
     fi
 
     echo $(( last_idx + 1 )) | tee "${TMP_IDX_FILE}"
@@ -89,7 +89,7 @@ case "$1" in
         tmp_pipe
     ;;
     *)
-        loki-log err "fenrir-tmp: Unknown option '$1'"
+        loki-log err "$(loki-ej-fail)" "fenrir-tmp: Unknown option '$1'"
         exit 9
     ;;
 esac

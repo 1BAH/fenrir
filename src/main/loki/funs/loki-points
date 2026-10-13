@@ -13,14 +13,14 @@ function loki-points {
     case "$op" in
         "+")
             echo -n $(( points + $(cat "$SCORE_FILE") )) > "$SCORE_FILE"
-            loki-log succ '(੭>ᴗ<)੭ ' "PASSED: +${points}"
+            loki-log succ "$(loki-ej-success) " "PASSED: +${points}"
             ;;
         "-")
             echo -n $(( $(cat "$SCORE_FILE") - points )) > "$SCORE_FILE"
-            loki-log fault '𐐘💥╾━╤デ╦︻ඞා ' "FAILED"
+            loki-log fault "$(loki-ej-fail) " "FAILED"
             ;;
         *)
-            loki-log err "loki-points: Unsupported operation <$op>"
+            loki-log err "$(loki-ej-wtf)" "loki-points: Unsupported operation <$op>"
             exit 56
     esac
 }

@@ -46,7 +46,7 @@ function pretty_print_testname {
 function finalise {
     ecode=${ecode:-"$1"}
     # Print score
-    loki-log info "Final score: $(cat "${SCORE_FILE}")"
+    loki-log info "$(loki-wrap "${BOLD}${ULINE}" "Final score: $(cat "${SCORE_FILE}")")"
     exit "$ecode"
 }
 
@@ -56,7 +56,7 @@ function switch_solution {
     if lokiw cd "$destination"; then
         loki-log succ "Inside solution's directory"
     else
-        loki-log fail "Failed to change directory"
+        loki-log fail "$(loki-ej-fail)" "Failed to change directory"
         return 3
     fi
 
@@ -73,16 +73,16 @@ function switch_solution {
             loki-log succ "Inside task's directory"
             return
         else
-            loki-log fail "Cannot change directory"
+            loki-log fail "$(loki-ej-fail)" "Cannot change directory"
             return 3
         fi
     fi
 
     if fenrir-change-branch "$task"; then
         if lokiw cd "$task"; then
-            loki-log succ "Inside task's directory"
+            loki-log succ "$(loki-ej-success)" "Inside task's directory"
         else
-            loki-log fail "Cannot change directory"
+            loki-log fail "$(loki-ej-fail)" "Cannot change directory"
             return 3
         fi
     else
@@ -140,7 +140,7 @@ switch_solution || {
     fi
 
     if (( linter_failed == 1 )); then
-        loki-log warn "Some linter inspections have failed: final score is reset to 0"
+        loki-log warn "$(loki-ej-wtf)" "Some linter inspections have failed: final score is reset to 0"
         echo -n 0 > "${SCORE_FILE}"
     fi
 

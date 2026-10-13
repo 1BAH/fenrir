@@ -32,4 +32,4 @@ fi
 
 cat "${test_file}" > "${FENRIR_HOME}/repo/local/local"
 
-loki-log succ '[]~(￣▽￣)~*' "Task 'local' has been updated!"
+loki-log succ "$(loki-ej-success)" "Task 'local' has been updated!"
