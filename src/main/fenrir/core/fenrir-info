@@ -30,26 +30,54 @@ echo "$FENRIR_LOGO"
 curr_task=$(fenrir-read-conf run task)
 
 pipeline=""
+mode=""
+
 if [ -f "${FENRIR_HOME}/repo/${curr_task}/pipeline.hel" ]; then
     pipeline=$(< "${FENRIR_HOME}/repo/${curr_task}/pipeline.hel")
-    inline=$(fenrir-read-conf "${curr_task}" inline)
-    inhost=$(fenrir-read-conf "${curr_task}" inhost)
-    indocker=$(fenrir-read-conf "${curr_task}" indocker)
+
+    if [ -z "$FENRIR_IN_ENV" ]; then
+		if [ "$(fenrir-read-conf "${curr_task}" inline)" = "0" ]; then
+			mode="-"
+		else
+			mode="I"
+		fi
+
+        if [ "$(fenrir-read-conf "${curr_task}" inhost)" = "0" ]; then
+        	mode="${mode}-:"
+        else
+        	mode="${mode}C:"
+        fi
+    fi
+
+	if [ "$(fenrir-read-conf "${curr_task}" inlined)" = "0" ]; then
+		mode="${mode}-"
+	else
+		mode="${mode}I"
+	fi
+
+	if [ "$(fenrir-read-conf "${curr_task}" indocker)" = "0" ]; then
+		mode="${mode}-"
+	else
+		mode="${mode}C"
+	fi
 elif [ "$curr_task" != "-" ]; then
     loki-log err "Found invalid state of task '${curr_task}'. It's strongly recommended to rerun 'fenrir task ${curr_task}'."
-    inline="?"
-    inhost="?"
-    indocker="?"
+    mode="??:??"
 fi
 
 
 cat <<____HEREDOC
+$([ -n "${FENRIR_IN_ENV}" ] && loki-wrap "${BOLD}${PEACH}" "You are inside env now!")
 $(loki-dup '-' "${LOKI_COLUMNS}")
 Current settings:
     * Remote: $(fenrir-read-conf main remote)
     * Current task: ${curr_task}
     * Blocking: $(fenrir-read-conf run blocking)
-    * Execution mode: ${inline:-1}${inhost:-1}${indocker:-1} (Inline-Host-Docker)
+          '0' keep running when a testcase fails
+          '1' stop running as soon as any testcase fails
+    * Execution mode: ${mode} $([ -z "${FENRIR_IN_ENV}" ] && echo "(Host:Docker)")
+          'I' is inline (test within the provided path) $(loki-wrap "${ITAL}" "Requires '-i' option")
+          'C' is clone  (use git clone) $([ -z "${FENRIR_IN_ENV}" ] && loki-wrap "${ITAL}" "\n          Use 'fenrir run' to test in the host system\n          Use 'fenrir rund' to test in the docker")
 $(loki-dup '-' "${LOKI_COLUMNS}")
 Run settings:
 $([ -n "${pipeline}" ] && loki-wrap "${YELLOW}" "${pipeline}")
