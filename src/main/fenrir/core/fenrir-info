@@ -75,7 +75,7 @@ Current settings:
     * Blocking: $(fenrir-read-conf run blocking)
           '0' keep running when a testcase fails
           '1' stop running as soon as any testcase fails
-    * Execution mode: ${mode} $([ -z "${FENRIR_IN_ENV}" ] && echo "(Host:Docker)")
+    * Execution mode: ${mode:-"??:??"} $([ -z "${FENRIR_IN_ENV}" ] && echo "(Host:Docker)")
           'I' is inline (test within the provided path) $(loki-wrap "${ITAL}" "Requires '-i' option")
           'C' is clone  (use git clone) $([ -z "${FENRIR_IN_ENV}" ] && loki-wrap "${ITAL}" "\n          Use 'fenrir run' to test in the host system\n          Use 'fenrir rund' to test in the docker")
 $(loki-dup '-' "${LOKI_COLUMNS}")

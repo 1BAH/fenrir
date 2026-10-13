@@ -1,5 +1,14 @@
 = Fenrir's changelog
 
+== Version 2026.1.5
+* Now envs have shared folder: `/tmp/fenrir-shared` is mounted to the `fenrir-shared` volume (recreated each env creation)
+* Unified text emoji api
+* Reformat `fenrir info` output
+* Option `inlined` for inline execution in docker (ignored when `rund`)
+
+== Version 2026.1.4
+* Minor fixes with FEND (make it run inside gitlab ci)
+
 == Version 2026.1.3
 * Finalise API
 * Fix rpm bug (disable shebang mangling)

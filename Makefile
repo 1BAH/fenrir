@@ -1,4 +1,4 @@
-VERSION      := 2026.1.4
+VERSION      := 2026.1.5
 BUILD_DIR    := /tmp/fenrir-build
 INSTALL_DIR  := fenrir-$(VERSION)
 INSTALL_ROOT := $(BUILD_DIR)/$(INSTALL_DIR)
@@ -75,5 +75,5 @@ update-repos: all
 	cd $(DEB_REPO_DIR) && apt-ftparchive --arch all packages pool/main > dists/stable/main/binary-all/Packages
 	cd $(DEB_REPO_DIR) && gzip -9fk dists/stable/main/binary-all/Packages
 	cd $(DEB_REPO_DIR) && apt-ftparchive -c release.conf release dists/stable > dists/stable/Release
-	cd $(DEB_REPO_DIR) && gpg --yes --clearsign -o dists/stable/InRelease dists/stable/Release
-	cd $(DEB_REPO_DIR) && gpg --yes -abs -o dists/stable/Release.gpg dists/stable/Release
+	cd $(DEB_REPO_DIR) && gpg -u 43F8ADDD31EA7E99 --yes --clearsign -o dists/stable/InRelease dists/stable/Release
+	cd $(DEB_REPO_DIR) && gpg -u 43F8ADDD31EA7E99 --yes -abs -o dists/stable/Release.gpg dists/stable/Release
