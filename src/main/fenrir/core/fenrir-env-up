@@ -87,9 +87,25 @@ loki-log info "Initialising env.."
 # Privileged mode (default when fenrir env) -> DIND
 ######
 
+loki-log info "Creating a shared directory.."
+if docker volume inspect fenrir-shared &> /dev/null; then
+	loki-log warn "$(loki-ej-wtf)" "The directory already exists.."
+	if [ -z "$bind" ]; then
+		loki-log fault "$(loki-ej-fail)" "Destroy the existing env to run tests!"
+		exit 8
+	fi
+	loki-log warn "The following execution might be unreliable!"
+	loki-log warn "Destroy the existing env to erase previous artifacts"
+else
+	lokiw -e docker volume create fenrir-shared
+fi
+
 # Testing => safe mode
 if [ -z "$bind" ]; then
-    container=$(docker run $privileged -e LOKI_VERBOSE -e FENRIR_IN_ENV=1 $rm_opt -d "$image" 2> "${ERR_FILE}")
+    container=$(docker run $privileged \
+     					-e LOKI_VERBOSE -e FENRIR_IN_ENV=1 -e FENRIR_COPYD=1 $rm_opt \
+     					-v fenrir-shared:/tmp/fenrir-shared -d \
+     					 "$image" 2> "${ERR_FILE}")
 else
     # Solution is mounted in container
     container=$(docker run \
@@ -97,6 +113,7 @@ else
         -e LOKI_VERBOSE \
         -e FENRIR_IN_ENV=1 \
         --mount "type=bind,src=${sol_dir},dst=${ENV_HOME}/solution" \
+        -v fenrir-shared:/tmp/fenrir-shared \
         $rm_opt -d \
         "$image" 2> "${ERR_FILE}")
 fi

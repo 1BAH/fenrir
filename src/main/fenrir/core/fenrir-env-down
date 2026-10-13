@@ -35,4 +35,6 @@ if [ -f "${FENRIR_TMP_DIR}/env" ]; then
     lokiw docker rm -f "$container"
 fi
 
+lokiw docker volume rm fenrir-shared
+
 rm -f "${FENRIR_TMP_DIR}/env" "${FENRIR_TMP_DIR}/env.conts"
