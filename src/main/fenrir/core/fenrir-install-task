@@ -129,7 +129,7 @@ done
 
 if (( succeed == 1 )); then
     echo "]"
-    loki-log succ "$(loki-ej-succ)" "Task '$task' has been downloaded"
+    loki-log succ "$(loki-ej-success)" "Task '$task' has been downloaded"
 else
     # shellcheck disable=SC2242
     exit 1984
