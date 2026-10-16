@@ -1,7 +1,7 @@
 %undefine __brp_mangle_shebangs
 
 Name:           fenrir
-Version:        2026.1.5
+Version:        2026.1.6
 Release:        1
 Summary:        Testing system 'fenrir'
 

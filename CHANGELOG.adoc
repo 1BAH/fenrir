@@ -1,5 +1,10 @@
 = Fenrir's changelog
 
+== Version 2026.1.6
+* Now `rund` uses `fikus` as a default user to avoid execution from `root`
+* Make `awooo` appear more rarely
+* Add `fenrir env down -f`
+
 == Version 2026.1.5
 * Now envs have shared folder: `/tmp/fenrir-shared` is mounted to the `fenrir-shared` volume (recreated each env creation)
 * Unified text emoji api
