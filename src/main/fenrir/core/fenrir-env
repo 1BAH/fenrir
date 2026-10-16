@@ -30,6 +30,9 @@ while (( $# > 0 )); do
         down)
             variant=down
         ;;
+    	-f)
+    		forced=1
+    	;;
         *)
             loki-log err "$(loki-ej-wtf)" "Unknown argument: <$1>"
             loki-log err "Expected <up> or <down>"
@@ -49,7 +52,8 @@ fi
 ######################################################################
 
 if [ "$variant" = "down" ]; then
-    fenrir-env-down
+    # shellcheck disable=SC2086
+    fenrir-env-down $forced # Might be -f
     ecode=$?
 
     loki-log info "Now the env is removed"

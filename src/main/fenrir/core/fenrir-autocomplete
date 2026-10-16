@@ -586,7 +586,9 @@ _fenrir()
                     COMPREPLY=($(compgen -W "$(_find_all_tests)" -- "${COMP_WORDS[COMP_CWORD]}"))
                 elif [[ "${COMP_WORDS[2]}" == up ]]; then
                     COMPREPLY=($(compgen -d -- "${COMP_WORDS[COMP_CWORD]}"))
-                fi
+                elif [[ "${COMP_WORDS[2]}" == down ]]; then
+					COMPREPLY=($(compgen -W "-f" -- "${COMP_WORDS[COMP_CWORD]}"))
+				fi
                 ;;
 #>>>>>>>>>>>###################################################################################################
             *)

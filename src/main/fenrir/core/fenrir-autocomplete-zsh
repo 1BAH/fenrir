@@ -117,6 +117,9 @@ function _fenrir_env {
         up)
             _arguments -C "1:Solution directory:_path_files -/"
         ;;
+    	down)
+			_arguments -C "-f[Forced removal]"
+		;;
     esac
 }
 
