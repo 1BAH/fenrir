@@ -13,12 +13,22 @@
 
 #include <shift-args>
 
+if [ "$1" = "-f" ]; then
+	loki-log warn "FORCE MODE IS ON!"
+	force=1
+	shift
+fi
+
 EXP_ARGC=0
 #include <verify-argc>
 
 ######################################################################
 ##                           MAIN PROGRAM                           ##
 ######################################################################
+
+if [ -n "${force}" ]; then
+	"$(fenrir-task-path repo)/env.down"
+fi
 
 # Env teardown
 if [ -x "${FENRIR_TMP_DIR}/env.down" ]; then
