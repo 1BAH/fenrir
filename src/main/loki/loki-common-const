@@ -73,7 +73,7 @@ LOGO
 ############################################
 
 function loki-ej-success {
-	if (( (RANDOM % 21) == 1 )); then
+	if (( (RANDOM % 210) == 1 )); then
 		echo 'awoooo🐺🐾'
 		return
 	fi
@@ -83,7 +83,7 @@ function loki-ej-success {
 }
 
 function loki-ej-fail {
-	if (( (RANDOM % 42) == 1 )); then
+	if (( (RANDOM % 210) == 1 )); then
 		echo 'awoooo🐺🐾'
 		return
 	fi
@@ -93,7 +93,7 @@ function loki-ej-fail {
 }
 
 function loki-ej-wtf {
-	if (( (RANDOM % 63) == 1 )); then
+	if (( (RANDOM % 210) == 1 )); then
 		echo 'awoooo🐺🐾'
 		return
 	fi
