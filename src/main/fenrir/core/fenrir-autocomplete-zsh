@@ -135,8 +135,6 @@ function _fenrir_run {
 
 function _fenrir_rund {
     _arguments -C \
-        "-d[Do not stop the container (allows further debug)]" \
-        "--debug[Do not stop the container (allows further debug)]" \
         "-nl[Skip linting stage (walk-inspections)]" \
         "--no-lint[Skip linting stage (walk-inspections)]" \
         "-c[Select the testcase to run]:testcase:($(_find_all_tests))" \

@@ -2,7 +2,7 @@
 
 ##
 # Usage:
-#   fenrir-rund [-d|--debug] [-nl|--no-lint] [-c|--testcase TESTCASE] <SOLUTION DIRECTORY>
+#   fenrir-rund [-nl|--no-lint] [-c|--testcase TESTCASE] <SOLUTION DIRECTORY>
 #
 # Starts a container and executes 'fenrir-run' inside.
 # After the execution the container is removed unless the 'debug' flag is set.
@@ -29,10 +29,6 @@ while [ "$#" -ne 0 ]; do
     case $1 in
         "--no-lint" | "-nl")
             NO_LINT="-nl"
-        ;;
-
-        "--debug" | "-d")
-            debug="YES"
         ;;
 
         "--testcase" | "-c")

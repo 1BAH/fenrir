@@ -318,8 +318,6 @@ _fenrir()
             rund)
                 if [[ "${COMP_WORDS[2]}" == -*  ]]; then
                     helpmsg=(
-                        [-d]="Does not stop the container (allows further debug)"
-                        [--debug]="Does not stop the container (allows further debug)"
                         [-nl]="Skip linting stage (walk-inspections)"
                         [--no-lint]="Skip linting stage (walk-inspections)"
                         [-c]="Select the testcase to run"
@@ -327,15 +325,13 @@ _fenrir()
                     )
 
                     display_name_map=(
-                        [-d]="-d, --debug"
-                        [--debug]="-d, --debug"
                         [-nl]="-nl, --no-lint"
                         [--no-lint]="-nl, --no-lint"
                         [-c]="-c, --testcase"
                         [--testcase]="-c, --testcase"
                     )
 
-                    CMDS=("-d" "--debug" "-nl" "--no-lint" "-c" "--testcase")
+                    CMDS=("-nl" "--no-lint" "-c" "--testcase")
                     output=("$(printf "$printfstr" "<directory>" "Solution directory")")
                     raw=()
 
@@ -502,8 +498,6 @@ _fenrir()
                     COMPREPLY=($(compgen -W "$(_find_all_tests)" -- "${COMP_WORDS[COMP_CWORD]}"))
                 elif [[ "${COMP_WORDS[COMP_CWORD]}" == -* ]]; then
                     helpmsg=(
-                        [-d]="Does not stop the container (allows further debug)"
-                        [--debug]="Does not stop the container (allows further debug)"
                         [-nl]="Skip linting stage (walk-inspections)"
                         [--no-lint]="Skip linting stage (walk-inspections)"
                         [-c]="Select the testcase to run"
@@ -511,15 +505,13 @@ _fenrir()
                     )
 
                     display_name_map=(
-                        [-d]="-d, --debug"
-                        [--debug]="-d, --debug"
                         [-nl]="-nl, --no-lint"
                         [--no-lint]="-nl, --no-lint"
                         [-c]="-c, --testcase"
                         [--testcase]="-c, --testcase"
                     )
 
-                    CMDS=("-d" "--debug" "-nl" "--no-lint" "-c" "--testcase")
+                    CMDS=("-nl" "--no-lint" "-c" "--testcase")
                     output=("$(printf "$printfstr" "<directory>" "Solution directory")")
                     raw=()
 
@@ -689,8 +681,6 @@ _fenrir()
                     COMPREPLY=($(compgen -W "$(_find_all_tests)" -- "${COMP_WORDS[COMP_CWORD]}"))
                 elif [[ "${COMP_WORDS[COMP_CWORD]}" == -* ]]; then
                     helpmsg=(
-                        [-d]="Does not stop the container (allows further debug)"
-                        [--debug]="Does not stop the container (allows further debug)"
                         [-nl]="Skip linting stage (walk-inspections)"
                         [--no-lint]="Skip linting stage (walk-inspections)"
                         [-c]="Select the testcase to run"
@@ -698,15 +688,13 @@ _fenrir()
                     )
 
                     display_name_map=(
-                        [-d]="-d, --debug"
-                        [--debug]="-d, --debug"
                         [-nl]="-nl, --no-lint"
                         [--no-lint]="-nl, --no-lint"
                         [-c]="-c, --testcase"
                         [--testcase]="-c, --testcase"
                     )
 
-                    CMDS=("-d" "--debug" "-nl" "--no-lint" "-c" "--testcase")
+                    CMDS=("-nl" "--no-lint" "-c" "--testcase")
                     output=("$(printf "$printfstr" "<directory>" "Solution directory")")
                     raw=()
 
@@ -796,20 +784,16 @@ _fenrir()
                     COMPREPLY=($(compgen -W "$(_find_all_tests)" -- "${COMP_WORDS[COMP_CWORD]}"))
                 elif [[ "${COMP_WORDS[COMP_CWORD]}" == -* ]]; then
                     helpmsg=(
-                        [-d]="Does not stop the container (allows further debug)"
-                        [--debug]="Does not stop the container (allows further debug)"
                         [-nl]="Skip linting stage (walk-inspections)"
                         [--no-lint]="Skip linting stage (walk-inspections)"
                     )
 
                     display_name_map=(
-                        [-d]="-d, --debug"
-                        [--debug]="-d, --debug"
                         [-nl]="-nl, --no-lint"
                         [--no-lint]="-nl, --no-lint"
                     )
 
-                    CMDS=("-d" "--debug" "-nl" "--no-lint")
+                    CMDS=("-nl" "--no-lint")
                     output=("$(printf "$printfstr" "<directory>" "Solution directory")")
                     raw=()
 
