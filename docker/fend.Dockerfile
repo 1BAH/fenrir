@@ -14,7 +14,8 @@ RUN apk add --no-cache  \
         curl            \
         bash
 
-RUN echo -e "breach\nbreach" | adduser -s "$(which bash)" fikus && \
+RUN chown root:root /usr/bin/sudo && chmod 4755 /usr/bin/sudo && \
+    echo -e "breach\nbreach" | adduser -s "$(which bash)" fikus && \
     echo "fikus ALL=(ALL)  ALL" >> "/etc/sudoers" && \
     git config --global user.email "fikus@example.com" && \
     git config --global user.name  "fikus"
