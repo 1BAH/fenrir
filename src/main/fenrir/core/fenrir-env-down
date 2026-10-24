@@ -2,7 +2,7 @@
 
 ##
 # Usage:
-#   fenrir-env-down [-f]
+#   fenrir-env-down
 #
 # TODO
 ##
@@ -13,12 +13,6 @@
 
 #include <shift-args>
 
-if [ "$1" = "-f" ]; then
-	loki-log warn "FORCE MODE IS ON!"
-	force=1
-	shift
-fi
-
 EXP_ARGC=0
 #include <verify-argc>
 
@@ -26,25 +20,24 @@ EXP_ARGC=0
 ##                           MAIN PROGRAM                           ##
 ######################################################################
 
-if [ -n "${force}" ]; then
-	"$(fenrir-task-path repo)/env.down"
-fi
+loki-log info "Destructing the env.."
 
+loki-log info "+ env.down"
 # Env teardown
-if [ -x "${FENRIR_TMP_DIR}/env.down" ]; then
-    "${FENRIR_TMP_DIR}/env.down"
-    rm "${FENRIR_TMP_DIR}/env.down"
+if [ -x "$(fenrir-task-path repo)/env.down" ]; then
+    "$(fenrir-task-path repo)/env.down"
 fi
 
-[ -f "${FENRIR_TMP_DIR}/env.conts" ] && while IFS= read -r cont; do
-    lokiw docker rm -f "$cont"
-done < "${FENRIR_TMP_DIR}/env.conts"
+loki-log info "+ Containers"
+# shellcheck disable=SC2046
+lokiw docker rm -f $(docker ps -aq --filter label="${FENRIR_DOCKER_LABEL}")
 
-if [ -f "${FENRIR_TMP_DIR}/env" ]; then
-    container=$(< "${FENRIR_TMP_DIR}/env")
-    lokiw docker rm -f "$container"
-fi
+loki-log info "+ Networks"
+# shellcheck disable=SC2046
+lokiw docker network rm -f $(docker network ls -q --filter label="${FENRIR_DOCKER_LABEL}")
 
-lokiw docker volume rm fenrir-shared
+loki-log info "+ Volumes"
+# shellcheck disable=SC2046
+lokiw docker volume rm -f $(docker volume ls -q --filter label="${FENRIR_DOCKER_LABEL}")
 
-rm -f "${FENRIR_TMP_DIR}/env" "${FENRIR_TMP_DIR}/env.conts"
+loki-log succ "Now the env is destroyed!"

@@ -111,7 +111,7 @@ else
 	it='-it'
 fi
 
-container=$(< "${FENRIR_TMP_DIR}/env")
+container=$(fenrir-main-cont)
 if [[ -v testcase ]]; then
     docker exec -u fikus $it "$container" sh -c "fenrir run -i -c ${testcase} ${NO_LINT} /home/fikus/solution"
     ecode=$?
@@ -121,8 +121,8 @@ else
 fi
 
 rm -f "/tmp/fenrir/tmp/fenrir_report.xml" "/tmp/fenrir/tmp/score"
-docker cp "$(fenrir-main-cont):/tmp/fenrir/tmp/fenrir_report.xml" "/tmp/fenrir/tmp/fenrir_report.xml"
-docker cp "$(fenrir-main-cont):/tmp/fenrir/tmp/score" "/tmp/fenrir/tmp/score"
+docker cp "${container}:/tmp/fenrir/tmp/fenrir_report.xml" "/tmp/fenrir/tmp/fenrir_report.xml"
+docker cp "${container}:/tmp/fenrir/tmp/score" "/tmp/fenrir/tmp/score"
 
 fenrir-env-down
 

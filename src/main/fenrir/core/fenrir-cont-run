@@ -1,4 +1,4 @@
-#! /usr/bin/env bash
+#! /usr/bin/env loki
 
 ##
 # Usage:
@@ -13,12 +13,11 @@
 
 #include <shift-args>
 
-cont=$(docker run "$@")
+cont=$(docker run --label="${FENRIR_DOCKER_LABEL}=extra" "$@")
 ecode=$?
 
 if (( ecode != 0 )); then
     exit $ecode
 fi
 
-tmp_dir=$(loki -c 'eval' 'echo $FENRIR_TMP_DIR')
-echo "$cont" | tee "${tmp_dir}/env.conts"
+echo "$cont"

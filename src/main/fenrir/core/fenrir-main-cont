@@ -1,4 +1,4 @@
-#! /usr/bin/env bash
+#! /usr/bin/env loki
 
 ##
 # Usage:
@@ -11,9 +11,10 @@
 ##                         VERIFY ARGUMENTS                         ##
 ######################################################################
 
-tmp_dir=$(loki -c 'eval' 'echo $FENRIR_TMP_DIR')
-if [ -f "${tmp_dir}/env" ]; then
-	cat "${tmp_dir}/env"
+mapfile -t cont < <(docker ps -q --filter label="${FENRIR_DOCKER_LABEL}=main")
+
+if (( ${#cont[@]} == 1 )); then
+	echo "${cont[0]}"
 else
 	exit 13
 fi

@@ -6,6 +6,7 @@
 
 LOKI_VERBOSE=${LOKI_VERBOSE-"-v"} # preserve emptiness
 LOKI_PROGRESS=0
+FENRIR_DOCKER_LABEL="com.github.1bah.fenrir.env"
 
 ############################################
 #>               Work dirs                <#

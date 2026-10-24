@@ -13,9 +13,7 @@ function finalise {
     local ecode=${2:-0}
 
     loki-log fail "$message"
-    loki-log err "Destructing env.."
-    docker rm -f "$container" &> /dev/null
-    rm -f "${FENRIR_TMP_DIR}/env"
+    fenrir-env-down
 
     exit "$ecode"
 }
@@ -90,25 +88,44 @@ loki-log info "Initialising env.."
 loki-log info "Creating a shared directory.."
 if docker volume inspect fenrir-shared &> /dev/null; then
 	loki-log warn "$(loki-ej-wtf)" "The directory already exists.."
-	if [ -z "$bind" ]; then
-		loki-log fault "$(loki-ej-fail)" "Destroy the existing env to run tests!"
-		exit 8
-	fi
-	loki-log warn "The following execution might be unreliable!"
-	loki-log warn "Destroy the existing env to erase previous artifacts"
-else
-	lokiw -e docker volume create fenrir-shared
+	loki-log warn "Do you want to recreate? [y|N]"
+
+	read -r op
+	while true; do
+		case "$op" in
+			y|Y)
+				break
+			;;
+			""|n|N)
+				loki-log err "Terminating.."
+				loki-log warn "Destroy the existing env to erase previous artifacts (run 'fenrir env down')"
+				exit 6
+			;;
+			*)
+				loki-log fault "$(loki-ej-wtf)" "Unknown option <$op>"
+				loki-log fault "Try again.."
+			;;
+		esac
+	done
+
+	# shellcheck disable=SC2046
+	lokiw -e docker rm -f $(docker ps -aq --filter "volume=fenrir-shared")
+	lokiw -e docker volume rm fenrir-shared
 fi
+
+lokiw -e docker volume create --label="${FENRIR_DOCKER_LABEL}=volumes" fenrir-shared
+
+loki-log info "Staring the main container.."
 
 # Testing => safe mode
 if [ -z "$bind" ]; then
-    container=$(docker run $privileged \
+    container=$(fenrir-cont-run $privileged \
      					-e LOKI_VERBOSE -e FENRIR_IN_ENV=1 -e FENRIR_COPYD=1 $rm_opt \
      					-v fenrir-shared:/tmp/fenrir-shared -d \
      					 "$image" 2> "${ERR_FILE}")
 else
     # Solution is mounted in container
-    container=$(docker run \
+    container=$(fenrir-cont-run \
         $privileged \
         -e LOKI_VERBOSE \
         -e FENRIR_IN_ENV=1 \
@@ -124,19 +141,15 @@ if (( status != 0 )); then
     exit $status
 fi
 
-# Save container ID
-echo "$container" > "${FENRIR_TMP_DIR}/env"
-
 if [ -z "$bind" ]; then
+	loki-log info "Copying the solution into env.."
     cp_file "${sol_dir}" "${ENV_HOME}/solution"
 fi
-
-loki-log info "Env is created.."
 
 ######################################################################
 ##                         Set up container                         ##
 ######################################################################
-loki-log info "Configuring env (fenrir).."
+loki-log info "Configuring env (installing fenrir).."
 
 # Fenrir
 cp_file "$FENRIR_HOME" "${ENV_HOME}"
@@ -151,6 +164,8 @@ done
 
 # Run config
 loki-log info "Fenrir version:" "$(docker exec -u fikus "$container" fenrir v)"
+
+loki-log info "Updating fenrir run configuration.."
 lokiw docker exec -u fikus "$container" fenrir-set-conf run blocking "$(fenrir-read-conf run blocking)" || {
     loki-log warn "Fenrir config: <fenrir-set-conf run blocking> has failed!"
 }
@@ -161,19 +176,7 @@ lokiw docker exec -u fikus "$container" fenrir-set-conf run root "${ENV_HOME}/so
     loki-log warn "Fenrir config: <fenrir-set-conf run root> has failed!"
 }
 
-loki-log info "Configuring env (solution).."
-
-# Copy solution when safe mode is on
-if [ -n "$use_safe" ]; then
-    cp_file "$sol_dir" "${ENV_HOME}/solution"
-fi
-
-loki-log info "Configuring env (setup file).."
-
-# In case of failed env.up, env.down is copied beforehand
-if [ -x "$(fenrir-task-path repo)/env.down" ]; then
-    cp "$(fenrir-task-path repo)/env.down" "${FENRIR_TMP_DIR}/env.down"
-fi
+loki-log info "Configuring env (env control files).."
 
 # Env setup
 if [ -x "$(fenrir-task-path repo)/env.up" ]; then
@@ -182,4 +185,4 @@ if [ -x "$(fenrir-task-path repo)/env.up" ]; then
     }
 fi
 
-loki-log info "$(loki-ej-success)" "Env is ready.."
+loki-log info "$(loki-ej-success)" "Env is ready"

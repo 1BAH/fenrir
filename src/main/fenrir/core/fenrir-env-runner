@@ -26,9 +26,9 @@ fi
 loki-log info "$(loki-ej-success)" "Now in env"
 
 if [ -x "$(fenrir-task-path repo)/global.init" ]; then
-    loki-log info "Testcase init.."
+    loki-log info "Global init.."
     source "$(fenrir-task-path repo)/global.init" || {
-        loki-log warn "Testcase init has failed!"
+        loki-log warn "Global init has failed!"
     }
 fi
 
@@ -55,8 +55,6 @@ Task ID:  $(fenrir-read-conf run task)
 $(loki-log info "$(loki-dup '-' $(( LOKI_COLUMNS - 10 )))")
 INFO
 
-echo "$BASHPID" > "$FENRIR_TMP_DIR/env.pid"
-
 # Allow user to run
 cd solution
 bash
@@ -73,8 +71,8 @@ elif [ -x "$(fenrir-task-path repo)/.exit" ]; then
 fi
 
 if [ -x "$(fenrir-task-path repo)/global.destroy" ]; then
-    loki-log info "Testcase destroy.."
+    loki-log info "Global destroy.."
     source "$(fenrir-task-path repo)/global.destroy" || {
-        loki-log warn "Testcase destroy has failed!"
+        loki-log warn "Global destroy has failed!"
     }
 fi
