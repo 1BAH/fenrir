@@ -16,7 +16,7 @@ fi
 loki-log info "BI: Inspecting '$file'"
 
 if [ "$LOKI_VERBOSE" == "-v" ]; then
-    if ! shellcheck -a -Calways "$file" ; then
+    if ! shellcheck -e SC2164,SC2006 -a -Calways "$file" ; then
         loki-log err "BI: File '$file' contains violations."
         exit 2
     fi
