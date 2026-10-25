@@ -35,7 +35,9 @@ mode=""
 fenrir-read-conf "${curr_task}" none > /dev/null
 ecode=$?
 
-if (( ecode != 0 )); then
+if [ "${curr_task}" == "-" ]; then
+	loki-log warn "The task is not set! Run 'fenrir task $(loki-wrap "${ITAL}" "<TASK_ID>")'"
+elif (( ecode != 0 )) ; then
 	loki-log fault "The task <$curr_task> is not supported in this version!"
 	exit $ecode
 fi
@@ -97,6 +99,6 @@ $(
 Run settings:
 $([ -n "${pipeline}" ] && loki-wrap "${YELLOW}" "${pipeline}")
 $(loki-dup '-' "${LOKI_COLUMNS}")
-fenrir $(fenrir-read-conf main version)$(fenrir-read-conf main "packaged"), 2026
+fenrir $(fenrir-read-conf main version)$(fenrir-read-conf main "packaged")
 @1BAH
 ____HEREDOC
