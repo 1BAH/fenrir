@@ -81,7 +81,7 @@ dump_arrays
 echo -n "Select image: "
 read -r task_img
 if [ -n "${task_img}" ]; then
-	echo "image=\"${task_img}\""
+	echo "image=\"${task_img}\"" >> "$dir/index.hel"
 fi
 
 echo -n "Select mode 0/1 (blocking): "
