@@ -52,6 +52,14 @@ for cfg in "$CFGS_DIR"/*.hel; do
     fi
 done
 
+    if ! {
+    	cp "${CFGS_DIR}/mirrors" "${FENRIR_CONF_DIR}/mirrors" &&
+        chown "$user" "${FENRIR_CONF_DIR}/mirrors"
+    }; then
+        loki-log err "Failed to install. Try again or submit an issue."
+        exit 22
+    fi
+
 echo "version=\"$VERSION\"" >> "${FENRIR_CONF_DIR}/main.hel"
 
 # Update config location
