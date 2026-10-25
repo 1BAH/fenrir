@@ -1,0 +1,9 @@
+[ "${FENV}" = "LÆVATEINN" ] || {
+	cat <<- OUT > /dev/stderr
+	${BOLD}${RED}
+	Invalid HEL format!
+	Expected <LÆVATEINN>, got <${FENV}> instead!
+	${ENDC}
+	OUT
+	exit 222
+}
