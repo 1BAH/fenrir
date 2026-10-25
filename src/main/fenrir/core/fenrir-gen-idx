@@ -1,0 +1,107 @@
+#! /usr/bin/env loki
+
+##
+# Usage:
+#   fenrir-gen-idx DIR
+#
+# Creates index.hel file
+##
+
+#include <shift-args>
+
+EXP_ARGC=1
+#include <verify-argc>
+
+dir=$1
+if ! [ -d "$dir" ]; then
+	loki-log err "Is not a directory <$dir>"
+	exit 1
+fi
+
+function dump_arrays {
+	{
+		echo "scripts=("
+		for script in "${scripts[@]}"; do
+			echo "    \"${script}\""
+		done
+		echo ")"
+
+		echo "cfgs=("
+		for cfg in "${cfgs[@]}"; do
+			echo "    \"${cfg}\""
+		done
+		echo ")"
+	} >> "$dir/index.hel"
+}
+
+function dump_run_opts {
+    {
+    	if ! (( inline )); then
+    		echo "inline=0"
+    	fi
+    	if ! (( inhost )); then
+    		echo "inhost=0"
+    	fi
+    	if ! (( indocker )); then
+    		echo "indocker=0"
+    	fi
+    	if ! (( inlined )); then
+    		echo "inlined=0"
+    	fi
+		echo "blocked=${blocked}"
+    } >> "$dir/index.hel"
+}
+
+cat <<- 'HEADER' > "$dir/index.hel"
+#include <hel-format-header>
+HEADER
+
+
+
+scripts=()
+cfgs=()
+
+for file in "$1"/* "$1"/.*; do
+	if [ -f "$file" ]; then # empty dir must cause errors
+		if [[ "$(head -n 1 "$file")" =~ ^#!.*$ ]]; then
+			scripts+=( "$(basename "$file")" )
+		elif ! [ "${file##*.}" = hel ]; then
+			cfgs+=( "$(basename "$file")" )
+		fi
+	fi
+done
+
+inline=1
+inhost=1
+indocker=1
+inlined=1
+
+dump_arrays
+
+echo -n "Select image: "
+read -r task_img
+if [ -n "${task_img}" ]; then
+	echo "image=\"${task_img}\""
+fi
+
+echo -n "Select mode 0/1 (blocked): "
+read -r blocked
+blocked=${blocked:-1}
+
+echo -n "Select mode 0/1 (inline): "
+read -r inline
+inline=${inline:-1}
+
+echo -n "Select mode 0/1 (inhost): "
+read -r inhost
+inhost=${inhost:-1}
+
+echo -n "Select mode 0/1 (indocker): "
+read -r indocker
+indocker=${indocker:-1}
+
+echo -n "Select mode 0/1 (inlined): "
+read -r inlined
+inlined=${inlined:-1}
+
+dump_run_opts
