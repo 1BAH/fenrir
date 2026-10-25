@@ -176,6 +176,21 @@ lokiw docker exec -u fikus "$container" fenrir-set-conf run root "${ENV_HOME}/so
     loki-log warn "Fenrir config: <fenrir-set-conf run root> has failed!"
 }
 
+lokiw docker exec -u fikus "$container" git --version  && {
+	loki-log info "Configuring env (git user).."
+	(
+		cd "${sol_dir}"
+		name=$(git config user.name)
+		email=$(git config user.email)
+
+		if [ -n "${name}" ] && [ -n "${email}" ]; then
+			docker exec -u fikus "$container" git config --global user.name "${name}"
+			docker exec -u fikus "$container" git config --global user.email "${email}"
+			loki-log info "Now using '${name} <${email}>'"
+		fi
+	)
+}
+
 loki-log info "Configuring env (env control files).."
 
 # Env setup
