@@ -7,6 +7,7 @@
 LOKI_VERBOSE=${LOKI_VERBOSE-"-v"} # preserve emptiness
 LOKI_PROGRESS=0
 FENRIR_DOCKER_LABEL="com.github.1bah.fenrir.env"
+FENV=LÆVATEINN
 
 ############################################
 #>               Work dirs                <#
@@ -61,12 +62,16 @@ LOKI_LOG_PREFIX=${LOKI_LOG_PREFIX:-""}
 #>                 Logo                   <#
 ############################################
 
-IFS= read -r -d '' FENRIR_LOGO << 'LOGO'
-  _____               _
- |  ___|__ _ __  _ __(_)_ __
- | |_ / _ \ '_ \| '__| | '__|
- |  _|  __/ | | | |  | | |
- |_|  \___|_| |_|_|  |_|_|
+IFS= read -r -d '' FENRIR_LOGO << LOGO
+${FAINT}   :#:       :#:   ${ENDC}
+${FAINT}  :###+     +###:  ${ENDC}
+${FAINT}  #++#@@@@@@@#++#  ${ENDC}       _____               _
+${FAINT} :@@@@@@@@@@@@@@@: ${ENDC}      |  ___|__ _ __  _ __(_)_ __
+${FAINT}:@@@${YELLOW}ooo${ENDC}${FAINT}@@@@@${YELLOW}ooo${ENDC}${FAINT}@@@:${ENDC}      | |_ / _ \ '_ \| '__| | '__|
+${FAINT}  +@@@@${YELLOW}o${ENDC}${FAINT}@@@${YELLOW}o${ENDC}${FAINT}@@@@+ ${ENDC}       |  _|  __/ | | | |  | | |
+${FAINT}    +@@@@:@@@@+  ${ENDC}        |_|  \___|_| |_|_|  |_|_|
+${FAINT}     :+@${RED}vvv${ENDC}${FAINT}@+:    ${ENDC}                       ${ITAL}LÆVATEINN${ENDC}
+${FAINT}       :+#+:       ${ENDC}
 LOGO
 
 ############################################
