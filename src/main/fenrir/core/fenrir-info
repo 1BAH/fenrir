@@ -40,6 +40,11 @@ if (( ecode != 0 )); then
 	exit $ecode
 fi
 
+env_cont=$(fenrir-main-cont)
+if (( $? == 0 )); then
+	env_task=$(docker inspect --format="{{index .Config.Labels \"${FENRIR_DOCKER_LABEL}.task\"}}" "${env_cont}")
+fi
+
 if [ -f "${FENRIR_HOME}/repo/${curr_task}/pipeline.hel" ]; then
     pipeline=$(sed -nE '/main=\([[:space:]]*/,$p' "${FENRIR_HOME}/repo/${curr_task}/pipeline.hel")
 
@@ -86,7 +91,9 @@ Current settings:
     * ${FAINT}Execution mode:${ENDC} $(loki-wrap "${SKY}" "${mode:-"??:??"}") $([ -z "${FENRIR_IN_ENV}" ] && echo "(Host:Docker)")
           'I' is inline (test within the provided path) $(loki-wrap "${ITAL}" "Requires '-i' option")
           'C' is clone  (use git clone) $([ -z "${FENRIR_IN_ENV}" ] && loki-wrap "${ITAL}" "\n          Use 'fenrir run' to test in the host system\n          Use 'fenrir rund' to test in the docker")
-$(loki-dup '-' "${LOKI_COLUMNS}")
+$(
+	[ -n "${env_cont}" ] && echo "    * ${FAINT}${ITAL}Current env:${ENDC} $(loki-wrap "${SKY}" "${env_task}\n")"
+)$(loki-dup '-' "${LOKI_COLUMNS}")
 Run settings:
 $([ -n "${pipeline}" ] && loki-wrap "${YELLOW}" "${pipeline}")
 $(loki-dup '-' "${LOKI_COLUMNS}")
