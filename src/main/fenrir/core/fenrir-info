@@ -32,8 +32,16 @@ curr_task=$(fenrir-read-conf run task)
 pipeline=""
 mode=""
 
+fenrir-read-conf "${curr_task}" none > /dev/null
+ecode=$?
+
+if (( ecode != 0 )); then
+	loki-log fault "The task <$curr_task> is not supported in this version!"
+	exit $ecode
+fi
+
 if [ -f "${FENRIR_HOME}/repo/${curr_task}/pipeline.hel" ]; then
-    pipeline=$(< "${FENRIR_HOME}/repo/${curr_task}/pipeline.hel")
+    pipeline=$(sed -nE '/main=\([[:space:]]*/,$p' "${FENRIR_HOME}/repo/${curr_task}/pipeline.hel")
 
     if [ -z "$FENRIR_IN_ENV" ]; then
 		if [ "$(fenrir-read-conf "${curr_task}" inline)" = "0" ]; then
@@ -70,12 +78,12 @@ cat <<____HEREDOC
 $([ -n "${FENRIR_IN_ENV}" ] && loki-wrap "${BOLD}${PEACH}" "You are inside env now!")
 $(loki-dup '-' "${LOKI_COLUMNS}")
 Current settings:
-    * Remote: $(fenrir-read-conf main remote)
-    * Current task: ${curr_task}
-    * Blocking: $(fenrir-read-conf run blocking)
+    * ${FAINT}Remote:${ENDC} $(loki-wrap "${SKY}" "$(fenrir-read-conf main remote)")
+    * ${FAINT}Current task:${ENDC} $(loki-wrap "${SKY}" "${curr_task}")
+    * ${FAINT}Blocking:${ENDC} $(loki-wrap "${SKY}" "$(fenrir-read-conf run blocking)")
           '0' keep running when a testcase fails
           '1' stop running as soon as any testcase fails
-    * Execution mode: ${mode:-"??:??"} $([ -z "${FENRIR_IN_ENV}" ] && echo "(Host:Docker)")
+    * ${FAINT}Execution mode:${ENDC} $(loki-wrap "${SKY}" "${mode:-"??:??"}") $([ -z "${FENRIR_IN_ENV}" ] && echo "(Host:Docker)")
           'I' is inline (test within the provided path) $(loki-wrap "${ITAL}" "Requires '-i' option")
           'C' is clone  (use git clone) $([ -z "${FENRIR_IN_ENV}" ] && loki-wrap "${ITAL}" "\n          Use 'fenrir run' to test in the host system\n          Use 'fenrir rund' to test in the docker")
 $(loki-dup '-' "${LOKI_COLUMNS}")
