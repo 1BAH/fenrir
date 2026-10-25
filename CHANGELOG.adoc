@@ -1,5 +1,8 @@
 = Fenrir's changelog
 
+== Version 2026.2.0
+* _TBD.._
+
 == Version 2026.1.6
 * Now `rund` uses `fikus` as a default user to avoid execution from `root`
 * Make `awooo` appear more rarely

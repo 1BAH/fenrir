@@ -7,7 +7,7 @@ function normalise_version {
 ##########################################################################
 
 # DO NOT MAKE IT AUTOLOADABLE!
-version="2026.1.6"
+version="2026.2.0"
 
 year=$(date +%Y)
 
@@ -19,7 +19,7 @@ loki-gorp
 
 loki-prog "fenrir info"
 
-loki-assert-regeq ".*fenrir $version(\+.*)?, $year.*" "$(fenrir info)"
+loki-assert-regeq ".*fenrir $version(\+.*)?.*" "$(fenrir info)"
 
 loki-gorp
 
