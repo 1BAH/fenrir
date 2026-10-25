@@ -119,19 +119,25 @@ loki-log info "Staring the main container.."
 
 # Testing => safe mode
 if [ -z "$bind" ]; then
-    container=$(fenrir-cont-run $privileged \
-     					-e LOKI_VERBOSE -e FENRIR_IN_ENV=1 -e FENRIR_COPYD=1 $rm_opt \
-     					-v fenrir-shared:/tmp/fenrir-shared -d \
-     					 "$image" 2> "${ERR_FILE}")
+	# shellcheck disable=SC2086
+    container=$(docker run \
+    		--label="${FENRIR_DOCKER_LABEL}=main" \
+    		--label="${FENRIR_DOCKER_LABEL}.task=${task}" \
+    		$privileged $rm_opt -d \
+     		-e LOKI_VERBOSE -e FENRIR_IN_ENV=1 -e FENRIR_COPYD=1 \
+     		-v fenrir-shared:/tmp/fenrir-shared \
+     		"$image" 2> "${ERR_FILE}")
 else
     # Solution is mounted in container
-    container=$(fenrir-cont-run \
-        $privileged \
+	# shellcheck disable=SC2086
+    container=$(docker run \
+		--label="${FENRIR_DOCKER_LABEL}=main" \
+		--label="${FENRIR_DOCKER_LABEL}.task=${task}" \
+        $privileged $rm_opt -d \
         -e LOKI_VERBOSE \
         -e FENRIR_IN_ENV=1 \
         --mount "type=bind,src=${sol_dir},dst=${ENV_HOME}/solution" \
         -v fenrir-shared:/tmp/fenrir-shared \
-        $rm_opt -d \
         "$image" 2> "${ERR_FILE}")
 fi
 status=$?
