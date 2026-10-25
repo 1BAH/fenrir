@@ -51,8 +51,7 @@ if [ "$INSTALL" -ne 0 ]; then
     fi
 fi
 
-branch=$(fenrir-read-conf "${TASK}" branch)
-fenrir-set-conf run task "$branch"
+fenrir-set-conf run task "$TASK"
 
 block=$(fenrir-read-conf "${TASK}" blocking)
 fenrir-set-conf run blocking "$block"
