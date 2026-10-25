@@ -13,7 +13,8 @@
 
 #include <shift-args>
 
-cont=$(docker run --label="${FENRIR_DOCKER_LABEL}=extra" "$@")
+task=$(fenrir-read-conf run task)
+cont=$(docker run --label="${FENRIR_DOCKER_LABEL}=extra" --label="${FENRIR_DOCKER_LABEL}.task=${task:-unknown}" "$@")
 ecode=$?
 
 if (( ecode != 0 )); then
