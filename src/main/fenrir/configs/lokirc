@@ -1,8 +1,9 @@
 # Default viewer
 FENRIR_EDITOR="less"
 
-# If you want to use batcat instead, uncomment the following lines
+# If you want to use bat (batcat) instead, uncomment the following lines
 #FENRIR_EDITOR='batcat --map-syntax="*:Bourne Again Shell (bash)"'
+#FENRIR_EDITOR='bat --map-syntax="*:Bourne Again Shell (bash)"'
 
 # Override local repo location
 FENRIR_HOME=${FENRIR_HOME}
