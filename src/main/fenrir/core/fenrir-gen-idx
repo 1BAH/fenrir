@@ -84,9 +84,9 @@ if [ -n "${task_img}" ]; then
 	echo "image=\"${task_img}\""
 fi
 
-echo -n "Select mode 0/1 (blocked): "
+echo -n "Select mode 0/1 (blocking): "
 read -r blocked
-blocked=${blocked:-1}
+blocked=${blocked:-0}
 
 echo -n "Select mode 0/1 (inline): "
 read -r inline
