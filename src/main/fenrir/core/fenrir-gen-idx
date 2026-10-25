@@ -48,7 +48,7 @@ function dump_run_opts {
     	if ! (( inlined )); then
     		echo "inlined=0"
     	fi
-		echo "blocked=${blocked}"
+		echo "blocking=${blocked}"
     } >> "$dir/index.hel"
 }
 
